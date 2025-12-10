@@ -242,25 +242,109 @@ const VisitorList: React.FC = () => {
       )}
 
       {/* Pagination */}
-      {visitors.length > 0 && pagination.totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <button
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-            disabled={pagination.page === 1}
-            className="px-3 py-1 text-sm border border-border rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-muted-foreground">
-            Page {pagination.page} of {pagination.totalPages}
-          </span>
-          <button
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-            disabled={pagination.page === pagination.totalPages}
-            className="px-3 py-1 text-sm border border-border rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
+      {visitors.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 p-4 bg-card border border-border rounded-lg">
+          {/* Records info */}
+          <div className="text-sm text-muted-foreground">
+            Showing {((pagination.page - 1) * pagination.perPage) + 1} to{' '}
+            {Math.min(pagination.page * pagination.perPage, pagination.total)} of{' '}
+            {pagination.total} records
+          </div>
+
+          {/* Page controls */}
+          <div className="flex items-center gap-1">
+            {/* First page */}
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: 1 }))}
+              disabled={pagination.page === 1}
+              className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              title="First page"
+            >
+              «
+            </button>
+            
+            {/* Previous */}
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={pagination.page === 1}
+              className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ‹ Prev
+            </button>
+
+            {/* Page numbers */}
+            <div className="flex items-center gap-1 mx-2">
+              {(() => {
+                const pages: (number | string)[] = [];
+                const totalPages = pagination.totalPages || 1;
+                const currentPage = pagination.page;
+                
+                if (totalPages <= 7) {
+                  for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                  if (currentPage <= 3) {
+                    pages.push(1, 2, 3, 4, '...', totalPages);
+                  } else if (currentPage >= totalPages - 2) {
+                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                  } else {
+                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                  }
+                }
+                
+                return pages.map((page, idx) => (
+                  page === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">...</span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => setPagination(prev => ({ ...prev, page: page as number }))}
+                      className={`min-w-[36px] h-9 text-sm rounded-md border transition-colors ${
+                        pagination.page === page
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'border-border hover:bg-accent'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                ));
+              })()}
+            </div>
+
+            {/* Next */}
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={pagination.page === pagination.totalPages || pagination.totalPages === 0}
+              className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next ›
+            </button>
+
+            {/* Last page */}
+            <button
+              onClick={() => setPagination(prev => ({ ...prev, page: prev.totalPages }))}
+              disabled={pagination.page === pagination.totalPages || pagination.totalPages === 0}
+              className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Last page"
+            >
+              »
+            </button>
+          </div>
+
+          {/* Per page selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Per page:</span>
+            <select
+              value={pagination.perPage}
+              onChange={(e) => setPagination(prev => ({ ...prev, perPage: Number(e.target.value), page: 1 }))}
+              className="px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
         </div>
       )}
     </div>
