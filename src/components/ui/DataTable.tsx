@@ -7,7 +7,7 @@ export interface TableColumn<T> {
   key: string;
   header: string;
   sortable?: boolean;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: any, row: T, index: number) => React.ReactNode;
   width?: string;
 }
 
@@ -128,7 +128,7 @@ function DataTable<T extends Record<string, any>>({
                   {columns.map((column) => (
                     <td key={column.key} className="px-4 py-3 text-sm text-foreground">
                       {column.render 
-                        ? column.render(row[column.key], row)
+                        ? column.render(row[column.key], row, rowIndex)
                         : row[column.key] ?? '-'
                       }
                     </td>

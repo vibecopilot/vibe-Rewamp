@@ -49,7 +49,7 @@ const SoftServiceList: React.FC = () => {
   };
 
   const columns: TableColumn<SoftService>[] = [
-    { key: 'id', header: 'S.No', width: '80px', render: (_, __, idx) => (idx || 0) + 1 },
+    { key: 'id', header: 'S.No', width: '80px', render: (_val, _row, idx) => idx + 1 },
     { key: 'name', header: 'Service Name', sortable: true },
     { key: 'service_type', header: 'Type', render: (v) => v || '-' },
     { key: 'status', header: 'Status', render: (_, row) => <StatusBadge status={getServiceStatus(row)} /> },

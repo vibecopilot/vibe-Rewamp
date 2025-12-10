@@ -53,11 +53,11 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ 
+const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(({ 
   status, 
   showDropdown = false,
   size = 'md'
-}) => {
+}, ref) => {
   const config = statusConfigs[status] || statusConfigs['pending'];
   
   const sizeClasses = size === 'sm' 
@@ -66,12 +66,15 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span 
+      ref={ref}
       className={`inline-flex items-center gap-1 rounded-full font-medium ${sizeClasses} ${config.className}`}
     >
       {config.label}
       {showDropdown && <ChevronDown className="w-3 h-3" />}
     </span>
   );
-};
+});
+
+StatusBadge.displayName = 'StatusBadge';
 
 export default StatusBadge;
