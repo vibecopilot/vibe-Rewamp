@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Settings,
   ChevronDown,
+  ChevronUp,
   Phone,
   Mail,
   LogOut,
@@ -12,6 +13,27 @@ import {
 } from 'lucide-react';
 import { getItemInLocalStorage, setItemInLocalStorage } from '../../utils/localStorage';
 import { getSiteData, siteChange } from '../../api';
+
+// Feature name mapping from FEATURES array to module names
+const featureToModuleMap: Record<string, string[]> = {
+  'tickets': ['service-desk'],
+  'assets': ['asset'],
+  'soft_services': ['soft-services'],
+  'items': ['inventory'],
+  'vendors': ['supplier-vendor'],
+  'audits': ['audit'],
+  'mailroom': ['mail-room'],
+  'incidents': ['incident'],
+  'permits': ['permit'],
+  'gatepass': ['vms'],
+  'bookings': ['amenities', 'space', 'fb'],
+  'meeting': ['meeting'],
+  'parking': ['parking'],
+  'transport': ['transportation'],
+  'fnb': ['fb'],
+  'space': ['fitout'],
+  'calendar': ['calendar'],
+};
 
 // Module configuration with sub-modules
 const modules = [
@@ -121,8 +143,41 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const [sitesData, setSitesData] = useState<SiteData[]>([]);
   const [selectedSite, setSelectedSite] = useState<SiteData | null>(null);
   const [loadingSites, setLoadingSites] = useState(true);
+  const [enabledFeatures, setEnabledFeatures] = useState<string[]>([]);
+  const [collapsedLevels, setCollapsedLevels] = useState({ level1: false, level2: false });
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const siteDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get enabled features from localStorage
+  useEffect(() => {
+    const storedFeatures = getItemInLocalStorage('FEATURES');
+    if (storedFeatures && Array.isArray(storedFeatures)) {
+      const featureNames = storedFeatures.map((f: any) => f.feature_name);
+      setEnabledFeatures(featureNames);
+    }
+  }, []);
+
+  // Filter modules based on enabled features
+  const isModuleEnabled = (moduleId: string): boolean => {
+    if (enabledFeatures.length === 0) return true; // Show all if no features configured
+    
+    for (const [feature, moduleIds] of Object.entries(featureToModuleMap)) {
+      if (moduleIds.includes(moduleId)) {
+        return enabledFeatures.includes(feature);
+      }
+    }
+    return true; // Show modules not in the map by default
+  };
+
+  // Filter modules and submodules based on features
+  const filteredModules = useMemo(() => {
+    return modules.map(mod => ({
+      ...mod,
+      subModules: mod.subModules.filter(sub => isModuleEnabled(sub.id))
+    })).filter(mod => 
+      mod.path || (mod.subModules && mod.subModules.length > 0)
+    );
+  }, [enabledFeatures]);
 
   // Fetch sites from API
   useEffect(() => {
@@ -224,7 +279,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const getActiveFromPath = () => {
     const pathname = location.pathname;
     
-    for (const mod of modules) {
+    for (const mod of filteredModules) {
       for (const subMod of mod.subModules) {
         if (pathname.startsWith(subMod.path)) {
           return { moduleId: mod.id, subModuleId: subMod.id };
@@ -239,8 +294,15 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
 
   const { moduleId: activeModule, subModuleId: activeSubModule } = getActiveFromPath();
 
-  const currentModule = modules.find(m => m.id === activeModule);
+  const currentModule = filteredModules.find(m => m.id === activeModule);
   const currentSubModule = currentModule?.subModules.find(s => s.id === activeSubModule);
+
+  // Auto-collapse when navigating to a sub-module with children (level 3)
+  useEffect(() => {
+    if (currentSubModule?.children && currentSubModule.children.length > 0) {
+      setCollapsedLevels({ level1: true, level2: true });
+    }
+  }, [currentSubModule]);
 
   const isActivePath = (path: string) => {
     if (path === '/asset') {
@@ -250,7 +312,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   };
 
   const handleModuleClick = (moduleId: string) => {
-    const mod = modules.find(m => m.id === moduleId);
+    const mod = filteredModules.find(m => m.id === moduleId);
     if (mod?.subModules.length) {
       navigate(mod.subModules[0].path);
     } else if (mod?.path) {
@@ -261,6 +323,9 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const handleSubModuleClick = (path: string) => {
     navigate(path);
   };
+
+  const toggleLevel1 = () => setCollapsedLevels(prev => ({ ...prev, level1: !prev.level1 }));
+  const toggleLevel2 = () => setCollapsedLevels(prev => ({ ...prev, level2: !prev.level2 }));
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
@@ -415,64 +480,96 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
       </div>
 
       {/* Module Navigation - Level 1 */}
-      <nav className="flex items-center justify-between gap-2 px-4 border-r-red border-b border-border overflow-x-auto">
-      {modules.map((module) => (
-        <button
-        key={module.id}
-        onClick={() => handleModuleClick(module.id)}
-        className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative uppercase
-          ${activeModule === module.id 
-          ? 'text-primary' 
-          : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-        {module.name}
-        {activeModule === module.id && (
-          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+      <div className="relative">
+        <nav className={`flex items-center justify-between gap-2 px-4 border-b border-border overflow-x-auto transition-all duration-300 ${collapsedLevels.level1 && currentModule ? 'h-0 overflow-hidden border-0' : ''}`}>
+          {filteredModules.map((module) => (
+            <button
+              key={module.id}
+              onClick={() => handleModuleClick(module.id)}
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative uppercase
+                ${activeModule === module.id 
+                  ? 'text-primary' 
+                  : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              {module.name}
+              {activeModule === module.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Collapse/Expand Button for Level 1 */}
+        {currentModule && (
+          <button
+            onClick={toggleLevel1}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent transition-colors z-10"
+            title={collapsedLevels.level1 ? "Expand modules" : "Collapse modules"}
+          >
+            {collapsedLevels.level1 ? (
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
         )}
-        </button>
-      ))}
-      </nav>
+      </div>
 
       {/* Sub-Module Navigation - Level 2 */}
       {currentModule && currentModule.subModules.length > 0 && (
-      <nav className="flex items-center justify-between gap-2 px-4 border-b border-border overflow-x-auto bg-secondary/30">
-        {currentModule.subModules.map((subModule) => (
-        <button
-          key={subModule.id}
-          onClick={() => handleSubModuleClick(subModule.path)}
-          className={`px-4 py-2.5 text-sm whitespace-nowrap transition-colors relative uppercase
-          ${activeSubModule === subModule.id 
-            ? 'text-primary font-medium' 
-            : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {subModule.name}
-          {activeSubModule === subModule.id && (
-          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-          )}
-        </button>
-        ))}
-      </nav>
+        <div className="relative">
+          <nav className={`flex items-center justify-between gap-2 px-4 border-b border-border overflow-x-auto bg-secondary/30 transition-all duration-300 ${collapsedLevels.level2 ? 'h-0 overflow-hidden border-0' : ''}`}>
+            {currentModule.subModules.map((subModule) => (
+              <button
+                key={subModule.id}
+                onClick={() => handleSubModuleClick(subModule.path)}
+                className={`px-4 py-2.5 text-sm whitespace-nowrap transition-colors relative uppercase
+                  ${activeSubModule === subModule.id 
+                    ? 'text-primary font-medium' 
+                    : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                {subModule.name}
+                {activeSubModule === subModule.id && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                )}
+              </button>
+            ))}
+          </nav>
+
+          {/* Collapse/Expand Button for Level 2 */}
+          <button
+            onClick={toggleLevel2}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent transition-colors z-10"
+            title={collapsedLevels.level2 ? "Expand sub-modules" : "Collapse sub-modules"}
+          >
+            {collapsedLevels.level2 ? (
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
+        </div>
       )}
 
       {/* Tertiary Navigation - Level 3 */}
       {currentSubModule && currentSubModule.children && currentSubModule.children.length > 0 && (
-      <nav className="flex items-center justify-between gap-2 px-4 py-2 border border-border overflow-x-auto bg-secondary/100">
-        {currentSubModule.children.map((item, idx) => (
-        <Link
-          key={idx}
-          to={item.path}
-          className={`flex items-center gap-2 text-sm whitespace-nowrap transition-colors uppercase
-          ${isActivePath(item.path) 
-            ? 'text-primary font-medium' 
-            : 'text-muted-foreground hover:text-foreground border-b-2 border-transparent hover:border-accent'
-          }`}
-        >
-          {item.name}
-        </Link>
-        ))}
-      </nav>
+        <nav className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto bg-muted/50">
+          {currentSubModule.children.map((item, idx) => (
+            <Link
+              key={idx}
+              to={item.path}
+              className={`px-3 py-1.5 text-sm whitespace-nowrap transition-colors uppercase rounded-md
+                ${isActivePath(item.path) 
+                  ? 'text-primary font-medium bg-background shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
       )}
     </header>
   );
