@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 5173,
+    port: 8080,
   },
   plugins: [
     react(),
@@ -17,5 +17,35 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  build: {
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 2000,
+    // Optimize build
+    target: 'esnext',
+    minify: 'esbuild',
+    // Split chunks for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor chunks
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'charts': ['apexcharts', 'react-apexcharts', 'chart.js', 'react-chartjs-2'],
+          'utils': ['axios', 'date-fns', 'moment', 'lodash'],
+        },
+      },
+    },
+    // Reduce sourcemap size in production
+    sourcemap: mode === 'development',
+  },
+  // Optimize dependency pre-bundling
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+    exclude: ['@mhoc/axios-digest-auth'],
+  },
+  // Increase memory for esbuild
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
 }));
