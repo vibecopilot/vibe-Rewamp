@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTitle from '../../components/ui/PageTitle';
-import AddAsset from '../SubPages/AddAsset';
+import AssetCreateForm from '../../components/forms/AssetCreateForm';
 
 const CreateAsset: React.FC = () => {
   return (
@@ -13,10 +13,7 @@ const CreateAsset: React.FC = () => {
         ]} 
       />
       
-      {/* Hide inner navbar with CSS, keep form functionality */}
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden [&_.hidden.md\\:block]:!hidden">
-        <AddAsset />
-      </div>
+      <AssetCreateForm />
     </div>
   );
 };

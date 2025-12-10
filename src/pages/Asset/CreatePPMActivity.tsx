@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTitle from '../../components/ui/PageTitle';
-import AddPPMActivity from '../SubPages/AddPPMActivity';
+import ChecklistCreateForm from '../../components/forms/ChecklistCreateForm';
 
 const CreatePPMActivity: React.FC = () => {
   return (
@@ -14,9 +14,7 @@ const CreatePPMActivity: React.FC = () => {
         ]} 
       />
       
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden [&_.hidden.md\\:block]:!hidden">
-        <AddPPMActivity />
-      </div>
+      <ChecklistCreateForm checklistType="ppm" />
     </div>
   );
 };

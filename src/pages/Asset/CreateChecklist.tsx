@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTitle from '../../components/ui/PageTitle';
-import AddChecklist from '../SubPages/AddChecklist';
+import ChecklistCreateForm from '../../components/forms/ChecklistCreateForm';
 
 const CreateChecklist: React.FC = () => {
   return (
@@ -14,9 +14,7 @@ const CreateChecklist: React.FC = () => {
         ]} 
       />
       
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden [&_.hidden.md\\:block]:!hidden">
-        <AddChecklist />
-      </div>
+      <ChecklistCreateForm checklistType="routine" />
     </div>
   );
 };

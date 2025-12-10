@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTitle from '../../components/ui/PageTitle';
-import AddAMC from '../SubPages/AddAMC';
+import AMCCreateForm from '../../components/forms/AMCCreateForm';
 
 const CreateAMC: React.FC = () => {
   return (
@@ -14,9 +14,7 @@ const CreateAMC: React.FC = () => {
         ]} 
       />
       
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden [&_.hidden.md\\:block]:!hidden">
-        <AddAMC />
-      </div>
+      <AMCCreateForm />
     </div>
   );
 };
