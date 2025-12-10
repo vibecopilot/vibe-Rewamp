@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ppmActivityService, PPMActivity } from '../../services/assetSubModules.service';
+import { ppmActivityService, PPMActivity } from '../../../services/assetSubModules.service';
 import { Loader2, AlertCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
-import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
+import StatusBadge, { StatusType } from '../../../components/ui/StatusBadge';
 
 interface PPMCalendarProps {
   searchValue: string;

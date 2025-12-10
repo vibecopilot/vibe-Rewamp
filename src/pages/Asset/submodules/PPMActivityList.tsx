@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import DataCard from '../../components/ui/DataCard';
-import DataTable, { TableColumn } from '../../components/ui/DataTable';
-import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
-import { ppmActivityService, PPMActivity } from '../../services/assetSubModules.service';
+import DataCard from '../../../components/ui/DataCard';
+import DataTable, { TableColumn } from '../../../components/ui/DataTable';
+import StatusBadge, { StatusType } from '../../../components/ui/StatusBadge';
+import { ppmActivityService, PPMActivity } from '../../../services/assetSubModules.service';
 import { Loader2, Activity, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface PPMActivityListProps {
