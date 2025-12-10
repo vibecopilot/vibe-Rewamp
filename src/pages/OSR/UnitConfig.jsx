@@ -5,7 +5,7 @@ import { Modal } from "antd";
 import Osr from "./Osr";
 import PropTypes from "prop-types";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const UnitConfigurations = ({ onClose = null }) => {
   const [unitConfigs, setUnitConfigs] = useState([]);

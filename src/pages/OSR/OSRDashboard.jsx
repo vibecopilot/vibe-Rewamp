@@ -6,7 +6,7 @@ import {
   serviceCategoryService,
 } from "./additionalServices";
 import Osr from "./Osr";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const OSRDashboard = () => {
   const [stats, setStats] = useState({

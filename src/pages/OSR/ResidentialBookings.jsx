@@ -9,7 +9,7 @@ import {
 } from "./additionalServices";
 import OsrModal from "./OsrModal";
 import Osr from "./Osr";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 import StarRating from "../../utils/StarRating";
 
 const MyBookings = () => {

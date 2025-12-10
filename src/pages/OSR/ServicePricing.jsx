@@ -9,7 +9,7 @@ import {
 import OsrModal from "./OsrModal";
 import PropTypes from "prop-types";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const ServicePricing = ({ onClose = null }) => {
   const [pricings, setPricings] = useState([]);

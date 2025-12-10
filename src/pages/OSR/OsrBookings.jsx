@@ -12,7 +12,7 @@ import {
 import OsrModal from "./OsrModal";
 import Osr from "./Osr";
 import { FaPlus } from "react-icons/fa";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const AdminBookings = () => {
   const navigate = useNavigate();
