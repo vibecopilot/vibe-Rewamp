@@ -1,4 +1,4 @@
-export const columnsData = [
+export const columnsData: string[] = [
   "Action",
   "Building",
   "Floor",
@@ -24,21 +24,3 @@ export const columnsData = [
   "Meter Configured",
   "Supplier",
 ];
-
-// export const serviceColumns = [
-//   "Action",
-//   "ID",
-//   "Service Name",
-//   "Service Code",
-//   "Reference Number",
-//   "Category",
-//   "Group",
-//   "UOM",
-//   "Site",
-//   "Floor",
-//   "Building",
-//   "Area",
-//   "Status",
-//   "Model Number",
-//   "Created On",
-// ];
