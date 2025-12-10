@@ -7,7 +7,7 @@ import { AssetMainList, AMCList, MeterList, ChecklistList, RoutineTaskList, PPMC
 const AssetList: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid'); // Default to grid
   const [searchValue, setSearchValue] = useState('');
 
   // Derive active tab from URL path
@@ -86,7 +86,7 @@ const AssetList: React.FC = () => {
 
   return (
     <div className="p-6">
-      <PageTitle title={getPageTitle()} breadcrumbs={[{ label: 'Asset', path: '/asset' }, { label: getPageTitle() }]} />
+      {/* Removed PageTitle to save space - navigation already shows context */}
 
       <ListToolbar
         searchPlaceholder={`Search ${activeTab.replace('-', ' ')}...`}
