@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, NavLink, Link, useLocation } from "react-router-dom";
 import { getItemInLocalStorage } from "../utils/localStorage";
 import { useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import {
   BsTicketPerforated,
   BsPersonCircle,
   BsChevronDown,
+  BsChevronUp,
 } from "react-icons/bs";
 import { 
   IoMdSettings,
@@ -18,6 +19,34 @@ import {
 } from "react-icons/io";
 import { PiSignOutBold } from "react-icons/pi";
 import { FaCheck, FaRegComment, FaMapMarkerAlt } from "react-icons/fa";
+
+// Feature name mapping from FEATURES array to module names
+const featureToModuleMap = {
+  'tickets': ['Service Desk'],
+  'assets': ['Asset'],
+  'soft_services': ['Soft Services'],
+  'items': ['Inventory'],
+  'vendors': ['Supplier/Vendor'],
+  'audits': ['Audit'],
+  'mailroom': ['Mail Room'],
+  'incidents': ['Incident'],
+  'permits': ['Permit'],
+  'gatepass': ['Passes'],
+  'bookings': ['Facility Booking', 'Hotel Request', 'Flight Request', 'Cab Request'],
+  'meeting': ['Meetings'],
+  'parking': ['Parking'],
+  'transport': ['Transportation'],
+  'fnb': ['Food & Beverage'],
+  'doctors': ['Doctor Appointment'],
+  'fitness': ['Fitness'],
+  'bills': ['Bills'],
+  'purchase_order': ['PO'],
+  'work_order': ['WO'],
+  'calendar': ['Calendar'],
+  'project_task': ['Project Management', 'Task Management'],
+  'space': ['Fit Out'],
+  'hrms': ['Employee WorkSpace'],
+};
 
 const navItems = [
   {
@@ -120,6 +149,8 @@ const Navbar = () => {
   const themeColor = useSelector((state) => state.theme.color);
   const [user, setUser] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [enabledFeatures, setEnabledFeatures] = useState([]);
+  const [collapsedLevels, setCollapsedLevels] = useState({ level1: false, level2: false });
   
   const firstName = getItemInLocalStorage("Name") || "";
   const lastName = getItemInLocalStorage("LASTNAME") || "";
@@ -128,7 +159,55 @@ const Navbar = () => {
   useEffect(() => {
     const userType = getItemInLocalStorage("USERTYPE");
     setUser(userType || "");
+    
+    // Get enabled features
+    const storedFeatures = getItemInLocalStorage('FEATURES');
+    if (storedFeatures && Array.isArray(storedFeatures)) {
+      const featureNames = storedFeatures.map((f) => f.feature_name);
+      setEnabledFeatures(featureNames);
+    }
   }, []);
+
+  // Filter modules based on enabled features
+  const isModuleEnabled = (moduleName) => {
+    if (enabledFeatures.length === 0) return true; // Show all if no features configured
+    
+    for (const [feature, modules] of Object.entries(featureToModuleMap)) {
+      if (modules.includes(moduleName)) {
+        return enabledFeatures.includes(feature);
+      }
+    }
+    return true; // Show modules not in the map by default
+  };
+
+  const filteredNavItems = useMemo(() => {
+    return navItems.map(item => ({
+      ...item,
+      children: item.children?.filter(child => isModuleEnabled(child.name))
+    })).filter(item => 
+      item.path || (item.children && item.children.length > 0)
+    );
+  }, [enabledFeatures]);
+
+  // Find active parent module
+  const activeParent = useMemo(() => {
+    for (const item of filteredNavItems) {
+      if (item.path && location.pathname.startsWith(item.path)) return item;
+      if (item.children) {
+        for (const child of item.children) {
+          if (child.path && location.pathname.startsWith(child.path)) return item;
+        }
+      }
+    }
+    return null;
+  }, [location.pathname, filteredNavItems]);
+
+  // Auto-collapse when navigating to a module
+  useEffect(() => {
+    if (activeParent) {
+      setCollapsedLevels({ level1: true, level2: false });
+    }
+  }, [activeParent]);
 
   const handleLogout = () => {
     const keysToRemove = [
@@ -242,67 +321,137 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Main Navigation */}
-      <nav className="px-2 overflow-x-auto" style={{ backgroundColor: themeColor }}>
-        <ul className="flex items-center gap-0" onMouseLeave={handleMouseLeave}>
-          {navItems.map((item) => (
-            <li
-              key={item.name}
-              className="relative"
-              onMouseEnter={() => handleMouseEnter(item.name)}
-            >
-              {item.path && !item.children ? (
-                <Link
-                  to={item.path}
-                  className={`
-                    block px-3 py-2.5 text-sm font-medium transition-colors whitespace-nowrap
-                    ${isActive(item.path) 
-                      ? 'bg-white text-gray-800 rounded-t-md' 
-                      : 'text-white hover:bg-white/20'
-                    }
-                  `}
-                >
-                  {item.name}
-                </Link>
-              ) : (
-                <span
-                  className={`
-                    block px-3 py-2.5 text-sm font-medium cursor-pointer transition-colors whitespace-nowrap
-                    ${isParentActive(item) || activeDropdown === item.name
-                      ? 'bg-white text-gray-800 rounded-t-md' 
-                      : 'text-white hover:bg-white/20'
-                    }
-                  `}
-                >
-                  {item.name}
-                </span>
-              )}
+      {/* Level 1 - Main Module Navigation */}
+      <div className="relative">
+        <nav 
+          className={`px-2 overflow-x-auto transition-all duration-300 ${collapsedLevels.level1 && activeParent ? 'h-0 overflow-hidden' : ''}`} 
+          style={{ backgroundColor: themeColor }}
+        >
+          <ul className="flex items-center gap-0" onMouseLeave={handleMouseLeave}>
+            {filteredNavItems.map((item) => (
+              <li
+                key={item.name}
+                className="relative"
+                onMouseEnter={() => handleMouseEnter(item.name)}
+              >
+                {item.path && !item.children ? (
+                  <Link
+                    to={item.path}
+                    className={`
+                      block px-3 py-2.5 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide
+                      ${isActive(item.path) 
+                        ? 'bg-white text-gray-800 rounded-t-md' 
+                        : 'text-white hover:bg-white/20'
+                      }
+                    `}
+                  >
+                    {item.name}
+                  </Link>
+                ) : (
+                  <span
+                    className={`
+                      block px-3 py-2.5 text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap uppercase tracking-wide
+                      ${isParentActive(item) || activeDropdown === item.name
+                        ? 'bg-white text-gray-800 rounded-t-md' 
+                        : 'text-white hover:bg-white/20'
+                      }
+                    `}
+                  >
+                    {item.name}
+                  </span>
+                )}
 
-              {/* Dropdown */}
-              {item.children && activeDropdown === item.name && (
-                <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-b-md shadow-lg min-w-[180px] py-1 z-50">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.name}
-                      to={child.path || '#'}
-                      className={`
-                        flex items-center px-4 py-2 text-sm transition-colors
-                        ${isActive(child.path) 
-                          ? 'bg-gray-100 font-medium' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                        }
-                      `}
-                      style={isActive(child.path) ? { color: themeColor } : {}}
-                    >
-                      {child.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
+                {/* Dropdown */}
+                {item.children && activeDropdown === item.name && (
+                  <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-b-md shadow-lg min-w-[180px] py-1 z-50">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.name}
+                        to={child.path || '#'}
+                        className={`
+                          flex items-center px-4 py-2 text-sm transition-colors
+                          ${isActive(child.path) 
+                            ? 'bg-gray-100 font-medium' 
+                            : 'text-gray-700 hover:bg-gray-100'
+                          }
+                        `}
+                        style={isActive(child.path) ? { color: themeColor } : {}}
+                      >
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Collapse/Expand Button for Level 1 */}
+        {activeParent && collapsedLevels.level1 && (
+          <button
+            onClick={() => setCollapsedLevels(prev => ({ ...prev, level1: false }))}
+            className="absolute right-2 top-0.5 p-1 rounded hover:bg-white/20 transition-colors z-10"
+            title="Expand modules"
+            style={{ backgroundColor: themeColor }}
+          >
+            <BsChevronDown size={14} className="text-white" />
+          </button>
+        )}
+        {activeParent && !collapsedLevels.level1 && (
+          <button
+            onClick={() => setCollapsedLevels(prev => ({ ...prev, level1: true }))}
+            className="absolute right-2 top-2 p-1 rounded hover:bg-white/20 transition-colors z-10"
+            title="Collapse modules"
+          >
+            <BsChevronUp size={14} className="text-white" />
+          </button>
+        )}
+      </div>
+
+      {/* Level 2 - Sub Module Navigation (when parent is active) */}
+      {activeParent?.children && activeParent.children.length > 0 && (
+        <div className="relative border-t border-gray-200 bg-gray-100">
+          <nav className={`px-2 overflow-x-auto transition-all duration-300 ${collapsedLevels.level2 ? 'h-0 overflow-hidden' : ''}`}>
+            <ul className="flex items-center gap-0 flex-nowrap">
+              {activeParent.children.map((child) => (
+                <li key={child.name} className="flex-shrink-0">
+                  <Link
+                    to={child.path || '#'}
+                    className={`block px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap uppercase
+                      ${isActive(child.path) 
+                        ? 'border-b-2 text-gray-800' 
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200'
+                      }`}
+                    style={isActive(child.path) ? { borderColor: themeColor, color: themeColor } : {}}
+                  >
+                    {child.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Collapse/Expand Button for Level 2 */}
+          {collapsedLevels.level2 ? (
+            <button
+              onClick={() => setCollapsedLevels(prev => ({ ...prev, level2: false }))}
+              className="absolute right-2 top-0.5 p-1 rounded hover:bg-gray-200 transition-colors"
+              title="Expand sub-modules"
+            >
+              <BsChevronDown size={12} className="text-gray-500" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setCollapsedLevels(prev => ({ ...prev, level2: true }))}
+              className="absolute right-2 top-1.5 p-1 rounded hover:bg-gray-200 transition-colors"
+              title="Collapse sub-modules"
+            >
+              <BsChevronUp size={12} className="text-gray-500" />
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 };

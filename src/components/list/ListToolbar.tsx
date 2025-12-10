@@ -34,7 +34,7 @@ const ListToolbar: React.FC<ListToolbarProps> = ({
   showAddButton = false,
   addButtonLabel = 'Add New',
   onAddClick,
-  viewMode = 'list',
+  viewMode = 'grid', // Default changed from 'list' to 'grid'
   onViewModeChange,
   showViewToggle = false,
   className = '',

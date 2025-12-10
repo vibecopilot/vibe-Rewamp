@@ -1,103 +1,59 @@
-import React from "react";
-import { MdOutlineWidgets } from "react-icons/md";
-import { Link, NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
+
+const assetSubModules = [
+  { name: "Asset", path: "/assets/all-assets" },
+  { name: "AMC", path: "/assets/amc" },
+  { name: "Meter", path: "/assets/meter" },
+  { name: "Checklist", path: "/assets/checklist" },
+  { name: "Routine Task", path: "/assets/routine-task" },
+  { name: "PPM Checklist", path: "/assets/ppm" },
+  { name: "PPM Activity", path: "/assets/ppm-task" },
+  { name: "PPM Calendar", path: "/assets/ppm-calendar" },
+  { name: "Stock Items", path: "/assets/stock-items" },
+];
 
 const AssetNav = () => {
+  const themeColor = useSelector((state) => state.theme.color);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
-    <div className="flex lg:flex-row flex-col gap-2 relative items-center justify-center w-full">
-      <div className="sm:flex grid grid-cols-2 flex-wrap text-sm md:text-base sm:flex-row gap-5 font-medium p-2 xl:rounded-full rounded-md opacity-90 bg-gray-200 ">
-        <NavLink
-          to={"/assets/all-assets"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          Assets
-        </NavLink>
-        <NavLink
-          to={"/assets/amc"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          AMC
-        </NavLink>
-        <NavLink
-          to={"/assets/meter"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          Meter
-        </NavLink>
-        <NavLink
-          to={"/assets/checklist"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          Checklist
-        </NavLink>
-        <NavLink
-          to={"/assets/routine-task"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          Routine Task
-        </NavLink>
-        <NavLink
-          to={"/assets/ppm"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          PPM Checklist
-        </NavLink>
-        <NavLink
-          to={"/assets/ppm-task"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          PPM Activity
-        </NavLink>
-        <NavLink
-          to={"/assets/ppm-calendar"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          PPM Calendar
-        </NavLink>
-        <NavLink
-          to={"/assets/stock-items"}
-          className={({ isActive }) =>
-            `  md:rounded-full px-4 cursor-pointer text-center transition-all duration-300 ease-linear ${
-              isActive && "bg-white text-blue-500 shadow-custom-all-sides"
-            }`
-          }
-        >
-          Stock Items
-        </NavLink>
-      </div>
-      <Link to={"/assets/overview"} className="lg:absolute right-0  shadow-custom-all-sides p-1 rounded-full cursor-pointer  hover:text-blue-500 transition-all duration-300 bg-gray-200 "><MdOutlineWidgets size={30} /></Link>
+    <div className="relative w-full mb-2">
+      <nav className={`overflow-x-auto transition-all duration-300 ${isCollapsed ? 'h-0 overflow-hidden' : ''}`}>
+        <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-lg">
+          {assetSubModules.map((module) => (
+            <NavLink
+              key={module.path}
+              to={module.path}
+              className={({ isActive }) =>
+                `px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-all duration-200 uppercase tracking-wide
+                ${isActive 
+                  ? "bg-white shadow-sm" 
+                  : "text-gray-600 hover:bg-white/50"
+                }`
+              }
+              style={({ isActive }) => isActive ? { color: themeColor } : {}}
+            >
+              {module.name}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+
+      {/* Collapse/Expand Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute right-0 -top-1 p-1 rounded hover:bg-gray-200 transition-colors"
+        title={isCollapsed ? "Expand sub-modules" : "Collapse sub-modules"}
+      >
+        {isCollapsed ? (
+          <BsChevronDown size={14} className="text-gray-500" />
+        ) : (
+          <BsChevronUp size={14} className="text-gray-500" />
+        )}
+      </button>
     </div>
   );
 };

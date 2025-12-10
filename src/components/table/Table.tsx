@@ -30,6 +30,8 @@ interface TableProps {
   paginationServer?: boolean;
   paginationTotalRows?: number;
   onChangeRowsPerPage?: (rows: number, page: number) => void;
+  selectableRowsNoSelectAll?: boolean;
+  clearSelectedRows?: boolean;
 }
 
 const Table: React.FC<TableProps> = ({
@@ -45,7 +47,9 @@ const Table: React.FC<TableProps> = ({
   onSelectedRows,
   paginationServer = false,
   paginationTotalRows = 0,
-  onChangeRowsPerPage
+  onChangeRowsPerPage,
+  selectableRowsNoSelectAll = false,
+  clearSelectedRows = false,
 }) => {
   const themeColor = useSelector((state: RootState) => state.theme.color);
 
@@ -116,6 +120,8 @@ const Table: React.FC<TableProps> = ({
         fixedHeader
         selectableRowsHighlight
         selectableRows={selectableRow}
+        selectableRowsNoSelectAll={selectableRowsNoSelectAll}
+        clearSelectedRows={clearSelectedRows}
         highlightOnHover
         onChangePage={onChangePage}
         onChangeRowsPerPage={onChangeRowsPerPage}
