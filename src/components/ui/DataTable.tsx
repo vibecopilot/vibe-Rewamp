@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StatusBadge, { StatusType } from './StatusBadge';
 
@@ -26,6 +26,35 @@ interface DataTableProps<T> {
   onView?: (row: T) => void;
 }
 
+// Custom Checkbox component for better styling
+const Checkbox: React.FC<{
+  checked: boolean;
+  indeterminate?: boolean;
+  onChange: () => void;
+  className?: string;
+}> = ({ checked, indeterminate, onChange, className = '' }) => {
+  return (
+    <label className={`relative inline-flex items-center cursor-pointer ${className}`}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="sr-only peer"
+      />
+      <div className={`
+        w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center
+        ${checked || indeterminate 
+          ? 'bg-primary border-primary' 
+          : 'bg-background border-border hover:border-primary/50'
+        }
+      `}>
+        {checked && <Check className="w-3.5 h-3.5 text-primary-foreground" strokeWidth={3} />}
+        {indeterminate && !checked && <div className="w-2.5 h-0.5 bg-primary-foreground rounded" />}
+      </div>
+    </label>
+  );
+};
+
 function DataTable<T extends Record<string, any>>({
   columns,
   data,
@@ -41,20 +70,20 @@ function DataTable<T extends Record<string, any>>({
   onView,
 }: DataTableProps<T>) {
   const allSelected = data.length > 0 && selectedRows.length === data.length;
+  const someSelected = selectedRows.length > 0 && selectedRows.length < data.length;
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden">
+    <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-secondary/50 border-b border-border">
               {selectable && (
                 <th className="w-12 px-4 py-3">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={allSelected}
-                    onChange={onSelectAll}
-                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    indeterminate={someSelected}
+                    onChange={() => onSelectAll?.()}
                   />
                 </th>
               )}
@@ -90,21 +119,19 @@ function DataTable<T extends Record<string, any>>({
           </thead>
           <tbody>
             {data.map((row, rowIndex) => {
-              const rowId = getRowId(row);
+              const rowId = String(getRowId(row));
               const isSelected = selectedRows.includes(rowId);
               
               return (
                 <tr 
                   key={rowId} 
-                  className={`border-b border-border hover:bg-accent/30 transition-colors ${isSelected ? 'bg-accent/50' : ''}`}
+                  className={`border-b border-border hover:bg-accent/30 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
                 >
                   {selectable && (
                     <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={isSelected}
                         onChange={() => onSelectRow?.(rowId)}
-                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                     </td>
                   )}
