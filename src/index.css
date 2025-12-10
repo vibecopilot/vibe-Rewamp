@@ -59,6 +59,14 @@
   
   /* Radius */
   --radius: 0.5rem;
+  
+  /* Login Page Colors */
+  --login-dark: 240 10% 10%;
+  --login-dark-card: 240 10% 14%;
+  --login-input-bg: 240 10% 18%;
+  --login-input-border: 240 10% 25%;
+  --login-text: 0 0% 95%;
+  --login-text-muted: 240 5% 65%;
 }
 
 .dark {

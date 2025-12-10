@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { FaGoogle, FaApple, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import wave from "/wave.png";
 import {
@@ -8,29 +9,28 @@ import {
   getHRMSEmployeeID,
   login,
   getAdminAccess,
-  vibeBGImages, // newly imported API call
+  vibeBGImages,
 } from "../../api";
 import { setItemInLocalStorage, getItemInLocalStorage } from "../../utils/localStorage";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  // Form and password states
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [password, showPassword] = useState(false);
   const [page, setPage] = useState("login");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
-  // New states for role access
   const [roleAccess, setRoleAccess] = useState({});
   const [clientDashboardVisible, setClientDashboardVisible] = useState(false);
-
-  // State for background image
   const [bgImage, setBgImage] = useState(wave);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [bgImages, setBgImages] = useState([wave]);
 
-  // Handle input change
   const onChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -38,7 +38,6 @@ const Login = () => {
     }));
   };
 
-  // If token exists, check role access and redirect accordingly.
   useEffect(() => {
     const token = localStorage.getItem("TOKEN");
     const approverId = localStorage.getItem("APPROVERID");
@@ -68,7 +67,6 @@ const Login = () => {
     }
   }, [navigate]);
 
-  // Handle login form submission
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
@@ -83,8 +81,7 @@ const Login = () => {
         },
       });
 
-      // Store various data in local storage
-      console.log("response data:",response.data)
+      console.log("response data:", response.data);
       const selectedSiteId = response.data.user.selected_site_id;
       const userNameFromResponse = response.data.user.firstname;
       const userEmail = response.data?.user?.email;
@@ -100,23 +97,6 @@ const Login = () => {
 
       const featNames = features.map((feature) => feature.feature_name);
 
-      // (Optional) Vibe Login logic commented out
-      // if (selectedSiteId === 10) {
-      //   if (featNames.includes("project_task")) {
-      //     const vibeResponse = await vibeLogin({
-      //       email: formData.email,
-      //       password: formData.password,
-      //     });
-      //     const vibeToken = vibeResponse.data.token.access.token;
-      //     setItemInLocalStorage("VIBETOKEN", vibeToken);
-      //     const vibeUserId = vibeResponse.data.data.user_id;
-      //     setItemInLocalStorage("VIBEUSERID", vibeUserId);
-      //     const vibeOrganizationId = vibeResponse.data.data.organization_id;
-      //     setItemInLocalStorage("VIBEORGID", vibeOrganizationId);
-      //   }
-      // }
-
-      // If HRMS feature is available, get employee and associated site info.
       if (featNames.includes("hrms") && response.data.user.organization_id) {
         try {
           const hrmsRes = await getHRMSEmployeeID(response.data.user.id);
@@ -125,13 +105,12 @@ const Login = () => {
           setItemInLocalStorage("HRMS_SITE_ID", associatedSiteID);
           setItemInLocalStorage("HRMS_EMPLOYEE_ID", hrmsRes.id);
           setItemInLocalStorage("APPROVERID", hrmsRes.id);
-          setItemInLocalStorage("HRMSORGID",hrmsRes.organization)
+          setItemInLocalStorage("HRMSORGID", hrmsRes.organization);
         } catch (error) {
           console.error("Error getting employee ID:", error);
         }
       }
 
-      // Store additional user details
       const loginD = response.data.user;
       setItemInLocalStorage("user", loginD);
       setItemInLocalStorage("UserId", response.data.user.id);
@@ -144,15 +123,11 @@ const Login = () => {
       const userType = response.data.user.user_type;
       setItemInLocalStorage("USERTYPE", userType);
       setItemInLocalStorage("COMPANYID", response.data.user.company_id);
-      // setItemInLocalStorage("HRMSORGID", response.data.user.organization_id);
       setItemInLocalStorage("STATUS", response.data.statuses);
       setItemInLocalStorage("complaint", response.data.complanits);
 
       toast.loading("Processing your data please wait...");
 
-      // -------------------------------
-      // ROLE ACCESS CHECK FOR CLIENT DASHBOARD
-      // -------------------------------
       const approverId = getItemInLocalStorage("APPROVERID");
       const hrmsOrgId = getItemInLocalStorage("HRMSORGID");
       if (hrmsOrgId && approverId) {
@@ -161,11 +136,8 @@ const Login = () => {
           if (accessRes && accessRes.length > 0) {
             const clientDashboardAccess =
               accessRes[0].client_dashboard === true || accessRes[0].client_dashboard === "true";
-            // Save full role access details in state if needed
             setRoleAccess(accessRes[0]);
             setClientDashboardVisible(clientDashboardAccess);
-            
-            // Store clientDashboardVisible in localStorage so App.jsx can check it
             localStorage.setItem('CLIENT_DASHBOARD_VISIBLE', clientDashboardAccess);
             
             console.log("Client Dashboard Visibility:", clientDashboardAccess);
@@ -173,18 +145,14 @@ const Login = () => {
               toast.dismiss();
               navigate("/admin/hrms/client-dashboard");
               window.location.reload();
-              return; // Stop further navigation
+              return;
             }
           }
         } catch (error) {
           console.error("Error fetching admin access:", error);
         }
       }
-      // -------------------------------
-      // END ROLE ACCESS CHECK
-      // -------------------------------
 
-      // Continue with the normal navigation logic if client dashboard is not to be shown
       if (userType === "pms_admin") {
         navigate("/dashboard");
       } else if (userType === "auditor") {
@@ -208,44 +176,37 @@ const Login = () => {
     }
   };
 
-  // Toggle password visibility
   const togglePassword = () => {
     showPassword(!password);
   };
 
-  // Fetch background image from API and set it with 6-hour interval caching
   useEffect(() => {
     const fetchBackgroundImage = async () => {
       try {
-        // Check if we have a cached image and timestamp
         const cachedImage = localStorage.getItem('VibeBg');
         const cachedTimestamp = localStorage.getItem('VibeBgTimestamp');
         const currentTime = new Date().getTime();
-        const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+        const sixHours = 6 * 60 * 60 * 1000;
 
-        // If we have cached image and it's less than 6 hours old, use it
         if (cachedImage && cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < sixHours) {
           setBgImage(cachedImage);
           return;
         }
 
-        // Fetch new image from API
         const aks = await vibeBGImages();
         const resp = aks.data;
         console.log("API response:", resp);
 
         if (resp && resp.data && resp.data.length > 0) {
-          // Filter only images with key "VibeBg"
           const vibeBgImages = resp.data.filter(item => item.key === "VibeBg");
           console.log("Filtered VibeBg images:", vibeBgImages);
           
           if (vibeBgImages.length > 0) {
-            // Calculate which image to show based on 6-hour intervals
             const dayStartTime = new Date();
-            dayStartTime.setHours(0, 0, 0, 0); // Start of the day
+            dayStartTime.setHours(0, 0, 0, 0);
             const timeSinceDayStart = currentTime - dayStartTime.getTime();
             const sixHourInterval = Math.floor(timeSinceDayStart / sixHours);
-            const imageIndex = sixHourInterval % vibeBgImages.length; // Cycle through available images
+            const imageIndex = sixHourInterval % vibeBgImages.length;
             
             const selectedImage = vibeBgImages[imageIndex];
             const newImageUrl = selectedImage.image;
@@ -254,8 +215,9 @@ const Login = () => {
             console.log("Selected image URL:", newImageUrl);
             
             setBgImage(newImageUrl);
+            setBgImages(vibeBgImages.map(img => img.image));
+            setCurrentImageIndex(imageIndex);
             
-            // Cache the new image and timestamp
             localStorage.setItem('VibeBg', newImageUrl);
             localStorage.setItem('VibeBgTimestamp', currentTime.toString());
           } else {
@@ -267,21 +229,16 @@ const Login = () => {
             }
           }
         } else if (cachedImage) {
-          // If API fails but we have a cached image, use it
           setBgImage(cachedImage);
         } else {
-          // Fallback to default wave image
           setBgImage(wave);
         }
       } catch (error) {
         console.error("Error fetching background image:", error);
-        
-        // Try to use cached image as fallback
         const cachedImage = localStorage.getItem('VibeBg');
         if (cachedImage) {
           setBgImage(cachedImage);
         } else {
-          // Final fallback to default wave image
           setBgImage(wave);
         }
       }
@@ -291,92 +248,175 @@ const Login = () => {
   }, []);
 
   return (
-    <div
-      className="h-screen relative"
-      style={{
-        backgroundImage: `url(${bgImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        background: "blur",
-        opacity: 0.9,
-      }}
-    >
-      <div className="rounded-md">
-        <h1 className="text-3xl text-white p-2 px-10 font-semibold jersey-15-regular">
-          VIBE CONNECT
-        </h1>
+    <div className="flex h-screen w-full">
+      {/* Left Side - Image Panel */}
+      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+        </div>
+        
+        {/* Logo and Back Link */}
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+          <h1 className="text-2xl font-bold text-white jersey-15-regular tracking-wider">
+            VIBE CONNECT
+          </h1>
+          <a 
+            href="/" 
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm hover:bg-white/20 transition-all"
+          >
+            Back to website <FaArrowRight className="w-3 h-3" />
+          </a>
+        </div>
+        
+        {/* Tagline */}
+        <div className="absolute bottom-12 left-6 right-6 z-10">
+          <h2 className="text-3xl font-light text-white leading-tight mb-6">
+            Capturing Moments,<br />
+            Creating Memories
+          </h2>
+          
+          {/* Pagination Dots */}
+          <div className="flex gap-2">
+            {bgImages.slice(0, 4).map((_, index) => (
+              <div
+                key={index}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex % 4
+                    ? 'w-8 bg-white'
+                    : 'w-4 bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="flex justify-center h-[90vh] items-center">
-        <div className="bg-white border-2 border-white w-[30rem] rounded-xl max-h-full p-5 shadow-2xl">
-          <h1 className="text-2xl font-semibold text-center">Login</h1>
-          <form onSubmit={onSubmit} className="m-2 flex flex-col gap-4 w-full">
-            <div className="flex flex-col gap-2 mx-5">
-              <label htmlFor="email" className="font-medium">
-                Email:
-              </label>
+
+      {/* Right Side - Form Panel */}
+      <div className="flex-1 flex items-center justify-center bg-[hsl(var(--login-dark))] px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden mb-8">
+            <h1 className="text-2xl font-bold text-white jersey-15-regular tracking-wider">
+              VIBE CONNECT
+            </h1>
+          </div>
+
+          {/* Form Header */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-semibold text-[hsl(var(--login-text))] mb-2">
+              {page === "login" ? "Welcome Back" : "Single Sign-On"}
+            </h2>
+            <p className="text-[hsl(var(--login-text-muted))]">
+              {page === "login" ? (
+                <>Don't have an account? <span className="text-primary underline cursor-pointer">Sign up</span></>
+              ) : (
+                <span className="cursor-pointer hover:text-primary" onClick={() => setPage("login")}>Back to Login</span>
+              )}
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={onSubmit} className="space-y-5">
+            {/* Email Field */}
+            <div>
               <input
                 type="email"
                 name="email"
                 id="email"
-                className="rounded-sm p-1 px-2 border border-black"
-                placeholder="example@company.com"
+                placeholder="Email"
                 onChange={onChange}
                 value={formData.email}
+                className="w-full px-4 py-3.5 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] placeholder:text-[hsl(var(--login-text-muted))] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               />
             </div>
+
+            {/* Password Field */}
             {page === "login" && (
-              <div className="flex flex-col gap-2 relative mx-5">
-                <label htmlFor="password" className="font-medium">
-                  Password:
-                </label>
+              <div className="relative">
                 <input
                   name="password"
                   id="password"
-                  className="rounded-sm p-1 px-2 border border-black"
-                  placeholder="**********"
+                  placeholder="Enter your password"
                   type={password ? "text" : "password"}
                   onChange={onChange}
                   value={formData.password}
+                  className="w-full px-4 py-3.5 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] placeholder:text-[hsl(var(--login-text-muted))] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
                 />
-                <div className="p-1 rounded-full absolute top-12 right-2 transform -translate-y-1/2 cursor-pointer">
-                  {password ? (
-                    <AiFillEye onClick={togglePassword} />
-                  ) : (
-                    <AiFillEyeInvisible onClick={togglePassword} />
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={togglePassword}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[hsl(var(--login-text-muted))] hover:text-[hsl(var(--login-text))] transition-colors"
+                >
+                  {password ? <AiFillEye size={20} /> : <AiFillEyeInvisible size={20} />}
+                </button>
               </div>
             )}
-            <div className="mx-5 flex gap-2">
-              <input type="checkbox" name="" id="" />
-              <label className="" htmlFor="">
-                Remember Me
+
+            {/* Remember Me / Terms */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-[hsl(var(--login-input-border))] bg-[hsl(var(--login-input-bg))] text-primary focus:ring-primary focus:ring-offset-0"
+              />
+              <label htmlFor="remember" className="text-sm text-[hsl(var(--login-text-muted))]">
+                I agree to the <span className="text-primary underline cursor-pointer">Terms & Conditions</span>
               </label>
             </div>
-            <div className="flex justify-center gap-4 w-full">
-              {page === "login" && (
-                <button
-                  type="submit"
-                  className="w-20 my-2 bg-black text-white p-1 rounded-md text-xl font-bold hover:bg-gray-300"
-                >
-                  Login
-                </button>
-              )}
-              <p
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary-dark transition-all duration-200 shadow-lg shadow-primary/25"
+            >
+              {page === "login" ? "Login" : "Continue with SSO"}
+            </button>
+
+            {/* SSO Toggle */}
+            {page === "login" && (
+              <button
+                type="button"
                 onClick={() => setPage("sso")}
-                className="w-20 my-2 border-black border-2 p-1 cursor-pointer text-center rounded-md text-xl font-medium hover:bg-gray-300"
+                className="w-full py-3.5 rounded-lg border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] font-medium hover:bg-[hsl(var(--login-input-bg))] transition-all"
               >
-                {page === "sso" ? "Submit" : "SSO"}
-              </p>
-            </div>
-            {page === "sso" && (
-              <p
-                className="text-center cursor-pointer hover:text-blue-400"
-                onClick={() => setPage("login")}
-              >
-                Login
-              </p>
+                SSO Login
+              </button>
             )}
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[hsl(var(--login-input-border))]" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-[hsl(var(--login-dark))] text-[hsl(var(--login-text-muted))]">
+                  Or login with
+                </span>
+              </div>
+            </div>
+
+            {/* Social Login */}
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] font-medium hover:bg-[hsl(var(--login-dark-card))] transition-all"
+              >
+                <FaGoogle className="w-5 h-5" />
+                Google
+              </button>
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] font-medium hover:bg-[hsl(var(--login-dark-card))] transition-all"
+              >
+                <FaApple className="w-5 h-5" />
+                Apple
+              </button>
+            </div>
           </form>
         </div>
       </div>
