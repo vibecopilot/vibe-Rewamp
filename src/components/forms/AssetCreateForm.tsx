@@ -21,7 +21,8 @@ import {
 
 const AssetCreateForm: React.FC = () => {
   const navigate = useNavigate();
-  const buildings = getItemInLocalStorage("Building") || [];
+  const storedBuildings = getItemInLocalStorage("Building");
+  const buildings = Array.isArray(storedBuildings) ? storedBuildings : [];
   const themeColor = useSelector((state: any) => state.theme.color);
 
   const [floors, setFloors] = useState<any[]>([]);
