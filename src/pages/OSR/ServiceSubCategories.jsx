@@ -7,7 +7,7 @@ import {
 import OsrModal from "./OsrModal";
 import PropTypes from "prop-types";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const ServiceSubcategories = ({ onClose = null }) => {
   const [subcategories, setSubcategories] = useState([]);

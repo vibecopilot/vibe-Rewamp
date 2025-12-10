@@ -10,7 +10,7 @@ import {
 import PropTypes from "prop-types";
 import { FaClock, FaRupeeSign, FaCalendarAlt, FaUser } from "react-icons/fa";
 import Osr from "./Osr";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const ServiceBooking = ({ onClose = null }) => {
   // State management

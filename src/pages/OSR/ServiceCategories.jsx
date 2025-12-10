@@ -5,7 +5,7 @@ import OsrModal from "./OsrModal";
 import PropTypes from "prop-types";
 import { getItemInLocalStorage } from "../../utils/localStorage";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import Loading from "../../utils/Loadinng";
+import Loading from "../../utils/Loading";
 
 const ServiceCategories = ({ onClose = null }) => {
   const [categories, setCategories] = useState([]);
