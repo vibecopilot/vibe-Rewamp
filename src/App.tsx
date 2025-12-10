@@ -49,21 +49,38 @@ function App() {
 
           {/* Asset Module */}
           <Route path="/asset" element={<AssetList />} />
+          <Route path="/asset/create" element={<PlaceholderPage title="Create Asset" />} />
+          <Route path="/asset/:id" element={<PlaceholderPage title="Asset Details" />} />
+          <Route path="/asset/:id/edit" element={<PlaceholderPage title="Edit Asset" />} />
           <Route path="/asset/amc" element={<AssetList />} />
+          <Route path="/asset/amc/create" element={<PlaceholderPage title="Create AMC" />} />
+          <Route path="/asset/amc/:id" element={<PlaceholderPage title="AMC Details" />} />
+          <Route path="/asset/amc/:id/edit" element={<PlaceholderPage title="Edit AMC" />} />
           <Route path="/asset/meter" element={<AssetList />} />
+          <Route path="/asset/meter/create" element={<PlaceholderPage title="Create Meter" />} />
+          <Route path="/asset/meter/:id" element={<PlaceholderPage title="Meter Details" />} />
+          <Route path="/asset/meter/:id/edit" element={<PlaceholderPage title="Edit Meter" />} />
           <Route path="/asset/checklist" element={<AssetList />} />
+          <Route path="/asset/checklist/create" element={<PlaceholderPage title="Create Checklist" />} />
+          <Route path="/asset/checklist/:id" element={<PlaceholderPage title="Checklist Details" />} />
+          <Route path="/asset/checklist/:id/edit" element={<PlaceholderPage title="Edit Checklist" />} />
           <Route path="/asset/routine-task" element={<AssetList />} />
+          <Route path="/asset/routine-task/create" element={<PlaceholderPage title="Create Routine Task" />} />
+          <Route path="/asset/routine-task/:id" element={<PlaceholderPage title="Routine Task Details" />} />
+          <Route path="/asset/routine-task/:id/edit" element={<PlaceholderPage title="Edit Routine Task" />} />
           <Route path="/asset/ppm-checklist" element={<AssetList />} />
+          <Route path="/asset/ppm-checklist/create" element={<PlaceholderPage title="Create PPM Checklist" />} />
+          <Route path="/asset/ppm-checklist/:id" element={<PlaceholderPage title="PPM Checklist Details" />} />
+          <Route path="/asset/ppm-checklist/:id/edit" element={<PlaceholderPage title="Edit PPM Checklist" />} />
           <Route path="/asset/ppm-activity" element={<AssetList />} />
+          <Route path="/asset/ppm-activity/create" element={<PlaceholderPage title="Create PPM Activity" />} />
+          <Route path="/asset/ppm-activity/:id" element={<PlaceholderPage title="PPM Activity Details" />} />
+          <Route path="/asset/ppm-activity/:id/edit" element={<PlaceholderPage title="Edit PPM Activity" />} />
           <Route path="/asset/ppm-calendar" element={<AssetList />} />
           <Route path="/asset/stock-items" element={<AssetList />} />
-          <Route path="/asset/amc/create" element={<PlaceholderPage title="Create AMC" />} />
-          <Route path="/asset/meter/create" element={<PlaceholderPage title="Create Meter" />} />
-          <Route path="/asset/checklist/create" element={<PlaceholderPage title="Create Checklist" />} />
-          <Route path="/asset/routine-task/create" element={<PlaceholderPage title="Create Routine Task" />} />
-          <Route path="/asset/ppm-checklist/create" element={<PlaceholderPage title="Create PPM Checklist" />} />
-          <Route path="/asset/ppm-activity/create" element={<PlaceholderPage title="Create PPM Activity" />} />
           <Route path="/asset/stock-items/create" element={<PlaceholderPage title="Create Stock Item" />} />
+          <Route path="/asset/stock-items/:id" element={<PlaceholderPage title="Stock Item Details" />} />
+          <Route path="/asset/stock-items/:id/edit" element={<PlaceholderPage title="Edit Stock Item" />} />
 
           {/* Soft Services */}
           <Route path="/soft-services" element={<SoftServiceList />} />

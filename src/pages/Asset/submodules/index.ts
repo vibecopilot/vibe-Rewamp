@@ -1,3 +1,4 @@
+export { default as AssetMainList } from './AssetMainList';
 export { default as AMCList } from './AMCList';
 export { default as MeterList } from './MeterList';
 export { default as ChecklistList } from './ChecklistList';
