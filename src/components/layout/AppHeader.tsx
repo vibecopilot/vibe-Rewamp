@@ -7,9 +7,11 @@ import {
   Mail,
   LogOut,
   Building2,
-  MapPin
+  MapPin,
+  LayoutDashboard
 } from 'lucide-react';
 import { getItemInLocalStorage, setItemInLocalStorage } from '../../utils/localStorage';
+import { getSiteData, siteChange } from '../../api';
 
 // Module configuration with sub-modules
 const modules = [
@@ -89,12 +91,11 @@ const modules = [
   },
 ];
 
-// Sample sites data - in real app, this would come from API
-const sitesData = [
-  { id: 1, name: 'PANCHSHIL AVENUE', company: 'A2z Online Service' },
-  { id: 2, name: 'TECH PARK TOWER', company: 'Global Tech Solutions' },
-  { id: 3, name: 'BUSINESS CENTER', company: 'Enterprise Corp' },
-];
+interface SiteData {
+  id: number;
+  name: string;
+  company?: string;
+}
 
 interface UserData {
   name: string;
@@ -117,25 +118,43 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const navigate = useNavigate();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showSiteDropdown, setShowSiteDropdown] = useState(false);
+  const [sitesData, setSitesData] = useState<SiteData[]>([]);
+  const [selectedSite, setSelectedSite] = useState<SiteData | null>(null);
+  const [loadingSites, setLoadingSites] = useState(true);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const siteDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get selected site from localStorage or default
-  const getSavedSite = () => {
-    const savedSiteId = getItemInLocalStorage('SITEID');
-    const savedBuilding = getItemInLocalStorage('Building');
-    if (savedSiteId) {
-      const site = sitesData.find(s => s.id === Number(savedSiteId));
-      if (site) return site;
-    }
-    if (savedBuilding) {
-      const site = sitesData.find(s => s.name === savedBuilding);
-      if (site) return site;
-    }
-    return sitesData[0];
-  };
-
-  const [selectedSite, setSelectedSite] = useState(getSavedSite);
+  // Fetch sites from API
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        const response = await getSiteData();
+        const sites = response?.data?.sites || response?.data || [];
+        const formattedSites = Array.isArray(sites) ? sites.map((site: any) => ({
+          id: site.id || site.site_id,
+          name: site.name || site.site_name || site.building_name,
+          company: site.company || site.company_name || ''
+        })) : [];
+        
+        setSitesData(formattedSites);
+        
+        // Set selected site from localStorage or first available
+        const savedSiteId = getItemInLocalStorage('SITEID');
+        if (savedSiteId && formattedSites.length) {
+          const savedSite = formattedSites.find((s: SiteData) => s.id === Number(savedSiteId));
+          setSelectedSite(savedSite || formattedSites[0]);
+        } else if (formattedSites.length) {
+          setSelectedSite(formattedSites[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching sites:', error);
+      } finally {
+        setLoadingSites(false);
+      }
+    };
+    
+    fetchSites();
+  }, []);
 
   // Get user data from localStorage
   const getUserData = (): UserData => {
@@ -182,16 +201,22 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
     window.location.href = '/login';
   };
 
-  const handleSiteChange = (site: typeof sitesData[0]) => {
-    setSelectedSite(site);
-    setShowSiteDropdown(false);
-    // Save to localStorage
-    setItemInLocalStorage('SITEID', site.id.toString());
-    setItemInLocalStorage('Building', site.name);
-    // Trigger data refresh
-    window.dispatchEvent(new CustomEvent('siteChanged', { detail: site }));
-    // Reload to refresh data
-    window.location.reload();
+  const handleSiteChange = async (site: SiteData) => {
+    try {
+      // Call API to change site
+      await siteChange(site.id);
+      setSelectedSite(site);
+      setShowSiteDropdown(false);
+      // Save to localStorage
+      setItemInLocalStorage('SITEID', site.id.toString());
+      setItemInLocalStorage('Building', site.name);
+      // Trigger data refresh
+      window.dispatchEvent(new CustomEvent('siteChanged', { detail: site }));
+      // Reload to refresh data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error changing site:', error);
+    }
   };
 
   // Derive active module and sub-module from current path
@@ -240,32 +265,38 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-        {/* Logo - Left Side */}
-        <Link to="/dashboard" className="text-xl font-bold text-foreground">
-          LOGO
-        </Link>
-
-        {/* Right Side Controls */}
+        {/* Left Side - Site Selector & Dashboard */}
         <div className="flex items-center gap-4">
           {/* Site/Company Selector */}
           <div className="relative" ref={siteDropdownRef}>
             <button 
               onClick={() => setShowSiteDropdown(!showSiteDropdown)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
+              disabled={loadingSites}
             >
               <Building2 className="w-4 h-4 text-primary" />
               <div className="text-left">
-                <div className="text-xs text-muted-foreground">{selectedSite.company}</div>
-                <div className="text-sm font-medium text-foreground flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {selectedSite.name}
-                </div>
+                {loadingSites ? (
+                  <div className="text-sm text-muted-foreground">Loading...</div>
+                ) : selectedSite ? (
+                  <>
+                    {selectedSite.company && (
+                      <div className="text-xs text-muted-foreground">{selectedSite.company}</div>
+                    )}
+                    <div className="text-sm font-medium text-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {selectedSite.name}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No sites</div>
+                )}
               </div>
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </button>
 
-            {showSiteDropdown && (
-              <div className="absolute right-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
+            {showSiteDropdown && sitesData.length > 0 && (
+              <div className="absolute left-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
                 <div className="p-2">
                   <div className="text-xs font-medium text-muted-foreground px-2 py-1">Select Site</div>
                   {sitesData.map((site) => (
@@ -273,17 +304,38 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                       key={site.id}
                       onClick={() => handleSiteChange(site)}
                       className={`w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors ${
-                        selectedSite.id === site.id ? 'bg-accent' : ''
+                        selectedSite?.id === site.id ? 'bg-accent' : ''
                       }`}
                     >
                       <div className="text-sm font-medium text-foreground">{site.name}</div>
-                      <div className="text-xs text-muted-foreground">{site.company}</div>
+                      {site.company && <div className="text-xs text-muted-foreground">{site.company}</div>}
                     </button>
                   ))}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Dashboard Link */}
+          <Link 
+            to="/dashboard" 
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+              location.pathname === '/dashboard' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'hover:bg-accent text-foreground'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="text-sm font-medium">Dashboard</span>
+          </Link>
+        </div>
+
+        {/* Right Side Controls */}
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <Link to="/dashboard" className="text-xl font-bold text-foreground">
+            LOGO
+          </Link>
 
           {/* Settings Icon */}
           <button className="p-2 hover:bg-accent rounded-lg transition-colors">
