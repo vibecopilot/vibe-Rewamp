@@ -4,8 +4,9 @@ interface ThemeState {
   color: string;
 }
 
+// Updated to use the new theme color #7132CA
 const initialState: ThemeState = {
-  color: "radial-gradient( circle 897px at 9% 80.3%,  rgba(55,60,245,1) 0%, rgba(234,161,15,0.90) 100.2% )",
+  color: "#7132CA",
 };
 
 export const themeSlice = createSlice({

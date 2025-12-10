@@ -1,53 +1,64 @@
 import React from 'react';
 
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
+type ButtonSize = 'sm' | 'md' | 'lg';
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   isLoading?: boolean;
+  loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
+
+const variantStyles: Record<ButtonVariant, string> = {
+  primary: 'bg-primary text-primary-foreground hover:bg-primary-dark focus:ring-primary',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-accent focus:ring-secondary',
+  outline: 'border border-border bg-transparent text-foreground hover:bg-accent focus:ring-primary',
+  ghost: 'bg-transparent text-foreground hover:bg-accent focus:ring-primary',
+  danger: 'bg-error text-white hover:bg-error/90 focus:ring-error',
+  success: 'bg-success text-white hover:bg-success/90 focus:ring-success',
+};
+
+const sizeStyles: Record<ButtonSize, string> = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-4 py-2 text-sm',
+  lg: 'px-6 py-3 text-base',
+};
 
 const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   size = 'md',
   isLoading = false,
+  loading = false,
   leftIcon,
   rightIcon,
   className = '',
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
-
-  const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-  };
-
-  const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-  };
-
-  const disabledStyles = 'opacity-50 cursor-not-allowed';
+  const isDisabled = disabled || isLoading || loading;
 
   return (
     <button
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
-        disabled || isLoading ? disabledStyles : ''
-      } ${className}`}
-      disabled={disabled || isLoading}
+      className={`
+        inline-flex items-center justify-center gap-2
+        font-medium rounded-lg
+        transition-colors duration-200
+        focus:outline-none focus:ring-2 focus:ring-offset-2
+        disabled:opacity-50 disabled:cursor-not-allowed
+        ${variantStyles[variant]}
+        ${sizeStyles[size]}
+        ${className}
+      `}
+      disabled={isDisabled}
       {...props}
     >
-      {isLoading ? (
+      {(isLoading || loading) ? (
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4"
+          className="animate-spin h-4 w-4"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -67,10 +78,10 @@ const Button: React.FC<ButtonProps> = ({
           />
         </svg>
       ) : leftIcon ? (
-        <span className="mr-2">{leftIcon}</span>
+        <span>{leftIcon}</span>
       ) : null}
       {children}
-      {rightIcon && !isLoading && <span className="ml-2">{rightIcon}</span>}
+      {rightIcon && !(isLoading || loading) && <span>{rightIcon}</span>}
     </button>
   );
 };
