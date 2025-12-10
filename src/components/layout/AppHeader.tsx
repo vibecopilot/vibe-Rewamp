@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutGrid, 
@@ -101,20 +101,39 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeModule, setActiveModule] = useState('fm-module');
-  const [activeSubModule, setActiveSubModule] = useState('asset');
-  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+
+  // Derive active module and sub-module from current path
+  const getActiveFromPath = () => {
+    const pathname = location.pathname;
+    
+    for (const mod of modules) {
+      for (const subMod of mod.subModules) {
+        if (pathname.startsWith(subMod.path)) {
+          return { moduleId: mod.id, subModuleId: subMod.id };
+        }
+      }
+      if (mod.path && pathname.startsWith(mod.path)) {
+        return { moduleId: mod.id, subModuleId: '' };
+      }
+    }
+    return { moduleId: 'fm-module', subModuleId: '' };
+  };
+
+  const { moduleId: activeModule, subModuleId: activeSubModule } = getActiveFromPath();
 
   const currentModule = modules.find(m => m.id === activeModule);
   const currentSubModule = currentModule?.subModules.find(s => s.id === activeSubModule);
 
-  const isActivePath = (path: string) => location.pathname.startsWith(path);
+  const isActivePath = (path: string) => {
+    if (path === '/asset') {
+      return location.pathname === '/asset';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const handleModuleClick = (moduleId: string) => {
-    setActiveModule(moduleId);
     const mod = modules.find(m => m.id === moduleId);
     if (mod?.subModules.length) {
-      setActiveSubModule(mod.subModules[0].id);
       navigate(mod.subModules[0].path);
     } else if (mod?.path) {
       navigate(mod.path);
@@ -122,7 +141,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   const handleSubModuleClick = (subModuleId: string, path: string) => {
-    setActiveSubModule(subModuleId);
     navigate(path);
   };
 
