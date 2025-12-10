@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
-import { AMCList, MeterList, ChecklistList, RoutineTaskList, PPMChecklistList, PPMActivityList, PPMCalendar, StockItemsList } from './submodules';
+import { AssetMainList, AMCList, MeterList, ChecklistList, RoutineTaskList, PPMChecklistList, PPMActivityList, PPMCalendar, StockItemsList } from './submodules';
 
 const AssetList: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +31,7 @@ const AssetList: React.FC = () => {
 
   const getAddPath = () => {
     const paths: Record<string, string> = {
+      'asset': '/asset/create',
       'amc': '/asset/amc/create',
       'meter': '/asset/meter/create',
       'checklist': '/asset/checklist/create',
@@ -44,6 +45,7 @@ const AssetList: React.FC = () => {
 
   const getAddLabel = () => {
     const labels: Record<string, string> = {
+      'asset': 'Add Asset',
       'amc': 'Add AMC',
       'meter': 'Add Meter',
       'checklist': 'Add Checklist',
@@ -73,6 +75,7 @@ const AssetList: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'asset': return <AssetMainList viewMode={viewMode} searchValue={searchValue} />;
       case 'amc': return <AMCList viewMode={viewMode} searchValue={searchValue} />;
       case 'meter': return <MeterList viewMode={viewMode} searchValue={searchValue} />;
       case 'checklist': return <ChecklistList viewMode={viewMode} searchValue={searchValue} />;
@@ -81,7 +84,7 @@ const AssetList: React.FC = () => {
       case 'ppm-activity': return <PPMActivityList viewMode={viewMode} searchValue={searchValue} />;
       case 'ppm-calendar': return <PPMCalendar searchValue={searchValue} />;
       case 'stock-items': return <StockItemsList viewMode={viewMode} searchValue={searchValue} />;
-      default: return <AMCList viewMode={viewMode} searchValue={searchValue} />;
+      default: return <AssetMainList viewMode={viewMode} searchValue={searchValue} />;
     }
   };
 
@@ -100,8 +103,8 @@ const AssetList: React.FC = () => {
         onExport={() => {}}
         onAdd={getAddLabel() ? () => navigate(getAddPath()) : undefined}
         addLabel={getAddLabel()}
-        showQrCode={activeTab === 'meter'}
-        onQrCode={activeTab === 'meter' ? () => {} : undefined}
+        showQrCode={activeTab === 'meter' || activeTab === 'asset'}
+        onQrCode={(activeTab === 'meter' || activeTab === 'asset') ? () => {} : undefined}
       />
 
       {renderContent()}
