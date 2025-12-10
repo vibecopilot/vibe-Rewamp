@@ -4,7 +4,7 @@ import { Settings, FileText, Calendar } from "lucide-react";
 import FormSection from "../ui/FormSection";
 import FormInput from "../ui/FormInput";
 import FormGrid from "../ui/FormGrid";
-import { Button } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 
 const AMCCreateForm: React.FC = () => {
   const navigate = useNavigate();
