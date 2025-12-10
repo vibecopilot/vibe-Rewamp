@@ -18,7 +18,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import FileInputBox from "../../../containers/Inputs/FileInputBox";
 import Select from "react-select";
 import Webcam from "react-webcam";
-import AxiosDigestAuth from "@mhoc/axios-digest-auth";
+// import AxiosDigestAuth from "@mhoc/axios-digest-auth"; // Removed - package has ES module issues
 const EmployeeAddVisitor = () => {
   const siteId = getItemInLocalStorage("SITEID");
   const userId = getItemInLocalStorage("UserId");
