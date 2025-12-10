@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import api from '../../../api';
+import axiosInstance from '../../../api/axiosInstance';
 import { FaDownload, FaFileExcel, FaChartBar } from 'react-icons/fa';
 
 const ReconciliationReport = () => {
@@ -19,7 +19,7 @@ const ReconciliationReport = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams(dateRange).toString();
-      const response = await api.get(`/income_entries/reconciliation_report.json?${params}`, {
+      const response = await axiosInstance.get(`/income_entries/reconciliation_report.json?${params}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('api_key')}`
         }

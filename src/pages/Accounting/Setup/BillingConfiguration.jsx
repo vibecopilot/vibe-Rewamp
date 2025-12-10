@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import api from '../../../api';
+import axiosInstance from '../../../api/axiosInstance';
 
 const BillingConfiguration = () => {
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ const BillingConfiguration = () => {
   const fetchBillingConfig = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/billing_configurations.json', {
+      const response = await axiosInstance.get('/billing_configurations.json', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('api_key')}`
         }
@@ -50,14 +50,14 @@ const BillingConfiguration = () => {
     setLoading(true);
     try {
       const response = formData.id
-        ? await api.put(`/billing_configurations/${formData.id}.json`, {
+        ? await axiosInstance.put(`/billing_configurations/${formData.id}.json`, {
             billing_configuration: formData
           }, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('api_key')}`
             }
           })
-        : await api.post('/billing_configurations.json', {
+        : await axiosInstance.post('/billing_configurations.json', {
             billing_configuration: formData
           }, {
             headers: {

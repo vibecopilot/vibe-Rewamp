@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import api from '../../../api';
+import axiosInstance from '../../../api/axiosInstance';
 import { FaPlus, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
 
 const IncomeTracking = () => {
@@ -34,7 +34,7 @@ const IncomeTracking = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams(filters).toString();
-      const response = await api.get(`/income_entries.json?${params}`, {
+      const response = await axiosInstance.get(`/income_entries.json?${params}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('api_key')}`
         }
@@ -52,7 +52,7 @@ const IncomeTracking = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/income_entries.json', {
+      const response = await axiosInstance.post('/income_entries.json', {
         income_entry: formData,
         create_journal_entry: true
       }, {
