@@ -29,31 +29,27 @@ const AssetList: React.FC = () => {
 
   const handleSearch = (value: string) => setSearchValue(value);
 
+  // Only submodules with existing create pages
+  const submodulesWithCreate = ['asset', 'amc', 'checklist', 'ppm-activity'];
+
   const getAddPath = () => {
+    if (!submodulesWithCreate.includes(activeTab)) return '';
     const paths: Record<string, string> = {
       'asset': '/asset/create',
       'amc': '/asset/amc/create',
-      'meter': '/asset/meter/create',
       'checklist': '/asset/checklist/create',
-      'routine-task': '/asset/routine-task/create',
-      'ppm-checklist': '/asset/ppm-checklist/create',
       'ppm-activity': '/asset/ppm-activity/create',
-      'stock-items': '/asset/stock-items/create',
     };
-    return paths[activeTab] || '/asset/create';
+    return paths[activeTab] || '';
   };
 
   const getAddLabel = () => {
+    if (!submodulesWithCreate.includes(activeTab)) return '';
     const labels: Record<string, string> = {
       'asset': 'Add Asset',
       'amc': 'Add AMC',
-      'meter': 'Add Meter',
       'checklist': 'Add Checklist',
-      'routine-task': 'Add Task',
-      'ppm-checklist': 'Add PPM Checklist',
       'ppm-activity': 'Add PPM Activity',
-      'ppm-calendar': '',
-      'stock-items': 'Add Stock Item',
     };
     return labels[activeTab] || '';
   };
