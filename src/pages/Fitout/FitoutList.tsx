@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
+import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
 import { fitoutService, FitoutRequest } from '../../services/fitout.service';
@@ -9,6 +10,7 @@ import { Loader2, HardHat, AlertCircle, RefreshCw } from 'lucide-react';
 
 const FitoutList: React.FC = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [requests, setRequests] = useState<FitoutRequest[]>([]);
@@ -93,8 +95,8 @@ const FitoutList: React.FC = () => {
         searchPlaceholder="Search requests..."
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        viewMode="table"
-        onViewModeChange={() => {}}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         onFilter={() => {}}
         onExport={() => {}}
         onAdd={() => navigate('/fitout/create')}
@@ -112,7 +114,25 @@ const FitoutList: React.FC = () => {
         </div>
       )}
 
-      {requests.length > 0 && (
+      {viewMode === 'grid' && requests.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {requests.map((request) => (
+            <DataCard
+              key={request.id}
+              title={request.title || `Request #${request.request_number}`}
+              subtitle={request.request_number || '-'}
+              status={getRequestStatus(request)}
+              fields={[
+                { label: 'Unit', value: request.unit_name || '-' },
+                { label: 'Start Date', value: request.start_date || '-' },
+                { label: 'End Date', value: request.end_date || '-' },
+              ]}
+              viewPath={`/fitout/${request.id}`}
+              editPath={`/fitout/${request.id}/edit`}
+            />
+          ))}
+        </div>
+      ) : requests.length > 0 && (
         <DataTable columns={columns} data={requests} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === requests.length ? [] : requests.map(r => String(r.id)))} viewPath={(row) => `/fitout/${row.id}`} />
       )}
 
@@ -120,10 +140,15 @@ const FitoutList: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 p-4 bg-card border border-border rounded-lg">
           <div className="text-sm text-muted-foreground">Showing {((pagination.page - 1) * pagination.perPage) + 1} to {Math.min(pagination.page * pagination.perPage, pagination.total)} of {pagination.total} records</div>
           <div className="flex items-center gap-1">
+            <button onClick={() => setPagination(prev => ({ ...prev, page: 1 }))} disabled={pagination.page === 1} className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50">«</button>
             <button onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))} disabled={pagination.page === 1} className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50">‹ Prev</button>
             <span className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md">{pagination.page}</span>
             <button onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))} disabled={pagination.page >= pagination.totalPages} className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50">Next ›</button>
+            <button onClick={() => setPagination(prev => ({ ...prev, page: prev.totalPages }))} disabled={pagination.page >= pagination.totalPages} className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50">»</button>
           </div>
+          <select value={pagination.perPage} onChange={(e) => setPagination(prev => ({ ...prev, perPage: Number(e.target.value), page: 1 }))} className="px-2 py-1.5 text-sm border border-border rounded-md bg-background">
+            <option value={10}>10</option><option value={25}>25</option><option value={50}>50</option>
+          </select>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
+import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
 import { serviceDeskService, Ticket } from '../../services/serviceDesk.service';
@@ -9,6 +10,7 @@ import { Loader2, Ticket as TicketIcon, AlertCircle, RefreshCw } from 'lucide-re
 
 const TicketList: React.FC = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -100,8 +102,8 @@ const TicketList: React.FC = () => {
         searchPlaceholder="Search tickets..."
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        viewMode="table"
-        onViewModeChange={() => {}}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         onFilter={() => {}}
         onExport={() => {}}
         onAdd={() => navigate('/service-desk/create')}
@@ -119,7 +121,26 @@ const TicketList: React.FC = () => {
         </div>
       )}
 
-      {tickets.length > 0 && (
+      {viewMode === 'grid' && tickets.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {tickets.map((ticket) => (
+            <DataCard
+              key={ticket.id}
+              title={ticket.title || `Ticket #${ticket.ticket_number}`}
+              subtitle={ticket.ticket_number || '-'}
+              status={getTicketStatus(ticket)}
+              fields={[
+                { label: 'Category', value: ticket.helpdesk_category?.name || ticket.category || '-' },
+                { label: 'Priority', value: ticket.priority || '-' },
+                { label: 'Assigned', value: ticket.assigned_to || 'Unassigned' },
+                { label: 'Created', value: ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : '-' },
+              ]}
+              viewPath={`/service-desk/${ticket.id}`}
+              editPath={`/service-desk/${ticket.id}/edit`}
+            />
+          ))}
+        </div>
+      ) : tickets.length > 0 && (
         <DataTable columns={columns} data={tickets} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === tickets.length ? [] : tickets.map(t => String(t.id)))} viewPath={(row) => `/service-desk/${row.id}`} />
       )}
 
