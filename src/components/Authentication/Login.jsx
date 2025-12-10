@@ -122,6 +122,8 @@ const Login = () => {
       setItemInLocalStorage("LASTNAME", response.data.user.lastname);
       const userType = response.data.user.user_type;
       setItemInLocalStorage("USERTYPE", userType);
+      setItemInLocalStorage("EMAIL", response?.data?.user?.email)
+      setItemInLocalStorage("MOBILE", response?.data?.user?.mobile)
       setItemInLocalStorage("COMPANYID", response.data.user.company_id);
       setItemInLocalStorage("STATUS", response.data.statuses);
       setItemInLocalStorage("complaint", response.data.complanits);
@@ -263,12 +265,12 @@ const Login = () => {
           <h1 className="text-2xl font-bold text-white jersey-15-regular tracking-wider">
             VIBE CONNECT
           </h1>
-          <a 
+          {/* <a 
             href="/" 
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm hover:bg-white/20 transition-all"
           >
             Back to website <FaArrowRight className="w-3 h-3" />
-          </a>
+          </a> */}
         </div>
         
         {/* Tagline */}

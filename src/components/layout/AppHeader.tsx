@@ -158,12 +158,12 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
 
   // Get user data from localStorage
   const getUserData = (): UserData => {
-    const firstName = getItemInLocalStorage('Name') || '';
-    const lastName = getItemInLocalStorage('LASTNAME') || '';
-    const userType = getItemInLocalStorage('USERTYPE') || 'User';
-    const email = getItemInLocalStorage('EMAIL') || getItemInLocalStorage('email') || '';
-    const mobile = getItemInLocalStorage('MOBILE') || getItemInLocalStorage('phone') || '';
-    const avatar = getItemInLocalStorage('AVATAR') || getItemInLocalStorage('profileImage') || '';
+    const firstName = String(getItemInLocalStorage('Name') || '');
+    const lastName = String(getItemInLocalStorage('LASTNAME') || '');
+    const userType = String(getItemInLocalStorage('USERTYPE') || 'User');
+    const email = String(getItemInLocalStorage('EMAIL') || getItemInLocalStorage('email') || '');
+    const mobile = String(getItemInLocalStorage('MOBILE') || getItemInLocalStorage('phone') || '');
+    const avatar = String(getItemInLocalStorage('AVATAR') || getItemInLocalStorage('profileImage') || '');
     
     const name = `${firstName} ${lastName}`.trim() || 'User';
     const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
@@ -172,6 +172,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   };
 
   const userData = getUserData();
+  // console.log("UserData------------", userData);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -265,212 +266,213 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-        {/* Left Side - Site Selector & Dashboard */}
-        <div className="flex items-center gap-4">
-          {/* Site/Company Selector */}
-          <div className="relative" ref={siteDropdownRef}>
-            <button 
-              onClick={() => setShowSiteDropdown(!showSiteDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
-              disabled={loadingSites}
-            >
-              <Building2 className="w-4 h-4 text-primary" />
-              <div className="text-left">
-                {loadingSites ? (
-                  <div className="text-sm text-muted-foreground">Loading...</div>
-                ) : selectedSite ? (
-                  <>
-                    {selectedSite.company && (
-                      <div className="text-xs text-muted-foreground">{selectedSite.company}</div>
-                    )}
-                    <div className="text-sm font-medium text-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {selectedSite.name}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-muted-foreground">No sites</div>
-                )}
-              </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            </button>
+      {/* Left Side - Site Selector & Dashboard */}
+      <div className="flex items-center gap-4">
+         {/* Logo */}
+        <Link to="/dashboard" className="text-xl font-bold text-foreground">
+        LOGO
+        </Link>
+       
 
-            {showSiteDropdown && sitesData.length > 0 && (
-              <div className="absolute left-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
-                <div className="p-2">
-                  <div className="text-xs font-medium text-muted-foreground px-2 py-1">Select Site</div>
-                  {sitesData.map((site) => (
-                    <button
-                      key={site.id}
-                      onClick={() => handleSiteChange(site)}
-                      className={`w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors ${
-                        selectedSite?.id === site.id ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <div className="text-sm font-medium text-foreground">{site.name}</div>
-                      {site.company && <div className="text-xs text-muted-foreground">{site.company}</div>}
-                    </button>
-                  ))}
-                </div>
+        {/* Dashboard Link */}
+        <Link 
+        to="/dashboard" 
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+          location.pathname === '/dashboard' 
+          ? 'bg-primary text-primary-foreground' 
+          : 'hover:bg-accent text-foreground'
+        }`}
+        >
+        <LayoutDashboard className="w-4 h-4" />
+        <span className="text-sm font-medium">Dashboard</span>
+        </Link>
+      </div>
+
+      {/* Right Side Controls */}
+      <div className="flex items-center gap-4">
+        {/* Site/Company Selector */}
+       
+   <div className="relative" ref={siteDropdownRef}>
+        <button 
+          onClick={() => setShowSiteDropdown(!showSiteDropdown)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
+          disabled={loadingSites}
+        >
+          <Building2 className="w-4 h-4 text-primary" />
+          <div className="text-left">
+          {loadingSites ? (
+            <div className="text-sm text-muted-foreground">Loading...</div>
+          ) : selectedSite ? (
+            <>
+            {selectedSite.company && (
+              <div className="text-xs text-muted-foreground">{selectedSite.company}</div>
+            )}
+            <div className="text-sm font-medium text-foreground flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {selectedSite.name}
+            </div>
+            </>
+          ) : (
+            <div className="text-sm text-muted-foreground">No sites</div>
+          )}
+          </div>
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+        {showSiteDropdown && sitesData.length > 0 && (
+          <div className="absolute left-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
+          <div className="p-2">
+            <div className="text-xs font-medium text-muted-foreground px-2 py-1">Select Site</div>
+            {sitesData.map((site) => (
+            <button
+              key={site.id}
+              onClick={() => handleSiteChange(site)}
+              className={`w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors ${
+              selectedSite?.id === site.id ? 'bg-accent' : ''
+              }`}
+            >
+              <div className="text-sm font-medium text-foreground">{site.name}</div>
+              {site.company && <div className="text-xs text-muted-foreground">{site.company}</div>}
+            </button>
+            ))}
+          </div>
+          </div>
+        )}
+        </div>
+        {/* Settings Icon */}
+        <button className="p-2 hover:bg-accent rounded-lg transition-colors">
+        <Settings className="w-5 h-5 text-muted-foreground" />
+        </button>
+
+        {/* User Dropdown */}
+        <div className="relative" ref={userDropdownRef}>
+        <button 
+          onClick={() => setShowUserDropdown(!showUserDropdown)}
+          className="flex items-center gap-2 hover:bg-accent rounded-lg p-1 transition-colors"
+        >
+          {userData.avatar ? (
+          <img 
+            src={userData.avatar} 
+            alt={userData.name}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+          ) : (
+          <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
+            {userData.initials}
+          </div>
+          )}
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+        {showUserDropdown && (
+          <div className="absolute right-0 top-full mt-1 w-72 bg-card border border-border rounded-lg shadow-lg z-50">
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center gap-3">
+            {userData.avatar ? (
+              <img 
+              src={userData.avatar} 
+              alt={userData.name}
+              className="w-12 h-12 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
+              {userData.initials}
               </div>
             )}
-          </div>
-
-          {/* Dashboard Link */}
-          <Link 
-            to="/dashboard" 
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
-              location.pathname === '/dashboard' 
-                ? 'bg-primary text-primary-foreground' 
-                : 'hover:bg-accent text-foreground'
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            <span className="text-sm font-medium">Dashboard</span>
-          </Link>
-        </div>
-
-        {/* Right Side Controls */}
-        <div className="flex items-center gap-4">
-          {/* Logo */}
-          <Link to="/dashboard" className="text-xl font-bold text-foreground">
-            LOGO
-          </Link>
-
-          {/* Settings Icon */}
-          <button className="p-2 hover:bg-accent rounded-lg transition-colors">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
-
-          {/* User Dropdown */}
-          <div className="relative" ref={userDropdownRef}>
-            <button 
-              onClick={() => setShowUserDropdown(!showUserDropdown)}
-              className="flex items-center gap-2 hover:bg-accent rounded-lg p-1 transition-colors"
-            >
-              {userData.avatar ? (
-                <img 
-                  src={userData.avatar} 
-                  alt={userData.name}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                  {userData.initials}
-                </div>
-              )}
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            </button>
-
-            {showUserDropdown && (
-              <div className="absolute right-0 top-full mt-1 w-72 bg-card border border-border rounded-lg shadow-lg z-50">
-                <div className="p-4 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    {userData.avatar ? (
-                      <img 
-                        src={userData.avatar} 
-                        alt={userData.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
-                        {userData.initials}
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-semibold text-foreground">{userData.name}</div>
-                      <div className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded inline-block">
-                        {userData.userType}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-3 space-y-2">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Mail className="w-4 h-4" />
-                    <span>{userData.email || 'Not available'}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Phone className="w-4 h-4" />
-                    <span>{userData.mobile || 'Not available'}</span>
-                  </div>
-                </div>
-
-                <div className="p-2 border-t border-border">
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                </div>
+            <div>
+              <div className="font-semibold text-foreground">{userData.name}</div>
+              <div className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded inline-block">
+              {userData.userType}
               </div>
-            )}
+            </div>
+            </div>
           </div>
+          
+          <div className="p-3 space-y-2">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Mail className="w-4 h-4" />
+            <span>{userData.email || 'Not available' }</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Phone className="w-4 h-4" />
+            <span>{userData.mobile || 'Not available'}</span>
+            </div>
+          </div>
+
+          <div className="p-2 border-t border-border">
+            <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+            >
+            <LogOut className="w-4 h-4" />
+            Logout
+            </button>
+          </div>
+          </div>
+        )}
         </div>
+      </div>
       </div>
 
       {/* Module Navigation - Level 1 */}
-      <nav className="flex items-center justify-center gap-2 px-4 border-b border-border overflow-x-auto">
-        {modules.map((module) => (
-          <button
-            key={module.id}
-            onClick={() => handleModuleClick(module.id)}
-            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative
-              ${activeModule === module.id 
-                ? 'text-primary' 
-                : 'text-muted-foreground hover:text-foreground'
-              }`}
-          >
-            {module.name}
-            {activeModule === module.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-            )}
-          </button>
-        ))}
+      <nav className="flex items-center justify-between gap-2 px-4 border-r-red border-b border-border overflow-x-auto">
+      {modules.map((module) => (
+        <button
+        key={module.id}
+        onClick={() => handleModuleClick(module.id)}
+        className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative uppercase
+          ${activeModule === module.id 
+          ? 'text-primary' 
+          : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+        {module.name}
+        {activeModule === module.id && (
+          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+        )}
+        </button>
+      ))}
       </nav>
 
       {/* Sub-Module Navigation - Level 2 */}
       {currentModule && currentModule.subModules.length > 0 && (
-        <nav className="flex items-center justify-center gap-2 px-4 border-b border-border overflow-x-auto bg-secondary/30">
-          {currentModule.subModules.map((subModule) => (
-            <button
-              key={subModule.id}
-              onClick={() => handleSubModuleClick(subModule.path)}
-              className={`px-4 py-2.5 text-sm whitespace-nowrap transition-colors relative
-                ${activeSubModule === subModule.id 
-                  ? 'text-primary font-medium' 
-                  : 'text-muted-foreground hover:text-foreground'
-                }`}
-            >
-              {subModule.name}
-              {activeSubModule === subModule.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </button>
-          ))}
-        </nav>
+      <nav className="flex items-center justify-between gap-2 px-4 border-b border-border overflow-x-auto bg-secondary/30">
+        {currentModule.subModules.map((subModule) => (
+        <button
+          key={subModule.id}
+          onClick={() => handleSubModuleClick(subModule.path)}
+          className={`px-4 py-2.5 text-sm whitespace-nowrap transition-colors relative uppercase
+          ${activeSubModule === subModule.id 
+            ? 'text-primary font-medium' 
+            : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {subModule.name}
+          {activeSubModule === subModule.id && (
+          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
+        </button>
+        ))}
+      </nav>
       )}
 
       {/* Tertiary Navigation - Level 3 */}
       {currentSubModule && currentSubModule.children && currentSubModule.children.length > 0 && (
-        <nav className="flex items-center justify-center gap-6 px-4 py-2 border-b border-border overflow-x-auto">
-          {currentSubModule.children.map((item, idx) => (
-            <Link
-              key={idx}
-              to={item.path}
-              className={`flex items-center gap-2 text-sm whitespace-nowrap transition-colors
-                ${isActivePath(item.path) 
-                  ? 'text-primary font-medium' 
-                  : 'text-muted-foreground hover:text-foreground'
-                }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
+      <nav className="flex items-center justify-between gap-2 px-4 py-2 border border-border overflow-x-auto bg-secondary/100">
+        {currentSubModule.children.map((item, idx) => (
+        <Link
+          key={idx}
+          to={item.path}
+          className={`flex items-center gap-2 text-sm whitespace-nowrap transition-colors uppercase
+          ${isActivePath(item.path) 
+            ? 'text-primary font-medium' 
+            : 'text-muted-foreground hover:text-foreground border-b-2 border-transparent hover:border-accent'
+          }`}
+        >
+          {item.name}
+        </Link>
+        ))}
+      </nav>
       )}
     </header>
   );
