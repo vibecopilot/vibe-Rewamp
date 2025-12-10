@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
@@ -154,6 +155,7 @@ const VisitorList: React.FC = () => {
 
   return (
     <div className="p-6">
+      <Breadcrumb items={[{ label: 'VMS', path: '/vms' }, { label: 'Visitors' }]} />
 
       <ListToolbar
         searchPlaceholder="Search by Name, Phone, or Company..."
