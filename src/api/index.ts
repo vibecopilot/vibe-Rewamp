@@ -10359,3 +10359,6 @@ export const postReceiptNumber = async (data) =>
       token: token,
     },
   });
+
+// Default export for backward compatibility
+export default axiosInstance;
