@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (authenticate) => {
-    const token = getItemInLocalStorage("TOKEN");
+    const token = getItemInLocalStorage<string>("TOKEN");
     if (token) {
       authenticate.headers["Authorization"] = `${token}`;
     }
@@ -19,4 +19,5 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 export default axiosInstance;

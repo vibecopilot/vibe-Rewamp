@@ -1,18 +1,17 @@
-
 import axios from "axios";
 
 const axiosInstance2 = axios.create({
   //  baseURL: "http://13.215.74.38",
-   baseURL: "https://admin.vibecopilot.ai",
+  baseURL: "https://admin.vibecopilot.ai",
   // Use proxy in development, direct URL in production
-//   baseURL: import.meta.env.DEV ? "/api" : "http://localhost:3000",
+  //   baseURL: import.meta.env.DEV ? "/api" : "http://localhost:3000",
   // baseURL: "https://app.myciti.life",
   // baseURL: "http://localhost:3000",
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 axiosInstance2.interceptors.request.use(
@@ -48,4 +47,3 @@ axiosInstance2.interceptors.response.use(
 );
 
 export default axiosInstance2;
-

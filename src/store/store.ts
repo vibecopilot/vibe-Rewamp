@@ -1,4 +1,4 @@
-// src/app/store.js
+// src/app/store.ts
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
@@ -16,7 +16,7 @@ import addedReducer from "../features/Project/Added";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["theme"], 
+  whitelist: ["theme"],
 };
 
 const rootReducer = combineReducers({
@@ -44,3 +44,7 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+// Infer types from store
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

@@ -1,5 +1,5 @@
-// dateUtils.js
-export function SendDueDateFormat(dateString) {
+// dateUtils.ts
+export function SendDueDateFormat(dateString: string): string {
   const date = new Date(dateString);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -10,39 +10,37 @@ export function SendDueDateFormat(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}:00`;
 }
 
-export function ShowFormatedDueDateOnDateField(dateString) {
+export function ShowFormatedDueDateOnDateField(dateString: string | undefined): string {
   if (!dateString) {
     return "";
   }
 
   const dateTimeString = dateString.split("+")[0];
-  // Parse the date and time string into a Date object
   const targetDate = new Date(dateTimeString);
-
-  const formattedDate = targetDate.toLocaleString(); // Adjust the formatting as needed
+  const formattedDate = targetDate.toLocaleString();
 
   return formattedDate;
 }
 
-export function formatDateTime(dateString) {
+export function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
 
   const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
 
   let hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const period = hours >= 12 ? "PM" : "AM";
 
-  hours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+  hours = hours % 12 || 12;
 
   return `${day}/${month}/${year} ${hours}:${minutes} ${period}`;
 }
 
-export function FormattedDateToShowProperly(inputDateTime) {
+export function FormattedDateToShowProperly(inputDateTime: string): string {
   const date = new Date(inputDateTime);
-  const options = {
+  const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -53,12 +51,12 @@ export function FormattedDateToShowProperly(inputDateTime) {
   return date.toLocaleString("en-US", options);
 }
 
-export const dateFormat = (dateString) => {
+export const dateFormat = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString();
 };
 
-export function SendDateFormat(dateString) {
+export function SendDateFormat(dateString: string | undefined): string {
   if (!dateString) {
     return "";
   }
@@ -70,9 +68,9 @@ export function SendDateFormat(dateString) {
   return `${year}-${month}-${day}`;
 }
 
-export function convertToIST(dateTimeString) {
+export function convertToIST(dateTimeString: string): string {
   const date = new Date(dateTimeString);
-  const options = {
+  const options: Intl.DateTimeFormatOptions = {
     timeZone: "Asia/Kolkata",
     hour: "2-digit",
     minute: "2-digit",
@@ -80,21 +78,22 @@ export function convertToIST(dateTimeString) {
   const istDate = date.toLocaleString("en-IN", options);
   return istDate;
 }
-export const dateTimeFormat = (dateString) => {
+
+export const dateTimeFormat = (dateString: string | undefined): string => {
   if (!dateString) {
     return " ";
   }
 
   const date = new Date(dateString);
 
-  if (isNaN(date)) {
+  if (isNaN(date.getTime())) {
     return " ";
   }
 
   return date.toLocaleString();
 };
 
-export const formatTime = (dateTimeString) => {
+export const formatTime = (dateTimeString: string | undefined): string => {
   if (!dateTimeString) {
     return "";
   }
@@ -109,20 +108,17 @@ export const formatTime = (dateTimeString) => {
   return `${hours}:${minutes} ${ampm}`;
 };
 
-export const convertTo12HourFormat = (time) => {
-  const [hour, minute] = time?.split(":");
+export const convertTo12HourFormat = (time: string | undefined): string => {
+  if (!time) return "";
+  const [hour, minute] = time.split(":");
   const hourInt = parseInt(hour, 10);
   const period = hourInt >= 12 ? "PM" : "AM";
   const formattedHour = hourInt % 12 || 12;
   return `${formattedHour}:${minute} ${period}`;
 };
 
-export const convertTo12HrFormat = (timeStr) => {
-  if (
-    typeof timeStr !== "string" ||
-    timeStr.trim() === "" ||
-    timeStr === "__"
-  ) {
+export const convertTo12HrFormat = (timeStr: string | undefined): string => {
+  if (typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "__") {
     return "No Data";
   }
 
@@ -137,20 +133,16 @@ export const convertTo12HrFormat = (timeStr) => {
   return `${hours}:${minutes} ${ampm}`;
 };
 
-export const formatShiftTime = (shiftStartTime, shiftEndTime) => {
-  return `${convertTo12HrFormat(shiftStartTime)} - ${convertTo12HrFormat(
-    shiftEndTime
-  )}`;
+export const formatShiftTime = (shiftStartTime: string, shiftEndTime: string): string => {
+  return `${convertTo12HrFormat(shiftStartTime)} - ${convertTo12HrFormat(shiftEndTime)}`;
 };
 
-export const dateFormatSTD = (dateString) => {
+export const dateFormatSTD = (dateString: string): string => {
   const date = new Date(dateString);
 
-  // Extract day, month, and year
   const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based
-  const year = String(date.getFullYear()).slice(-2); // Get last 2 digits of the year
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
 
-  // Return formatted date
   return `${day}/${month}/${year}`;
 };
