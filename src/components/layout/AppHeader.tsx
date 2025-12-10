@@ -3,13 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Settings,
   ChevronDown,
-  User,
   Phone,
   Mail,
   LogOut,
   Building2,
   MapPin
 } from 'lucide-react';
+import { getItemInLocalStorage, setItemInLocalStorage } from '../../utils/localStorage';
 
 // Module configuration with sub-modules
 const modules = [
@@ -89,7 +89,7 @@ const modules = [
   },
 ];
 
-// Sample sites/companies data
+// Sample sites data - in real app, this would come from API
 const sitesData = [
   { id: 1, name: 'PANCHSHIL AVENUE', company: 'A2z Online Service' },
   { id: 2, name: 'TECH PARK TOWER', company: 'Global Tech Solutions' },
@@ -117,29 +117,39 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const navigate = useNavigate();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showSiteDropdown, setShowSiteDropdown] = useState(false);
-  const [selectedSite, setSelectedSite] = useState(sitesData[0]);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const siteDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Get selected site from localStorage or default
+  const getSavedSite = () => {
+    const savedSiteId = getItemInLocalStorage('SITEID');
+    const savedBuilding = getItemInLocalStorage('Building');
+    if (savedSiteId) {
+      const site = sitesData.find(s => s.id === Number(savedSiteId));
+      if (site) return site;
+    }
+    if (savedBuilding) {
+      const site = sitesData.find(s => s.name === savedBuilding);
+      if (site) return site;
+    }
+    return sitesData[0];
+  };
+
+  const [selectedSite, setSelectedSite] = useState(getSavedSite);
+
   // Get user data from localStorage
   const getUserData = (): UserData => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        return {
-          name: parsed.name || parsed.username || 'User',
-          initials: (parsed.name || parsed.username || 'U').substring(0, 2).toUpperCase(),
-          email: parsed.email || 'user@example.com',
-          mobile: parsed.mobile || parsed.phone || '+91 9876543210',
-          userType: parsed.userType || parsed.role || 'Admin',
-          avatar: parsed.avatar || parsed.profileImage
-        };
-      } catch {
-        return { name: 'User', initials: 'U', email: 'user@example.com', mobile: '+91 9876543210', userType: 'Admin' };
-      }
-    }
-    return { name: 'User', initials: 'U', email: 'user@example.com', mobile: '+91 9876543210', userType: 'Admin' };
+    const firstName = getItemInLocalStorage('Name') || '';
+    const lastName = getItemInLocalStorage('LASTNAME') || '';
+    const userType = getItemInLocalStorage('USERTYPE') || 'User';
+    const email = getItemInLocalStorage('EMAIL') || getItemInLocalStorage('email') || '';
+    const mobile = getItemInLocalStorage('MOBILE') || getItemInLocalStorage('phone') || '';
+    const avatar = getItemInLocalStorage('AVATAR') || getItemInLocalStorage('profileImage') || '';
+    
+    const name = `${firstName} ${lastName}`.trim() || 'User';
+    const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
+
+    return { name, initials, email, mobile, userType, avatar };
   };
 
   const userData = getUserData();
@@ -159,16 +169,29 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
+    // Clear all localStorage keys used in the app
+    const keysToRemove = [
+      'TOKEN', 'COMPANYID', 'HRMSORGID', 'board_id', 'menuState', 'Name',
+      'LASTNAME', 'USERTYPE', 'user', 'UNITID', 'Building', 'categories',
+      'SITEID', 'STATUS', 'complaint', 'UserId', 'VIBETOKEN', 'VIBEUSERID',
+      'VIBEORGID', 'FEATURES', 'HRMS_EMPLOYEE_ID', 'EMAIL', 'MOBILE', 'AVATAR'
+    ];
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
     sessionStorage.clear();
-    navigate('/login');
+    // Force redirect to login page
+    window.location.href = '/login';
   };
 
   const handleSiteChange = (site: typeof sitesData[0]) => {
     setSelectedSite(site);
     setShowSiteDropdown(false);
-    // Trigger data refresh - you can dispatch an event or use context
+    // Save to localStorage
+    setItemInLocalStorage('SITEID', site.id.toString());
+    setItemInLocalStorage('Building', site.name);
+    // Trigger data refresh
     window.dispatchEvent(new CustomEvent('siteChanged', { detail: site }));
+    // Reload to refresh data
+    window.location.reload();
   };
 
   // Derive active module and sub-module from current path
@@ -209,7 +232,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
     }
   };
 
-  const handleSubModuleClick = (subModuleId: string, path: string) => {
+  const handleSubModuleClick = (path: string) => {
     navigate(path);
   };
 
@@ -314,11 +337,11 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                 <div className="p-3 space-y-2">
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <Mail className="w-4 h-4" />
-                    <span>{userData.email}</span>
+                    <span>{userData.email || 'Not available'}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <Phone className="w-4 h-4" />
-                    <span>{userData.mobile}</span>
+                    <span>{userData.mobile || 'Not available'}</span>
                   </div>
                 </div>
 
@@ -363,7 +386,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
           {currentModule.subModules.map((subModule) => (
             <button
               key={subModule.id}
-              onClick={() => handleSubModuleClick(subModule.id, subModule.path)}
+              onClick={() => handleSubModuleClick(subModule.path)}
               className={`px-4 py-2.5 text-sm whitespace-nowrap transition-colors relative
                 ${activeSubModule === subModule.id 
                   ? 'text-primary font-medium' 

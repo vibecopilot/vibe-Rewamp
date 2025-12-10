@@ -1,5 +1,9 @@
 export const setItemInLocalStorage = (key: string, value: unknown): void => {
-  localStorage.setItem(key, JSON.stringify(value));
+  if (typeof value === 'string') {
+    localStorage.setItem(key, value);
+  } else {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
 };
 
 export const getItemInLocalStorage = <T = unknown>(key: string): T | null => {
@@ -8,6 +12,7 @@ export const getItemInLocalStorage = <T = unknown>(key: string): T | null => {
   try {
     return JSON.parse(item) as T;
   } catch {
-    return null;
+    // Return as string if not valid JSON
+    return item as unknown as T;
   }
 };
