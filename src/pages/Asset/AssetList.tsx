@@ -9,6 +9,9 @@ const AssetList: React.FC = () => {
   const location = useLocation();
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid'); // Default to grid
   const [searchValue, setSearchValue] = useState('');
+  
+  // Records per page: 12 for grid, 10 for table
+  const recordsPerPage = viewMode === 'grid' ? 12 : 10;
 
   // Derive active tab from URL path
   const getActiveTab = () => {
@@ -71,16 +74,16 @@ const AssetList: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'asset': return <AssetMainList viewMode={viewMode} searchValue={searchValue} />;
-      case 'amc': return <AMCList viewMode={viewMode} searchValue={searchValue} />;
-      case 'meter': return <MeterList viewMode={viewMode} searchValue={searchValue} />;
-      case 'checklist': return <ChecklistList viewMode={viewMode} searchValue={searchValue} />;
-      case 'routine-task': return <RoutineTaskList viewMode={viewMode} searchValue={searchValue} />;
-      case 'ppm-checklist': return <PPMChecklistList viewMode={viewMode} searchValue={searchValue} />;
-      case 'ppm-activity': return <PPMActivityList viewMode={viewMode} searchValue={searchValue} />;
+      case 'asset': return <AssetMainList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'amc': return <AMCList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'meter': return <MeterList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'checklist': return <ChecklistList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'routine-task': return <RoutineTaskList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'ppm-checklist': return <PPMChecklistList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'ppm-activity': return <PPMActivityList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
       case 'ppm-calendar': return <PPMCalendar searchValue={searchValue} />;
-      case 'stock-items': return <StockItemsList viewMode={viewMode} searchValue={searchValue} />;
-      default: return <AssetMainList viewMode={viewMode} searchValue={searchValue} />;
+      case 'stock-items': return <StockItemsList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      default: return <AssetMainList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
     }
   };
 

@@ -317,7 +317,15 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
   const sortedLevel3 = useMemo(() => {
     if (!currentSubModule?.children) return [];
     const activePath = location.pathname;
-    const activeItem = currentSubModule.children.find(c => activePath.startsWith(c.path) || activePath === c.path);
+    
+    // Find active item - exact match first, then startsWith for nested paths
+    const activeItem = currentSubModule.children.find(c => {
+      if (c.path === '/asset') {
+        return activePath === '/asset';
+      }
+      return activePath === c.path || activePath.startsWith(c.path + '/');
+    });
+    
     if (!activeItem) return currentSubModule.children;
     const rest = currentSubModule.children.filter(c => c.path !== activeItem.path);
     return [activeItem, ...rest];

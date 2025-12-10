@@ -9,14 +9,20 @@ import { Loader2, ClipboardList, AlertCircle, RefreshCw } from 'lucide-react';
 interface ChecklistListProps {
   viewMode: 'grid' | 'table';
   searchValue: string;
+  perPage?: number;
 }
 
-const ChecklistList: React.FC<ChecklistListProps> = ({ viewMode, searchValue }) => {
+const ChecklistList: React.FC<ChecklistListProps> = ({ viewMode, searchValue, perPage = 10 }) => {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, perPage, total: 0, totalPages: 0 });
+
+  // Update perPage when prop changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage, page: 1 }));
+  }, [perPage]);
 
   const fetchChecklists = useCallback(async () => {
     setLoading(true);

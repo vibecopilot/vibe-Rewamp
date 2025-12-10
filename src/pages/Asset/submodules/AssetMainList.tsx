@@ -9,14 +9,20 @@ import { Loader2, Package, AlertCircle, RefreshCw } from 'lucide-react';
 interface AssetMainListProps {
   viewMode: 'grid' | 'table';
   searchValue: string;
+  perPage?: number;
 }
 
-const AssetMainList: React.FC<AssetMainListProps> = ({ viewMode, searchValue }) => {
+const AssetMainList: React.FC<AssetMainListProps> = ({ viewMode, searchValue, perPage = 10 }) => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, perPage, total: 0, totalPages: 0 });
+
+  // Update perPage when prop changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage, page: 1 }));
+  }, [perPage]);
 
   const fetchAssets = useCallback(async () => {
     setLoading(true);
