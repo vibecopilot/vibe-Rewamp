@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PageTitle from '../../components/ui/PageTitle';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import ListToolbar from '../../components/ui/ListToolbar';
 import { AssetMainList, AMCList, MeterList, ChecklistList, RoutineTaskList, PPMChecklistList, PPMActivityList, PPMCalendar, StockItemsList } from './submodules';
 
@@ -72,6 +72,14 @@ const AssetList: React.FC = () => {
     return titles[activeTab] || 'Assets';
   };
 
+  const getBreadcrumbs = () => {
+    const base = [{ label: 'Asset', path: '/asset' }];
+    if (activeTab !== 'asset') {
+      base.push({ label: getPageTitle() });
+    }
+    return base;
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'asset': return <AssetMainList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
@@ -89,7 +97,7 @@ const AssetList: React.FC = () => {
 
   return (
     <div className="p-6">
-      {/* Removed PageTitle to save space - navigation already shows context */}
+      <Breadcrumb items={getBreadcrumbs()} />
 
       <ListToolbar
         searchPlaceholder={`Search ${activeTab.replace('-', ' ')}...`}
