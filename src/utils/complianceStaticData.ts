@@ -1,4 +1,32 @@
-export const complianceData = [
+interface ComplianceChild {
+  id: number;
+  name: string;
+  active: boolean;
+  tag_type: string;
+  resource_id: number;
+  resource_type: string;
+  comment: string | null;
+  root_id: number;
+  parent_id: number | null;
+  grand_parent_id: number | null;
+  children: ComplianceChild[];
+}
+
+interface ComplianceData {
+  id: number;
+  name: string;
+  active: boolean;
+  tag_type: string;
+  resource_id: number;
+  resource_type: string;
+  comment: string | null;
+  root_id: number;
+  parent_id: number | null;
+  grand_parent_id: number | null;
+  children: ComplianceChild[];
+}
+
+export const complianceData: ComplianceData[] = [
   {
     id: 42,
     name: "Areas of Compliance",

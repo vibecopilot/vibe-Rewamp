@@ -1,13 +1,5 @@
-import { useState } from "react";
-
-export const stateCityModal = {
-  AndhraPradesh: [
-    "Visakhapatnam",
-    "Vijayawada",
-    "Guntur",
-    "Nellore",
-    "Tirupatis",
-  ],
+export const stateCityModal: Record<string, string[]> = {
+  AndhraPradesh: ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Tirupatis"],
   ArunachalPradesh: ["Itanagar", "Tawang", "Pasighat", "Ziro", "Bomdila"],
   Assam: ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Tezpur"],
   Bihar: ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga"],

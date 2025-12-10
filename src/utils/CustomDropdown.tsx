@@ -1,25 +1,51 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
+interface Site {
+  site_name: string;
+  id?: string | number;
+  [key: string]: unknown;
+}
+
+interface CustomDropdownProps {
+  AllSites: Site[];
+  selectedValue: Site | null;
+  onSelect: (site: Site) => void;
+}
+
+export const CustomDropdown: React.FC<CustomDropdownProps> = ({
+  AllSites,
+  selectedValue,
+  onSelect,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
     width: 0,
   });
 
-  // Close dropdown if clicking outside (but not on the button)
+  // Always include "Select All Sites" as the first option
+  const filteredSites: Site[] = [
+    { site_name: "Select All Sites" },
+    ...AllSites.filter(
+      (site) =>
+        site &&
+        site.site_name.toLowerCase().includes(searchText.toLowerCase())
+    ),
+  ];
+
+  // Close dropdown if clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
+        !dropdownRef.current.contains(e.target as Node) &&
         buttonRef.current &&
-        !buttonRef.current.contains(e.target)
+        !buttonRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -28,28 +54,18 @@ export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Always include "Select All Sites" as the first option
-  const filteredSites = [
-    { site_name: "Select All Sites" },
-    ...AllSites.filter(
-      (site) =>
-        site && site.site_name.toLowerCase().includes(searchText.toLowerCase())
-    ),
-  ];
-
   // Calculate the position of the dropdown relative to the button
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY, // account for scroll
+        top: rect.bottom + window.scrollY,
         left: rect.left + window.scrollX,
         width: rect.width,
       });
     }
   }, [isOpen]);
 
-  // The dropdown panel rendered via a portal so it’s not clipped
   const dropdownContent = (
     <div
       ref={dropdownRef}
@@ -62,7 +78,6 @@ export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
         zIndex: 9999,
       }}
     >
-      {/* Search bar */}
       <input
         type="text"
         placeholder="Search by text..."
@@ -71,7 +86,6 @@ export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
         className="w-full p-2 border-b border-gray-300 rounded-t-lg focus:outline-none"
         autoComplete="off"
       />
-      {/* Options list with fixed height; scroll enabled */}
       <div className="h-60 overflow-y-auto">
         {filteredSites.length === 0 ? (
           <div className="p-2 text-gray-500">No options found</div>
@@ -94,11 +108,8 @@ export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
     </div>
   );
 
-  
-  // return
   return (
     <div className="relative w-full min-w-[100px] max-w-md">
-      {/* Trigger button with ref and stopPropagation to prevent double toggling */}
       <button
         ref={buttonRef}
         onClick={(e) => {
@@ -109,8 +120,9 @@ export const RoasterDropdown = ({ AllSites, selectedValue, onSelect }) => {
       >
         {selectedValue?.site_name || "Select All Sites"}
       </button>
-      {/* Render dropdown panel via portal */}
       {isOpen && createPortal(dropdownContent, document.body)}
     </div>
   );
 };
+
+export default CustomDropdown;
