@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  LayoutGrid, 
-  Check, 
-  MessageSquare, 
-  Bell, 
   Settings,
   ChevronDown,
+  User,
+  Phone,
+  Mail,
+  LogOut,
+  Building2,
   MapPin
 } from 'lucide-react';
 
@@ -88,6 +89,22 @@ const modules = [
   },
 ];
 
+// Sample sites/companies data
+const sitesData = [
+  { id: 1, name: 'PANCHSHIL AVENUE', company: 'A2z Online Service' },
+  { id: 2, name: 'TECH PARK TOWER', company: 'Global Tech Solutions' },
+  { id: 3, name: 'BUSINESS CENTER', company: 'Enterprise Corp' },
+];
+
+interface UserData {
+  name: string;
+  initials: string;
+  email: string;
+  mobile: string;
+  userType: string;
+  avatar?: string;
+}
+
 interface AppHeaderProps {
   userName?: string;
   userInitials?: string;
@@ -95,14 +112,64 @@ interface AppHeaderProps {
   locationName?: string;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({
-  userName = 'MA',
-  userInitials = 'MA',
-  serviceName = 'A2z Online Service',
-  locationName = 'PANCHSHIL AVENUE'
-}) => {
+const AppHeader: React.FC<AppHeaderProps> = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showSiteDropdown, setShowSiteDropdown] = useState(false);
+  const [selectedSite, setSelectedSite] = useState(sitesData[0]);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+  const siteDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get user data from localStorage
+  const getUserData = (): UserData => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        return {
+          name: parsed.name || parsed.username || 'User',
+          initials: (parsed.name || parsed.username || 'U').substring(0, 2).toUpperCase(),
+          email: parsed.email || 'user@example.com',
+          mobile: parsed.mobile || parsed.phone || '+91 9876543210',
+          userType: parsed.userType || parsed.role || 'Admin',
+          avatar: parsed.avatar || parsed.profileImage
+        };
+      } catch {
+        return { name: 'User', initials: 'U', email: 'user@example.com', mobile: '+91 9876543210', userType: 'Admin' };
+      }
+    }
+    return { name: 'User', initials: 'U', email: 'user@example.com', mobile: '+91 9876543210', userType: 'Admin' };
+  };
+
+  const userData = getUserData();
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+      if (siteDropdownRef.current && !siteDropdownRef.current.contains(event.target as Node)) {
+        setShowSiteDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate('/login');
+  };
+
+  const handleSiteChange = (site: typeof sitesData[0]) => {
+    setSelectedSite(site);
+    setShowSiteDropdown(false);
+    // Trigger data refresh - you can dispatch an event or use context
+    window.dispatchEvent(new CustomEvent('siteChanged', { detail: site }));
+  };
 
   // Derive active module and sub-module from current path
   const getActiveFromPath = () => {
@@ -150,63 +217,128 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-        <div className="flex items-center gap-6">
-          {/* Logo */}
-          <Link to="/dashboard" className="text-xl font-bold text-foreground">
-            LOGO
-          </Link>
-          
-          {/* Dashboard Link */}
-          <Link 
-            to="/dashboard" 
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            <LayoutGrid className="w-4 h-4" />
-            Dashboard
-          </Link>
+        {/* Logo - Left Side */}
+        <Link to="/dashboard" className="text-xl font-bold text-foreground">
+          LOGO
+        </Link>
 
-          {/* Service Dropdown */}
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
-              A
-            </div>
-            <span className="text-foreground">{serviceName}</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </div>
-
-          {/* Location Dropdown */}
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="w-4 h-4 text-muted-foreground" />
-            <span className="text-foreground">{locationName}</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </div>
-        </div>
-
-        {/* Right Side Icons */}
+        {/* Right Side Controls */}
         <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-accent rounded-lg transition-colors">
-            <Check className="w-5 h-5 text-muted-foreground" />
-          </button>
-          <button className="p-2 hover:bg-accent rounded-lg transition-colors">
-            <MessageSquare className="w-5 h-5 text-muted-foreground" />
-          </button>
-          <button className="relative p-2 hover:bg-accent rounded-lg transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-              3
-            </span>
-          </button>
-          <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-            {userInitials}
+          {/* Site/Company Selector */}
+          <div className="relative" ref={siteDropdownRef}>
+            <button 
+              onClick={() => setShowSiteDropdown(!showSiteDropdown)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
+            >
+              <Building2 className="w-4 h-4 text-primary" />
+              <div className="text-left">
+                <div className="text-xs text-muted-foreground">{selectedSite.company}</div>
+                <div className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {selectedSite.name}
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </button>
+
+            {showSiteDropdown && (
+              <div className="absolute right-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
+                <div className="p-2">
+                  <div className="text-xs font-medium text-muted-foreground px-2 py-1">Select Site</div>
+                  {sitesData.map((site) => (
+                    <button
+                      key={site.id}
+                      onClick={() => handleSiteChange(site)}
+                      className={`w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors ${
+                        selectedSite.id === site.id ? 'bg-accent' : ''
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-foreground">{site.name}</div>
+                      <div className="text-xs text-muted-foreground">{site.company}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Settings Icon */}
           <button className="p-2 hover:bg-accent rounded-lg transition-colors">
             <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
+
+          {/* User Dropdown */}
+          <div className="relative" ref={userDropdownRef}>
+            <button 
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              className="flex items-center gap-2 hover:bg-accent rounded-lg p-1 transition-colors"
+            >
+              {userData.avatar ? (
+                <img 
+                  src={userData.avatar} 
+                  alt={userData.name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
+                  {userData.initials}
+                </div>
+              )}
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </button>
+
+            {showUserDropdown && (
+              <div className="absolute right-0 top-full mt-1 w-72 bg-card border border-border rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    {userData.avatar ? (
+                      <img 
+                        src={userData.avatar} 
+                        alt={userData.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
+                        {userData.initials}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-semibold text-foreground">{userData.name}</div>
+                      <div className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded inline-block">
+                        {userData.userType}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-3 space-y-2">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Mail className="w-4 h-4" />
+                    <span>{userData.email}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <Phone className="w-4 h-4" />
+                    <span>{userData.mobile}</span>
+                  </div>
+                </div>
+
+                <div className="p-2 border-t border-border">
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Module Navigation - Level 1 */}
-      <nav className="flex items-center gap-1 px-4 border-b border-border overflow-x-auto">
+      <nav className="flex items-center justify-center gap-2 px-4 border-b border-border overflow-x-auto">
         {modules.map((module) => (
           <button
             key={module.id}
@@ -227,7 +359,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
       {/* Sub-Module Navigation - Level 2 */}
       {currentModule && currentModule.subModules.length > 0 && (
-        <nav className="flex items-center gap-1 px-4 border-b border-border overflow-x-auto bg-secondary/30">
+        <nav className="flex items-center justify-center gap-2 px-4 border-b border-border overflow-x-auto bg-secondary/30">
           {currentModule.subModules.map((subModule) => (
             <button
               key={subModule.id}
@@ -249,7 +381,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
       {/* Tertiary Navigation - Level 3 */}
       {currentSubModule && currentSubModule.children && currentSubModule.children.length > 0 && (
-        <nav className="flex items-center gap-6 px-4 py-2 border-b border-border overflow-x-auto">
+        <nav className="flex items-center justify-center gap-6 px-4 py-2 border-b border-border overflow-x-auto">
           {currentSubModule.children.map((item, idx) => (
             <Link
               key={idx}
