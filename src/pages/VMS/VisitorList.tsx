@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
@@ -16,13 +15,19 @@ const VisitorList: React.FC = () => {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const getPerPage = (mode: 'grid' | 'table') => mode === 'grid' ? 12 : 10;
   const [pagination, setPagination] = useState({
     page: 1,
-    perPage: 10,
+    perPage: getPerPage('grid'),
     total: 0,
     totalPages: 0,
   });
   const [filters, setFilters] = useState<VisitorFilters>({});
+
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage: getPerPage(viewMode), page: 1 }));
+  }, [viewMode]);
 
   const fetchVisitors = useCallback(async () => {
     setLoading(true);
@@ -119,13 +124,6 @@ const VisitorList: React.FC = () => {
   if (loading && visitors.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle
-          title="Visitors"
-          breadcrumbs={[
-            { label: 'VMS', path: '/vms' },
-            { label: 'Visitors' }
-          ]}
-        />
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
           <p className="text-muted-foreground">Loading visitors...</p>
@@ -138,13 +136,6 @@ const VisitorList: React.FC = () => {
   if (error && visitors.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle
-          title="Visitors"
-          breadcrumbs={[
-            { label: 'VMS', path: '/vms' },
-            { label: 'Visitors' }
-          ]}
-        />
         <div className="flex flex-col items-center justify-center py-20">
           <AlertCircle className="w-12 h-12 text-error mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Failed to Load Visitors</h3>
@@ -163,13 +154,6 @@ const VisitorList: React.FC = () => {
 
   return (
     <div className="p-6">
-      <PageTitle
-        title="Visitors"
-        breadcrumbs={[
-          { label: 'VMS', path: '/vms' },
-          { label: 'Visitors' }
-        ]}
-      />
 
       <ListToolbar
         searchPlaceholder="Search by Name, Phone, or Company..."

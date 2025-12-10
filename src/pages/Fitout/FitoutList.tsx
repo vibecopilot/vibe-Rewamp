@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
@@ -10,13 +9,19 @@ import { Loader2, HardHat, AlertCircle, RefreshCw } from 'lucide-react';
 
 const FitoutList: React.FC = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [requests, setRequests] = useState<FitoutRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  
+  const getPerPage = (mode: 'grid' | 'table') => mode === 'grid' ? 12 : 10;
+  const [pagination, setPagination] = useState({ page: 1, perPage: getPerPage('grid'), total: 0, totalPages: 0 });
+
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage: getPerPage(viewMode), page: 1 }));
+  }, [viewMode]);
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -62,7 +67,6 @@ const FitoutList: React.FC = () => {
   if (loading && requests.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle title="Fitout Requests" breadcrumbs={[{ label: 'Fitout', path: '/fitout' }, { label: 'Requests' }]} />
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
           <p className="text-muted-foreground">Loading fitout requests...</p>
@@ -74,7 +78,6 @@ const FitoutList: React.FC = () => {
   if (error && requests.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle title="Fitout Requests" breadcrumbs={[{ label: 'Fitout', path: '/fitout' }, { label: 'Requests' }]} />
         <div className="flex flex-col items-center justify-center py-20">
           <AlertCircle className="w-12 h-12 text-error mb-4" />
           <h3 className="text-lg font-semibold mb-2">Failed to Load Requests</h3>
@@ -89,7 +92,6 @@ const FitoutList: React.FC = () => {
 
   return (
     <div className="p-6">
-      <PageTitle title="Fitout Requests" breadcrumbs={[{ label: 'Fitout', path: '/fitout' }, { label: 'Requests' }]} />
 
       <ListToolbar
         searchPlaceholder="Search requests..."

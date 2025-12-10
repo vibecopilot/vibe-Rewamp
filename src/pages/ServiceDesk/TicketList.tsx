@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import PageTitle from '../../components/ui/PageTitle';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
@@ -10,13 +9,21 @@ import { Loader2, Ticket as TicketIcon, AlertCircle, RefreshCw } from 'lucide-re
 
 const TicketList: React.FC = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  
+  // Records per page: 12 for grid, 10 for table
+  const getPerPage = (mode: 'grid' | 'table') => mode === 'grid' ? 12 : 10;
+  const [pagination, setPagination] = useState({ page: 1, perPage: getPerPage('grid'), total: 0, totalPages: 0 });
+
+  // Update perPage when viewMode changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage: getPerPage(viewMode), page: 1 }));
+  }, [viewMode]);
 
   const fetchTickets = useCallback(async () => {
     setLoading(true);
@@ -69,7 +76,6 @@ const TicketList: React.FC = () => {
   if (loading && tickets.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle title="Service Desk" breadcrumbs={[{ label: 'Service Desk', path: '/service-desk' }, { label: 'Tickets' }]} />
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
           <p className="text-muted-foreground">Loading tickets...</p>
@@ -81,7 +87,6 @@ const TicketList: React.FC = () => {
   if (error && tickets.length === 0) {
     return (
       <div className="p-6">
-        <PageTitle title="Service Desk" breadcrumbs={[{ label: 'Service Desk', path: '/service-desk' }, { label: 'Tickets' }]} />
         <div className="flex flex-col items-center justify-center py-20">
           <AlertCircle className="w-12 h-12 text-error mb-4" />
           <h3 className="text-lg font-semibold mb-2">Failed to Load Tickets</h3>
@@ -96,7 +101,6 @@ const TicketList: React.FC = () => {
 
   return (
     <div className="p-6">
-      <PageTitle title="Service Desk" breadcrumbs={[{ label: 'Service Desk', path: '/service-desk' }, { label: 'Tickets' }]} />
 
       <ListToolbar
         searchPlaceholder="Search tickets..."
