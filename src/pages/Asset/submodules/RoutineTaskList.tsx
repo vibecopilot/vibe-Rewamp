@@ -9,14 +9,20 @@ import { Loader2, ListTodo, AlertCircle, RefreshCw } from 'lucide-react';
 interface RoutineTaskListProps {
   viewMode: 'grid' | 'table';
   searchValue: string;
+  perPage?: number;
 }
 
-const RoutineTaskList: React.FC<RoutineTaskListProps> = ({ viewMode, searchValue }) => {
+const RoutineTaskList: React.FC<RoutineTaskListProps> = ({ viewMode, searchValue, perPage = 10 }) => {
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, perPage, total: 0, totalPages: 0 });
+
+  // Update perPage when prop changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage, page: 1 }));
+  }, [perPage]);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);

@@ -9,14 +9,20 @@ import { Loader2, Activity, AlertCircle, RefreshCw } from 'lucide-react';
 interface PPMActivityListProps {
   viewMode: 'grid' | 'table';
   searchValue: string;
+  perPage?: number;
 }
 
-const PPMActivityList: React.FC<PPMActivityListProps> = ({ viewMode, searchValue }) => {
+const PPMActivityList: React.FC<PPMActivityListProps> = ({ viewMode, searchValue, perPage = 10 }) => {
   const [activities, setActivities] = useState<PPMActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, perPage, total: 0, totalPages: 0 });
+
+  // Update perPage when prop changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage, page: 1 }));
+  }, [perPage]);
 
   const fetchActivities = useCallback(async () => {
     setLoading(true);

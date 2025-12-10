@@ -9,14 +9,20 @@ import { Loader2, Package, AlertCircle, RefreshCw } from 'lucide-react';
 interface StockItemsListProps {
   viewMode: 'grid' | 'table';
   searchValue: string;
+  perPage?: number;
 }
 
-const StockItemsList: React.FC<StockItemsListProps> = ({ viewMode, searchValue }) => {
+const StockItemsList: React.FC<StockItemsListProps> = ({ viewMode, searchValue, perPage = 10 }) => {
   const [items, setItems] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 10, total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, perPage, total: 0, totalPages: 0 });
+
+  // Update perPage when prop changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, perPage, page: 1 }));
+  }, [perPage]);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
