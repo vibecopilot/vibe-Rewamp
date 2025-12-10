@@ -71,7 +71,7 @@ import {
 } from "../api";
 import RemainingTime from "../components/RemainingTime";
 import { BiPlus, BiSolidCalendarEdit } from "react-icons/bi";
-import LinearProgressBar from "../components/LinearProgessBar";
+import LinearProgressBar from "../components/LinearProgressBar";
 import toast from "react-hot-toast";
 import DeleteTaskModal from "../containers/modals/DeleteTaskModal";
 import bridge from "/bridge.jpg";
