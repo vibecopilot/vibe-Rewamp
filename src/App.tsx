@@ -10,7 +10,16 @@ import Login from "./components/Authentication/Login";
 
 // Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
-import { VisitorList, CreateVisitor, ViewVisitor } from "./pages/VMS";
+import { 
+  VMSLayout, 
+  VMSVisitors, 
+  VMSRegisteredVehicles, 
+  VMSStaff, 
+  VMSPatrolling, 
+  VMSGoodsInOut,
+  CreateVisitor, 
+  ViewVisitor 
+} from "./pages/VMS";
 import AssetList from "./pages/Asset/AssetList";
 import CreateAsset from "./pages/Asset/CreateAsset";
 import CreateAMC from "./pages/Asset/CreateAMC";
@@ -55,16 +64,30 @@ function App() {
         {/* Dashboard */}
         <Route path="/dashboard" element={<AuthenticatedLayout><Dashboard /></AuthenticatedLayout>} />
 
-        {/* VMS - Visitor Management */}
-        <Route path="/vms" element={<Navigate to="/vms/visitors" replace />} />
-        <Route path="/vms/visitors" element={<AuthenticatedLayout><VisitorList /></AuthenticatedLayout>} />
+        {/* VMS - Visitor Management with Tabbed Layout */}
+        <Route path="/vms" element={<AuthenticatedLayout><VMSLayout /></AuthenticatedLayout>}>
+          <Route index element={<Navigate to="/vms/visitors" replace />} />
+          <Route path="visitors" element={<VMSVisitors />} />
+          <Route path="registered-vehicles" element={<VMSRegisteredVehicles />} />
+          <Route path="staff" element={<VMSStaff />} />
+          <Route path="patrolling" element={<VMSPatrolling />} />
+          <Route path="goods-in-out" element={<VMSGoodsInOut />} />
+        </Route>
+        
+        {/* VMS Detail/Create/Edit routes - outside the tabbed layout */}
         <Route path="/vms/visitors/create" element={<AuthenticatedLayout><CreateVisitor /></AuthenticatedLayout>} />
         <Route path="/vms/visitors/:id" element={<AuthenticatedLayout><ViewVisitor /></AuthenticatedLayout>} />
         <Route path="/vms/visitors/:id/edit" element={<AuthenticatedLayout><CreateVisitor /></AuthenticatedLayout>} />
-        <Route path="/vms/pre-approved" element={<AuthenticatedLayout><PlaceholderPage title="Pre-Approved Visitors" /></AuthenticatedLayout>} />
-        <Route path="/vms/blacklist" element={<AuthenticatedLayout><PlaceholderPage title="Blacklist" /></AuthenticatedLayout>} />
-        <Route path="/vms/reports" element={<AuthenticatedLayout><PlaceholderPage title="VMS Reports" /></AuthenticatedLayout>} />
-        <Route path="/vms/configuration" element={<AuthenticatedLayout><PlaceholderPage title="VMS Configuration" /></AuthenticatedLayout>} />
+        <Route path="/vms/registered-vehicles/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Vehicle" /></AuthenticatedLayout>} />
+        <Route path="/vms/registered-vehicles/:id" element={<AuthenticatedLayout><PlaceholderPage title="Vehicle Details" /></AuthenticatedLayout>} />
+        <Route path="/vms/registered-vehicles/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Vehicle" /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Staff" /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/:id" element={<AuthenticatedLayout><PlaceholderPage title="Staff Details" /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Staff" /></AuthenticatedLayout>} />
+        <Route path="/vms/patrolling/:id" element={<AuthenticatedLayout><PlaceholderPage title="Patrolling Details" /></AuthenticatedLayout>} />
+        <Route path="/vms/patrolling/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Patrolling" /></AuthenticatedLayout>} />
+        <Route path="/vms/goods-in-out/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Goods" /></AuthenticatedLayout>} />
+        <Route path="/vms/goods-in-out/:id" element={<AuthenticatedLayout><PlaceholderPage title="Goods Details" /></AuthenticatedLayout>} />
 
         {/* Asset Module */}
         <Route path="/asset" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
