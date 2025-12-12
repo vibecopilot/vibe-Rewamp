@@ -73,7 +73,17 @@ const modules = [
     id: 'security',
     name: 'Security',
     subModules: [
-      { id: 'visitors', name: 'Visitors', path: '/vms/visitors' },
+      { id: 'visitors', name: 'Visitors', path: '/vms/visitors',
+        children: [
+          { name: 'All', path: '/vms/visitors' },
+          { name: 'Visitor In', path: '/vms/visitors/in' },
+          { name: 'Visitor Out', path: '/vms/visitors/out' },
+          { name: 'Approvals', path: '/vms/visitors/approvals' },
+          { name: 'History', path: '/vms/visitors/history' },
+          { name: 'Logs', path: '/vms/visitors/logs' },
+          { name: 'Self-Registration', path: '/vms/visitors/self-registration' },
+        ]
+      },
       { id: 'registered-vehicles', name: 'Registered Vehicles', path: '/vms/registered-vehicles' },
       { id: 'staff', name: 'Staff', path: '/vms/staff' },
       { id: 'patrolling', name: 'Patrolling', path: '/vms/patrolling' },
