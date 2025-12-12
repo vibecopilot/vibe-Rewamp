@@ -51,6 +51,7 @@ import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
 import { DocumentsList } from "./pages/Documents";
 import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
+import { CalendarPage, PlanMyCalendar } from "./pages/Calendar";
 
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -225,7 +226,8 @@ function App() {
         <Route path="/fitout/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Fitout Request" /></AuthenticatedLayout>} />
 
         {/* Calendar */}
-        <Route path="/calendar" element={<AuthenticatedLayout><PlaceholderPage title="Calendar" /></AuthenticatedLayout>} />
+        <Route path="/calendar" element={<AuthenticatedLayout><CalendarPage /></AuthenticatedLayout>} />
+        <Route path="/calendar/plan" element={<AuthenticatedLayout><PlanMyCalendar /></AuthenticatedLayout>} />
 
         {/* Catch all - redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

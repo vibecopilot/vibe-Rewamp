@@ -265,3 +265,105 @@ body::before {
 .rdt_Pagination {
   @apply border-t border-border !important;
 }
+
+/* FullCalendar Styles */
+.fc {
+  font-family: inherit;
+}
+
+.fc .fc-toolbar-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.fc .fc-button {
+  @apply bg-primary text-primary-foreground border-primary hover:bg-primary/90;
+}
+
+.fc .fc-button-active {
+  @apply bg-primary/80;
+}
+
+.fc .fc-daygrid-day-number {
+  @apply text-foreground p-2;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  @apply bg-accent/30;
+}
+
+.fc .fc-daygrid-day-top {
+  @apply flex-row-reverse;
+}
+
+.fc .fc-event {
+  @apply rounded text-xs font-medium cursor-pointer;
+}
+
+.fc .fc-col-header-cell-cushion {
+  @apply text-muted-foreground font-medium py-2;
+}
+
+.fc .fc-daygrid-day-frame {
+  @apply min-h-[100px];
+}
+
+.fc .fc-scrollgrid {
+  @apply border-border;
+}
+
+.fc th, .fc td {
+  @apply border-border;
+}
+
+/* React Select Styles */
+.react-select-container .react-select__control {
+  @apply bg-background border-border rounded-lg min-h-[42px];
+}
+
+.react-select-container .react-select__control:hover {
+  @apply border-primary/50;
+}
+
+.react-select-container .react-select__control--is-focused {
+  @apply border-primary ring-2 ring-primary/20 shadow-none;
+}
+
+.react-select-container .react-select__menu {
+  @apply bg-card border border-border rounded-lg shadow-lg z-50;
+}
+
+.react-select-container .react-select__option {
+  @apply px-3 py-2 text-foreground cursor-pointer;
+}
+
+.react-select-container .react-select__option--is-focused {
+  @apply bg-secondary;
+}
+
+.react-select-container .react-select__option--is-selected {
+  @apply bg-primary text-primary-foreground;
+}
+
+.react-select-container .react-select__multi-value {
+  @apply bg-secondary rounded;
+}
+
+.react-select-container .react-select__multi-value__label {
+  @apply text-foreground text-sm;
+}
+
+.react-select-container .react-select__multi-value__remove {
+  @apply hover:bg-primary/20 hover:text-primary rounded-r;
+}
+
+.react-select-container .react-select__placeholder {
+  @apply text-muted-foreground;
+}
+
+.react-select-container .react-select__input-container {
+  @apply text-foreground;
+}
+
+.react-select-container .react-select__single-value {
+  @apply text-foreground;
+}
