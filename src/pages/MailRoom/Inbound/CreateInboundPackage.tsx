@@ -71,9 +71,11 @@ const CreateInboundPackage: React.FC = () => {
   const fetchVendors = async () => {
     try {
       const response = await getVendors();
-      setVendors(response.data || []);
+      const data = Array.isArray(response?.data) ? response.data : [];
+      setVendors(data);
     } catch (error) {
       console.error('Error fetching vendors:', error);
+      setVendors([]);
     }
   };
 
@@ -168,11 +170,17 @@ const CreateInboundPackage: React.FC = () => {
                 className="w-full px-4 py-2.5 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select Vendor</option>
-                {vendors.map((vendor) => (
-                  <option key={vendor.id} value={vendor.id}>
-                    {vendor.vendor_name}
+                {Array.isArray(vendors) && vendors.length > 0 ? (
+                  vendors.map((vendor) => (
+                    <option key={vendor.id} value={vendor.id}>
+                      {vendor.vendor_name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No vendors available
                   </option>
-                ))}
+                )}
               </select>
             </div>
 
