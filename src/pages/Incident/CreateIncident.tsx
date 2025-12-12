@@ -71,33 +71,36 @@ const CreateIncident: React.FC = () => {
 
   const fetchDropdownData = async () => {
     try {
+      // Helper to ensure array
+      const ensureArray = (data: any) => Array.isArray(data) ? data : (data?.data || data?.tags || []);
+
       // Fetch primary categories
       const primaryRes = await getIncidentTags('primary_category');
-      setPrimaryCategories(primaryRes.data || []);
+      setPrimaryCategories(ensureArray(primaryRes.data));
 
       // Fetch severity options
       const severityRes = await getIncidentTags('severity');
-      setSeverityOptions(severityRes.data || []);
+      setSeverityOptions(ensureArray(severityRes.data));
 
       // Fetch incident level options
       const levelRes = await getIncidentTags('incident_level');
-      setIncidentLevelOptions(levelRes.data || []);
+      setIncidentLevelOptions(ensureArray(levelRes.data));
 
       // Fetch near miss options
       const nearMissRes = await getIncidentTags('near_miss');
-      setNearMissOptions(nearMissRes.data || []);
+      setNearMissOptions(ensureArray(nearMissRes.data));
 
       // Fetch probability options
       const probRes = await getIncidentTags('probability');
-      setProbabilityOptions(probRes.data || []);
+      setProbabilityOptions(ensureArray(probRes.data));
 
       // Fetch injury categories
       const injuryRes = await getIncidentTags('injury_category');
-      setInjuryCategories(injuryRes.data || []);
+      setInjuryCategories(ensureArray(injuryRes.data));
 
       // Get buildings from localStorage
-      const storedBuildings = getItemInLocalStorage('Building') || [];
-      setBuildings(storedBuildings);
+      const storedBuildings = getItemInLocalStorage('Building');
+      setBuildings(Array.isArray(storedBuildings) ? storedBuildings : []);
     } catch (error) {
       console.error('Error fetching dropdown data:', error);
     }
@@ -137,15 +140,19 @@ const CreateIncident: React.FC = () => {
     }
   };
 
+  // Helper to ensure array from API response
+  const ensureArray = (data: any) => Array.isArray(data) ? data : (data?.data || data?.tags || []);
+
   // Handle category change to load subcategories
   const handlePrimaryCategoryChange = async (value: string) => {
     setFormData(prev => ({ ...prev, primary_incident_category_id: value, incident_category_id: '', secondary_category_id: '', secondary_category_2_id: '' }));
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setCategoryForIncident(res.data || []);
+        setCategoryForIncident(ensureArray(res.data));
       } catch (error) {
         console.error('Error fetching subcategories:', error);
+        setCategoryForIncident([]);
       }
     } else {
       setCategoryForIncident([]);
@@ -157,9 +164,10 @@ const CreateIncident: React.FC = () => {
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setSecondaryCategories(res.data || []);
+        setSecondaryCategories(ensureArray(res.data));
       } catch (error) {
         console.error('Error fetching secondary categories:', error);
+        setSecondaryCategories([]);
       }
     } else {
       setSecondaryCategories([]);
@@ -171,9 +179,10 @@ const CreateIncident: React.FC = () => {
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setSecondaryCategories2(res.data || []);
+        setSecondaryCategories2(ensureArray(res.data));
       } catch (error) {
         console.error('Error fetching secondary categories 2:', error);
+        setSecondaryCategories2([]);
       }
     } else {
       setSecondaryCategories2([]);
@@ -185,9 +194,10 @@ const CreateIncident: React.FC = () => {
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setInjurySubCategories(res.data || []);
+        setInjurySubCategories(ensureArray(res.data));
       } catch (error) {
         console.error('Error fetching injury subcategories:', error);
+        setInjurySubCategories([]);
       }
     } else {
       setInjurySubCategories([]);
@@ -199,9 +209,10 @@ const CreateIncident: React.FC = () => {
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setInjurySubCategories2(res.data || []);
+        setInjurySubCategories2(ensureArray(res.data));
       } catch (error) {
         console.error('Error fetching injury subcategories 2:', error);
+        setInjurySubCategories2([]);
       }
     } else {
       setInjurySubCategories2([]);
@@ -213,8 +224,15 @@ const CreateIncident: React.FC = () => {
     if (value) {
       try {
         const res = await getIncidentSubTag(value);
-        setInjurySubCategories3(res.data || []);
+        setInjurySubCategories3(ensureArray(res.data));
       } catch (error) {
+        console.error('Error fetching injury subcategories 3:', error);
+        setInjurySubCategories3([]);
+      }
+    } else {
+      setInjurySubCategories3([]);
+    }
+  };
         console.error('Error fetching injury subcategories 3:', error);
       }
     } else {
