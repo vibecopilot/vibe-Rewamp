@@ -4,7 +4,6 @@ import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import { Loader2, Users, AlertCircle, RefreshCw, Eye, Edit2 } from 'lucide-react';
 import { getStaff, domainPrefix } from '../../api';
-import { dateFormat } from '../../utils/dateUtils';
 
 interface Staff {
   id: number;
@@ -14,10 +13,6 @@ interface Staff {
   email?: string;
   mobile_no?: string;
   work_type?: string;
-  vendor_name?: string;
-  valid_from?: string;
-  valid_till?: string;
-  status?: boolean;
   profile_picture?: { url: string };
   created_at?: string;
 }
@@ -91,7 +86,7 @@ const VMSStaff: React.FC = () => {
   const columns: TableColumn<Staff>[] = [
     {
       key: 'actions',
-      header: 'Action',
+      header: 'ACTION',
       width: '100px',
       render: (_, row) => (
         <div className="flex items-center gap-3">
@@ -106,7 +101,7 @@ const VMSStaff: React.FC = () => {
     },
     {
       key: 'profile_picture',
-      header: 'Profile',
+      header: 'PROFILE',
       width: '80px',
       render: (_, row) => (
         <div className="w-10 h-10 rounded-full overflow-hidden bg-muted">
@@ -126,36 +121,14 @@ const VMSStaff: React.FC = () => {
     { key: 'id', header: 'ID', sortable: true },
     {
       key: 'name',
-      header: 'Name',
+      header: 'NAME',
       sortable: true,
       render: (_, row) => `${row.firstname || ''} ${row.lastname || ''}`.trim() || '-',
     },
-    { key: 'unit_name', header: 'Unit', render: (value) => value || '-' },
-    { key: 'email', header: 'Email', render: (value) => value || '-' },
-    { key: 'mobile_no', header: 'Mobile', render: (value) => value || '-' },
-    { key: 'work_type', header: 'Work Type', render: (value) => value || '-' },
-    { key: 'vendor_name', header: 'Vendor', render: (value) => value || '-' },
-    {
-      key: 'valid_from',
-      header: 'From',
-      render: (value) => value ? dateFormat(value) : '-',
-    },
-    {
-      key: 'valid_till',
-      header: 'Till',
-      render: (value) => value ? dateFormat(value) : '-',
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
-          {value ? 'Active' : 'Inactive'}
-        </span>
-      ),
-    },
+    { key: 'unit_name', header: 'UNIT', render: (value) => value || '-' },
+    { key: 'email', header: 'EMAIL', render: (value) => value || '-' },
+    { key: 'mobile_no', header: 'MOBILE', render: (value) => value || '-' },
+    { key: 'work_type', header: 'WORK TYPE', render: (value) => value || '-' },
   ];
 
   if (loading && staffList.length === 0) {
@@ -187,13 +160,13 @@ const VMSStaff: React.FC = () => {
   return (
     <>
       <ListToolbar
-        searchPlaceholder="Search by name, unit, or mobile..."
+        searchPlaceholder="Search by name, unit, or mobile"
         searchValue={searchValue}
         onSearchChange={handleSearch}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/staff/create')}
-        addLabel="Add Staff"
+        addLabel="Add"
       />
 
       {loading && staffList.length > 0 && (

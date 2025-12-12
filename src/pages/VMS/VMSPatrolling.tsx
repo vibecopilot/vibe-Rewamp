@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import { Loader2, Shield, AlertCircle, RefreshCw, Eye, Edit2, Plus } from 'lucide-react';
-import { getPatrollings, getPatrollingHistory, postPatrolling, getFloors, getUnits } from '../../api';
+import { getPatrollings, getPatrollingHistory, postPatrolling, getFloors, getUnits, getStaff } from '../../api';
 import { convertToIST, SendDateFormat, formatTime } from '../../utils/dateUtils';
 import { getItemInLocalStorage } from '../../utils/localStorage';
 import toast from 'react-hot-toast';
@@ -13,18 +13,25 @@ interface Patrolling {
   building_name?: string;
   floor_name?: string;
   unit_name?: string;
+  start_time?: string;
+  assigned_to?: string;
+  status?: string;
   start_date?: string;
   end_date?: string;
-  start_time?: string;
   end_time?: string;
   created_at?: string;
 }
 
 interface PatrollingHistory {
   id: number;
+  date?: string;
+  time?: string;
   building_name?: string;
   floor_name?: string;
   unit_name?: string;
+  staff_name?: string;
+  status?: string;
+  remarks?: string;
   expected_time?: string;
   actual_time?: string;
 }
@@ -44,8 +51,16 @@ interface Unit {
   name: string;
 }
 
+interface StaffMember {
+  id: number;
+  firstname?: string;
+  lastname?: string;
+}
+
+type SubTab = 'schedule' | 'logs';
+
 const VMSPatrolling: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs'>('schedule');
+  const [activeTab, setActiveTab] = useState<SubTab>('schedule');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [patrollings, setPatrollings] = useState<Patrolling[]>([]);
@@ -59,28 +74,27 @@ const VMSPatrolling: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [floors, setFloors] = useState<Floor[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [selectedHours, setSelectedHours] = useState<string[]>([]);
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [formData, setFormData] = useState({
     buildingId: '',
     floorId: '',
     unitId: '',
-    startDate: '',
-    endDate: '',
-    startTime: '',
-    endTime: '',
-    timeInterval: '',
+    scheduleTime: '',
+    assignedTo: '',
+    frequency: 'Daily',
+    status: 'Active',
   });
 
   const buildings: Building[] = getItemInLocalStorage('Building') || [];
-  const hours = Array.from({ length: 24 }, (_, i) => i < 10 ? `0${i}` : `${i}`);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [patrollingRes, historyRes] = await Promise.all([
+      const [patrollingRes, historyRes, staffRes] = await Promise.all([
         getPatrollings(),
         getPatrollingHistory(),
+        getStaff(),
       ]);
       
       const patrollingData = patrollingRes.data || [];
@@ -98,6 +112,9 @@ const VMSPatrolling: React.FC = () => {
         : [];
       setHistories(sortedHistory);
       setFilteredHistories(sortedHistory);
+
+      const staffData = staffRes.data?.staffs || staffRes.data || [];
+      setStaffList(staffData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch patrolling data';
       setError(errorMessage);
@@ -137,6 +154,17 @@ const VMSPatrolling: React.FC = () => {
     }
   };
 
+  const handleTabChange = (tab: SubTab) => {
+    setActiveTab(tab);
+    setSearchValue('');
+    setSelectedRows([]);
+    if (tab === 'schedule') {
+      setFilteredPatrollings(patrollings);
+    } else {
+      setFilteredHistories(histories);
+    }
+  };
+
   const handleFormChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
@@ -162,12 +190,6 @@ const VMSPatrolling: React.FC = () => {
     }
   };
 
-  const toggleHourSelection = (hour: string) => {
-    setSelectedHours(prev =>
-      prev.includes(hour) ? prev.filter(h => h !== hour) : [...prev, hour]
-    );
-  };
-
   const handleSubmit = async () => {
     if (!formData.buildingId || !formData.floorId) {
       toast.error('Please select Building and Floor!');
@@ -178,14 +200,10 @@ const VMSPatrolling: React.FC = () => {
     sendData.append('patrolling[building_id]', formData.buildingId);
     sendData.append('patrolling[floor_id]', formData.floorId);
     sendData.append('patrolling[unit_id]', formData.unitId);
-    sendData.append('patrolling[start_date]', formData.startDate);
-    sendData.append('patrolling[end_date]', formData.endDate);
-    sendData.append('patrolling[start_time]', formData.startTime);
-    sendData.append('patrolling[end_time]', formData.endTime);
-    sendData.append('patrolling[time_intervals]', formData.timeInterval);
-    selectedHours.forEach(hour => {
-      sendData.append('patrolling[specific_times][]', hour);
-    });
+    sendData.append('patrolling[start_time]', formData.scheduleTime);
+    sendData.append('patrolling[assigned_to]', formData.assignedTo);
+    sendData.append('patrolling[frequency]', formData.frequency);
+    sendData.append('patrolling[status]', formData.status);
 
     try {
       toast.loading('Creating patrolling...');
@@ -197,13 +215,11 @@ const VMSPatrolling: React.FC = () => {
         buildingId: '',
         floorId: '',
         unitId: '',
-        startDate: '',
-        endDate: '',
-        startTime: '',
-        endTime: '',
-        timeInterval: '',
+        scheduleTime: '',
+        assignedTo: '',
+        frequency: 'Daily',
+        status: 'Active',
       });
-      setSelectedHours([]);
       fetchData();
     } catch {
       toast.dismiss();
@@ -214,7 +230,7 @@ const VMSPatrolling: React.FC = () => {
   const scheduleColumns: TableColumn<Patrolling>[] = [
     {
       key: 'actions',
-      header: 'Action',
+      header: 'ACTION',
       width: '100px',
       render: (_, row) => (
         <div className="flex items-center gap-3">
@@ -227,22 +243,59 @@ const VMSPatrolling: React.FC = () => {
         </div>
       ),
     },
-    { key: 'building_name', header: 'Building', sortable: true, render: (v) => v || '-' },
-    { key: 'floor_name', header: 'Floor', sortable: true, render: (v) => v || '-' },
-    { key: 'unit_name', header: 'Unit', sortable: true, render: (v) => v || '-' },
-    { key: 'start_date', header: 'Start Date', sortable: true, render: (v) => v || '-' },
-    { key: 'end_date', header: 'End Date', sortable: true, render: (v) => v || '-' },
-    { key: 'start_time', header: 'Start Time', sortable: true, render: (v) => v ? convertToIST(v) : '-' },
-    { key: 'end_time', header: 'End Time', sortable: true, render: (v) => v ? convertToIST(v) : '-' },
-    { key: 'created_at', header: 'Created On', sortable: true, render: (v) => v ? SendDateFormat(v) : '-' },
+    { key: 'building_name', header: 'BUILDING', sortable: true, render: (v) => v || '-' },
+    { key: 'floor_name', header: 'FLOOR', sortable: true, render: (v) => v || '-' },
+    { key: 'unit_name', header: 'UNIT', sortable: true, render: (v) => v || '-' },
+    { key: 'start_time', header: 'SCHEDULE TIME', sortable: true, render: (v) => v ? convertToIST(v) : '-' },
+    { key: 'assigned_to', header: 'ASSIGNED TO', sortable: true, render: (v) => v || '-' },
+    { 
+      key: 'status', 
+      header: 'STATUS', 
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}>
+          {value || 'Active'}
+        </span>
+      ),
+    },
   ];
 
   const historyColumns: TableColumn<PatrollingHistory>[] = [
-    { key: 'building_name', header: 'Building', sortable: true, render: (v) => v || '-' },
-    { key: 'floor_name', header: 'Floor', sortable: true, render: (v) => v || '-' },
-    { key: 'unit_name', header: 'Unit', sortable: true, render: (v) => v || '-' },
-    { key: 'expected_time', header: 'Expected Time', sortable: true, render: (v) => v ? formatTime(v) : '-' },
-    { key: 'actual_time', header: 'Actual Time', sortable: true, render: (v) => v ? formatTime(v) : '-' },
+    {
+      key: 'actions',
+      header: 'ACTION',
+      width: '80px',
+      render: (_, row) => (
+        <Link to={`/vms/patrolling/${row.id}`} className="text-muted-foreground hover:text-primary">
+          <Eye className="w-4 h-4" />
+        </Link>
+      ),
+    },
+    { key: 'date', header: 'DATE', sortable: true, render: (v) => v || '-' },
+    { key: 'time', header: 'TIME', sortable: true, render: (v) => v ? formatTime(v) : '-' },
+    { key: 'building_name', header: 'BUILDING', sortable: true, render: (v) => v || '-' },
+    { key: 'floor_name', header: 'FLOOR', sortable: true, render: (v) => v || '-' },
+    { key: 'unit_name', header: 'UNIT', sortable: true, render: (v) => v || '-' },
+    { key: 'staff_name', header: 'STAFF NAME', sortable: true, render: (v) => v || '-' },
+    { 
+      key: 'status', 
+      header: 'STATUS',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'Completed' ? 'bg-green-100 text-green-700' : 
+          value === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+        }`}>
+          {value || '-'}
+        </span>
+      ),
+    },
+    { key: 'remarks', header: 'REMARKS', render: (v) => v || '-' },
+  ];
+
+  const subTabs: { id: SubTab; label: string }[] = [
+    { id: 'schedule', label: 'Schedule' },
+    { id: 'logs', label: 'Logs' },
   ];
 
   if (loading) {
@@ -274,37 +327,30 @@ const VMSPatrolling: React.FC = () => {
   return (
     <>
       {/* Sub-tabs */}
-      <div className="flex gap-4 border-b border-border mb-4">
-        <button
-          onClick={() => { setActiveTab('schedule'); setSearchValue(''); }}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'schedule'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Schedule
-        </button>
-        <button
-          onClick={() => { setActiveTab('logs'); setSearchValue(''); }}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'logs'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Logs
-        </button>
+      <div className="flex gap-1 border-b border-border mb-4">
+        {subTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <ListToolbar
-        searchPlaceholder="Search by building, floor, unit..."
+        searchPlaceholder="Search by building, floor, unit"
         searchValue={searchValue}
         onSearchChange={handleSearch}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={activeTab === 'schedule' ? () => setModalVisible(true) : undefined}
-        addLabel="Add Patrolling"
+        addLabel="Add"
       />
 
       {activeTab === 'schedule' ? (
@@ -353,12 +399,12 @@ const VMSPatrolling: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50" onClick={() => setModalVisible(false)}>
           <div className="bg-card border border-border rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-xl font-semibold text-foreground mb-6 text-center bg-primary text-primary-foreground py-2 rounded-full">
-              Add Patrolling
+              Add Patrolling Schedule
             </h2>
 
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Building</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Building <span className="text-destructive">*</span></label>
                 <select
                   name="buildingId"
                   value={formData.buildingId}
@@ -370,7 +416,7 @@ const VMSPatrolling: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Floor</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Floor <span className="text-destructive">*</span></label>
                 <select
                   name="floorId"
                   value={formData.floorId}
@@ -382,7 +428,7 @@ const VMSPatrolling: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Unit</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Unit <span className="text-destructive">*</span></label>
                 <select
                   name="unitId"
                   value={formData.unitId}
@@ -393,86 +439,60 @@ const VMSPatrolling: React.FC = () => {
                   {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                 </select>
               </div>
-            </div>
-
-            <h3 className="text-sm font-medium text-foreground border-b border-border pb-2 mb-4">Frequency</h3>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Start Time</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Schedule Time <span className="text-destructive">*</span></label>
                 <input
                   type="time"
-                  name="startTime"
-                  value={formData.startTime}
+                  name="scheduleTime"
+                  value={formData.scheduleTime}
                   onChange={handleFormChange}
                   className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">End Time</label>
-                <input
-                  type="time"
-                  name="endTime"
-                  value={formData.endTime}
+                <label className="block text-sm font-medium text-foreground mb-1">Assigned To <span className="text-destructive">*</span></label>
+                <select
+                  name="assignedTo"
+                  value={formData.assignedTo}
                   onChange={handleFormChange}
                   className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-                />
+                >
+                  <option value="">Select Staff</option>
+                  {staffList.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {`${s.firstname || ''} ${s.lastname || ''}`.trim() || `Staff ${s.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Frequency</label>
+                <select
+                  name="frequency"
+                  value={formData.frequency}
+                  onChange={handleFormChange}
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                >
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleFormChange}
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-1">Time Interval (hrs)</label>
-              <input
-                type="number"
-                name="timeInterval"
-                value={formData.timeInterval}
-                onChange={handleFormChange}
-                placeholder="Enter interval in hours"
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">Specific Hours</label>
-              <div className="flex flex-wrap gap-2">
-                {hours.map(hour => (
-                  <button
-                    key={hour}
-                    type="button"
-                    onClick={() => toggleHourSelection(hour)}
-                    className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${
-                      selectedHours.includes(hour)
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'border-border hover:bg-accent'
-                    }`}
-                  >
-                    {hour}:00
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setModalVisible(false)}
                 className="px-4 py-2 border border-border rounded-lg hover:bg-accent"
@@ -483,7 +503,7 @@ const VMSPatrolling: React.FC = () => {
                 onClick={handleSubmit}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
               >
-                Create
+                Save
               </button>
             </div>
           </div>

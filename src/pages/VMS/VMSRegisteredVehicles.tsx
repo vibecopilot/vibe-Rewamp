@@ -4,23 +4,28 @@ import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import { Loader2, Car, AlertCircle, RefreshCw, Eye, Edit2 } from 'lucide-react';
 import { getRegisteredVehicle } from '../../api';
+import { dateFormat } from '../../utils/dateUtils';
 
 interface RegisteredVehicle {
   id: number;
   vehicle_number: string;
-  category?: string;
   slot_name?: string;
+  sticker_number?: string;
+  user_name?: string;
+  unit_name?: string;
+  created_at?: string;
+  category?: string;
   vehicle_category?: string;
   vehicle_type?: string;
-  sticker_number?: string;
   registration_number?: string;
   insurance_number?: string;
-  insurance_valid_till?: string;
-  created_at?: string;
 }
+
+type SubTab = 'all' | 'history';
 
 const VMSRegisteredVehicles: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<SubTab>('all');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [vehicles, setVehicles] = useState<RegisteredVehicle[]>([]);
@@ -69,6 +74,12 @@ const VMSRegisteredVehicles: React.FC = () => {
     }
   };
 
+  const handleTabChange = (tab: SubTab) => {
+    setActiveTab(tab);
+    setSearchValue('');
+    setSelectedRows([]);
+  };
+
   const handleSelectRow = (id: string) => {
     setSelectedRows(prev =>
       prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
@@ -86,7 +97,7 @@ const VMSRegisteredVehicles: React.FC = () => {
   const columns: TableColumn<RegisteredVehicle>[] = [
     {
       key: 'actions',
-      header: 'Action',
+      header: 'ACTION',
       width: '100px',
       render: (_, row) => (
         <div className="flex items-center gap-3">
@@ -99,14 +110,17 @@ const VMSRegisteredVehicles: React.FC = () => {
         </div>
       ),
     },
-    { key: 'vehicle_number', header: 'Vehicle Number', sortable: true },
-    { key: 'category', header: 'Category', sortable: true, render: (value) => value || '-' },
-    { key: 'slot_name', header: 'Parking Slot', sortable: true, render: (value) => value || '-' },
-    { key: 'vehicle_category', header: 'Vehicle Category', sortable: true, render: (value) => value || '-' },
-    { key: 'vehicle_type', header: 'Vehicle Type', sortable: true, render: (value) => value || '-' },
-    { key: 'sticker_number', header: 'Sticker Number', sortable: true, render: (value) => value || '-' },
-    { key: 'registration_number', header: 'Registration Number', sortable: true, render: (value) => value || '-' },
-    { key: 'insurance_number', header: 'Insurance Number', sortable: true, render: (value) => value || '-' },
+    { key: 'vehicle_number', header: 'VEHICLE NUMBER', sortable: true },
+    { key: 'slot_name', header: 'PARKING SLOT', sortable: true, render: (value) => value || '-' },
+    { key: 'sticker_number', header: 'STICKER NUMBER', sortable: true, render: (value) => value || '-' },
+    { key: 'user_name', header: 'OWNER NAME', sortable: true, render: (value) => value || '-' },
+    { key: 'unit_name', header: 'UNIT', sortable: true, render: (value) => value || '-' },
+    { key: 'created_at', header: 'REGISTERED DATE', sortable: true, render: (value) => value ? dateFormat(value) : '-' },
+  ];
+
+  const subTabs: { id: SubTab; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'history', label: 'History' },
   ];
 
   if (loading && vehicles.length === 0) {
@@ -137,14 +151,31 @@ const VMSRegisteredVehicles: React.FC = () => {
 
   return (
     <>
+      {/* Sub-tabs */}
+      <div className="flex gap-1 border-b border-border mb-4">
+        {subTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <ListToolbar
-        searchPlaceholder="Search by vehicle number, parking slot, sticker number..."
+        searchPlaceholder="Search by parking slot, sticker number, vehicle number"
         searchValue={searchValue}
         onSearchChange={handleSearch}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/registered-vehicles/create')}
-        addLabel="Add Vehicle"
+        addLabel="Add"
       />
 
       {loading && vehicles.length > 0 && (
