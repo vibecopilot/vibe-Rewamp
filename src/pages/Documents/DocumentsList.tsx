@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Folder, FileText, Plus, Upload, MoreVertical, Share2, Trash2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Breadcrumb from '../../components/ui/Breadcrumb';
+import TabNavigation from '../../components/ui/TabNavigation';
 import Modal from '../../components/ui/Modal';
 import { 
   getFolderDocumentPersonal, 
@@ -55,7 +56,7 @@ const DocumentsList: React.FC = () => {
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ id: null, name: 'Root' }]);
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const [parentID, setParentID] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -194,7 +195,7 @@ const DocumentsList: React.FC = () => {
 
   // Initial fetch and tab change
   useEffect(() => {
-    setBreadcrumbs([{ id: null, name: 'Root' }]);
+    setBreadcrumbs([]);
     setParentID(null);
     fetchData(activeTab);
   }, [activeTab]);
@@ -219,10 +220,17 @@ const DocumentsList: React.FC = () => {
 
   // Navigate to breadcrumb
   const handleBreadcrumbClick = async (index: number) => {
-    const selectedBreadcrumb = breadcrumbs[index];
-    setBreadcrumbs(breadcrumbs.slice(0, index + 1));
-    setParentID(selectedBreadcrumb.id);
-    await fetchData(activeTab, selectedBreadcrumb.id);
+    if (index === -1) {
+      // Go to root
+      setBreadcrumbs([]);
+      setParentID(null);
+      await fetchData(activeTab, null);
+    } else {
+      const selectedBreadcrumb = breadcrumbs[index];
+      setBreadcrumbs(breadcrumbs.slice(0, index + 1));
+      setParentID(selectedBreadcrumb.id);
+      await fetchData(activeTab, selectedBreadcrumb.id);
+    }
   };
 
   // Create folder
@@ -372,41 +380,37 @@ const DocumentsList: React.FC = () => {
     <div className="p-6">
       <Breadcrumb items={[{ label: 'Documents', path: '/documents' }]} />
       
-      {/* Tabs */}
-      <div className="flex justify-center my-4">
-        <div className="flex gap-1 p-1 bg-muted rounded-full">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id as TabType)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeTab === tab.id
-                  ? 'bg-background text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Second Level Tabs */}
+      <TabNavigation
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(tabId) => handleTabChange(tabId as TabType)}
+      />
 
-      {/* Folder Path Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-        {breadcrumbs.map((crumb, index) => (
-          <React.Fragment key={crumb.id || 'root'}>
-            {index > 0 && <span>/</span>}
-            <button
-              onClick={() => handleBreadcrumbClick(index)}
-              className={`hover:text-primary transition-colors ${
-                index === breadcrumbs.length - 1 ? 'text-foreground font-medium' : ''
-              }`}
-            >
-              {crumb.name}
-            </button>
-          </React.Fragment>
-        ))}
-      </nav>
+      {/* Folder Path Breadcrumb - only show when inside folders */}
+      {breadcrumbs.length > 0 && (
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <button
+            onClick={() => handleBreadcrumbClick(-1)}
+            className="hover:text-primary transition-colors"
+          >
+            Home
+          </button>
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={crumb.id || index}>
+              <span>/</span>
+              <button
+                onClick={() => handleBreadcrumbClick(index)}
+                className={`hover:text-primary transition-colors ${
+                  index === breadcrumbs.length - 1 ? 'text-foreground font-medium' : ''
+                }`}
+              >
+                {crumb.name}
+              </button>
+            </React.Fragment>
+          ))}
+        </nav>
+      )}
 
       {/* Action Buttons */}
       {activeTab !== 'shared' && (
