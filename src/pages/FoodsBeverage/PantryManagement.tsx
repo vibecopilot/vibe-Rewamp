@@ -28,12 +28,21 @@ const PantryManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Grid default 12, List default 10
+  const getDefaultPerPage = (mode: 'grid' | 'table') => mode === 'grid' ? 12 : 10;
+  
   const [pagination, setPagination] = useState({
     page: 1,
-    perPage: 12,
+    perPage: getDefaultPerPage('grid'),
     total: 0,
     totalPages: 0,
   });
+
+  // Update perPage when view mode changes
+  const handleViewModeChange = (mode: 'grid' | 'table') => {
+    setViewMode(mode);
+    setPagination(prev => ({ ...prev, perPage: getDefaultPerPage(mode), page: 1 }));
+  };
 
   const fetchPantryItems = useCallback(async () => {
     setLoading(true);
@@ -200,7 +209,7 @@ const PantryManagement: React.FC = () => {
             searchValue={searchValue}
             onSearchChange={handleSearch}
             viewMode={viewMode}
-            onViewModeChange={setViewMode}
+            onViewModeChange={handleViewModeChange}
             onFilter={() => console.log('Filter clicked')}
             showViewToggle={true}
           />
@@ -306,10 +315,10 @@ const PantryManagement: React.FC = () => {
               onChange={(e) => setPagination(prev => ({ ...prev, perPage: Number(e.target.value), page: 1 }))}
               className="px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             >
+              <option value={10}>10</option>
               <option value={12}>12</option>
-              <option value={24}>24</option>
-              <option value={48}>48</option>
-              <option value={96}>96</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>
