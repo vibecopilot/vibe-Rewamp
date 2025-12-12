@@ -159,6 +159,17 @@ export const vmsService = {
     });
   },
 
+  // Get visitor device logs
+  getDeviceLogs: async (page = 1, perPage = 10) => {
+    return axiosInstance.get('/visitor_device_logs.json', {
+      params: {
+        token: getToken(),
+        page,
+        per_page: perPage,
+      },
+    });
+  },
+
   // Get visitor categories
   getCategories: async () => {
     return axiosInstance.get('/visitor_staff_category.json', {
