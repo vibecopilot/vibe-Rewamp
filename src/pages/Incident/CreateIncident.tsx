@@ -233,12 +233,6 @@ const CreateIncident: React.FC = () => {
       setInjurySubCategories3([]);
     }
   };
-        console.error('Error fetching injury subcategories 3:', error);
-      }
-    } else {
-      setInjurySubCategories3([]);
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
