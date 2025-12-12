@@ -42,7 +42,13 @@ import TicketCreate from "./pages/ServiceDesk/TicketCreate";
 import TicketView from "./pages/ServiceDesk/TicketView";
 import TicketEdit from "./pages/ServiceDesk/TicketEdit";
 import SoftServiceList from "./pages/SoftService/SoftServiceList";
-import AmenitiesBookingList from "./pages/Amenities/AmenitiesBookingList";
+import {
+  AmenitiesLayout,
+  AmenitiesList,
+  HotelBookingsList,
+  BookAmenity,
+  BookHotel
+} from "./pages/Amenities";
 import FitoutList from "./pages/Fitout/FitoutList";
 
 // Placeholder pages for other modules
@@ -166,10 +172,15 @@ function App() {
         <Route path="/incident/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Incident" /></AuthenticatedLayout>} />
         <Route path="/incident/:id" element={<AuthenticatedLayout><PlaceholderPage title="Incident Details" /></AuthenticatedLayout>} />
 
-        {/* Amenities Booking */}
-        <Route path="/amenities" element={<AuthenticatedLayout><AmenitiesBookingList /></AuthenticatedLayout>} />
-        <Route path="/amenities/book" element={<AuthenticatedLayout><PlaceholderPage title="Book Amenity" /></AuthenticatedLayout>} />
+        {/* Amenities Booking - with toggle layout */}
+        <Route path="/amenities" element={<AuthenticatedLayout><AmenitiesLayout /></AuthenticatedLayout>}>
+          <Route index element={<AmenitiesList />} />
+          <Route path="hotel" element={<HotelBookingsList />} />
+        </Route>
+        <Route path="/amenities/book" element={<AuthenticatedLayout><BookAmenity /></AuthenticatedLayout>} />
         <Route path="/amenities/bookings/:id" element={<AuthenticatedLayout><PlaceholderPage title="Booking Details" /></AuthenticatedLayout>} />
+        <Route path="/amenities/hotel/book" element={<AuthenticatedLayout><BookHotel /></AuthenticatedLayout>} />
+        <Route path="/amenities/hotel/:id" element={<AuthenticatedLayout><PlaceholderPage title="Hotel Booking Details" /></AuthenticatedLayout>} />
 
         {/* Space Booking */}
         <Route path="/space-booking" element={<AuthenticatedLayout><PlaceholderPage title="Space Booking" /></AuthenticatedLayout>} />
