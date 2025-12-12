@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Loader2, Users, AlertCircle, RefreshCw, Search, Filter, Grid3X3, List, Download, Plus, Calendar, Phone, Building2 } from 'lucide-react';
 import { BsEye } from 'react-icons/bs';
@@ -9,13 +9,10 @@ import { IoClose } from 'react-icons/io5';
 import DataTable from 'react-data-table-component';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
-import axiosInstance from '../../api/axiosInstance';
 import { getItemInLocalStorage } from '../../utils/localStorage';
 import Modal from '../../components/ui/Modal';
 import { commonService } from '../../services/common.service';
 import { vmsService, Visitor } from '../../services/vms.service';
-
-type SubTab = 'all' | 'in' | 'out' | 'approval' | 'history' | 'logs' | 'self-registration';
 
 interface FilterState {
   dateFrom: string;
@@ -30,19 +27,8 @@ interface FilterState {
 
 const VMSVisitors: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const themeColor = useSelector((state: any) => state.theme?.color);
   
-  // Get active tab from URL query params (default to 'all')
-  const getActiveTab = (): SubTab => {
-    const tab = searchParams.get('tab');
-    if (tab && ['all', 'in', 'out', 'approval', 'history', 'logs', 'self-registration'].includes(tab)) {
-      return tab as SubTab;
-    }
-    return 'all';
-  };
-
-  const [activeTab, setActiveTab] = useState<SubTab>(getActiveTab());
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -85,7 +71,6 @@ const VMSVisitors: React.FC = () => {
   const [units, setUnits] = useState<any[]>([]);
   const [hosts, setHosts] = useState<any[]>([]);
 
-  const token = getItemInLocalStorage<string>('TOKEN');
   const perPage = viewMode === 'grid' ? 12 : 10;
 
   // Helper to extract array from API response
@@ -148,63 +133,29 @@ const VMSVisitors: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      if (activeTab === 'approval') {
-        const res = await vmsService.getApprovals(pagination.page, perPage);
-        const data = res.data;
-        const list = Array.isArray(data) ? data : data.data || data.visitors || [];
-        setVisitors(list);
-        setPagination(prev => ({
-          ...prev,
-          total: data.total || data.total_count || list.length,
-          totalPages: data.total_pages || Math.ceil((data.total || list.length) / perPage),
-        }));
-        return;
+      // Build filter params - always exclude security_guard
+      const filterParams: any = { 
+        search: searchValue,
+        userTypeNotEq: 'security_guard',
+      };
+
+      // Add applied filters
+      if (appliedFilters.dateFrom) {
+        filterParams.dateFrom = appliedFilters.dateFrom;
       }
-
-      if (activeTab === 'history') {
-        const res = await vmsService.getHistory(pagination.page, perPage);
-        const data = res.data;
-        const list = Array.isArray(data) ? data : data.data || data.visitors || [];
-        setVisitors(list);
-        setPagination(prev => ({
-          ...prev,
-          total: data.total || data.total_count || list.length,
-          totalPages: data.total_pages || Math.ceil((data.total || list.length) / perPage),
-        }));
-        return;
+      if (appliedFilters.dateTo) {
+        filterParams.dateTo = appliedFilters.dateTo;
       }
-
-      if (activeTab === 'logs') {
-        const res = await vmsService.getDeviceLogs(pagination.page, perPage);
-        const data = res.data;
-        const list = Array.isArray(data) ? data : data.data || [];
-        setVisitors(list as any);
-        setPagination(prev => ({
-          ...prev,
-          total: data.total || data.total_count || list.length,
-          totalPages: data.total_pages || Math.ceil((data.total || list.length) / perPage),
-        }));
-        return;
+      if (appliedFilters.mobile) {
+        filterParams.mobile = appliedFilters.mobile;
       }
-
-      // For All / In / Out / Self-Registration use getVisitors with VisitorFilters
-      const filterParams: any = { ...appliedFilters, search: searchValue };
-
-      if (activeTab === 'in') {
-        filterParams.visitorInOut = 'in';
-      } else if (activeTab === 'out') {
-        filterParams.visitorInOut = 'out';
-      }
-
-      // Business rule: always exclude security_guard
-      filterParams.userTypeNotEq = 'security_guard';
-
-      if (activeTab === 'self-registration') {
-        filterParams.self_registered = true;
+      if (appliedFilters.hostId) {
+        filterParams.host = appliedFilters.hostId;
       }
 
       const res = await vmsService.getVisitors(pagination.page, perPage, filterParams);
       const data = res.data;
+      
       if (Array.isArray(data)) {
         setVisitors(data);
         setPagination(prev => ({
@@ -226,43 +177,17 @@ const VMSVisitors: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error fetching visitors:', err);
-      if (err?.response?.status === 404) {
-        setError(`Endpoint not available for ${activeTab} tab`);
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch visitors';
-        setError(errorMessage);
-      }
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch visitors';
+      setError(errorMessage);
       setVisitors([]);
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, perPage, searchValue, activeTab, appliedFilters]);
+  }, [pagination.page, perPage, searchValue, appliedFilters]);
 
   useEffect(() => {
     fetchVisitors();
   }, [fetchVisitors]);
-
-  // Sync active tab with URL params (for browser back/forward)
-  useEffect(() => {
-    const tabFromUrl = getActiveTab();
-    if (tabFromUrl !== activeTab) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
-
-  // Update URL when tab changes
-  useEffect(() => {
-    const currentTab = searchParams.get('tab');
-    if (currentTab !== activeTab) {
-      setSearchParams({ tab: activeTab });
-    }
-  }, [activeTab]);
-
-  const handleTabChange = (tab: SubTab) => {
-    setActiveTab(tab);
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setError(null);
-  };
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -400,25 +325,6 @@ const VMSVisitors: React.FC = () => {
         row.host?.user ? `${row.host.user.firstname || ''} ${row.host.user.lastname || ''}`.trim() : '-',
       sortable: true,
     },
-    ...(activeTab === 'approval' ? [{
-      name: 'Accept/Reject',
-      cell: (row: Visitor) => (
-        <div className="flex gap-2">
-          <button 
-            onClick={() => handleApprove(row.id)}
-            className="p-1.5 bg-green-500 rounded-full hover:bg-green-600 text-white transition-colors"
-          >
-            <FaCheck size={12} />
-          </button>
-          <button 
-            onClick={() => handleReject(row.id)}
-            className="p-1.5 bg-red-500 rounded-full hover:bg-red-600 text-white transition-colors"
-          >
-            <IoClose size={14} />
-          </button>
-        </div>
-      ),
-    }] : []),
   ];
 
   const customStyles = {
@@ -441,16 +347,6 @@ const VMSVisitors: React.FC = () => {
       },
     },
   };
-
-  const tabs: { key: SubTab; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'in', label: 'Visitors In' },
-    { key: 'out', label: 'Visitors Out' },
-    { key: 'approval', label: 'Approvals' },
-    { key: 'history', label: 'History' },
-    { key: 'logs', label: 'Logs' },
-    { key: 'self-registration', label: 'Self-Registration' },
-  ];
 
   if (loading && visitors.length === 0) {
     return (
@@ -479,24 +375,7 @@ const VMSVisitors: React.FC = () => {
   }
 
   return (
-    <div className="p-4">
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => handleTabChange(tab.key)}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === tab.key
-                ? 'bg-white text-primary shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
+    <div>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         {/* Add Button */}
@@ -632,22 +511,6 @@ const VMSVisitors: React.FC = () => {
                 >
                   <BiEdit size={14} /> Edit
                 </Link>
-                {activeTab === 'approval' && (
-                  <>
-                    <button
-                      onClick={() => handleApprove(visitor.id)}
-                      className="p-1.5 bg-green-500 rounded hover:bg-green-600 text-white transition-colors"
-                    >
-                      <FaCheck size={12} />
-                    </button>
-                    <button
-                      onClick={() => handleReject(visitor.id)}
-                      className="p-1.5 bg-red-500 rounded hover:bg-red-600 text-white transition-colors"
-                    >
-                      <IoClose size={14} />
-                    </button>
-                  </>
-                )}
               </div>
             </div>
           ))}
@@ -791,7 +654,7 @@ const VMSVisitors: React.FC = () => {
             <select
               value={filters.buildingId}
               onChange={(e) => setFilters({ ...filters, buildingId: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             >
               <option value="">Select Building</option>
               {buildings.map((building) => (
@@ -809,7 +672,7 @@ const VMSVisitors: React.FC = () => {
               value={filters.floorId}
               onChange={(e) => setFilters({ ...filters, floorId: e.target.value })}
               disabled={!filters.buildingId}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 bg-white"
             >
               <option value="">Select Floor</option>
               {floors.map((floor) => (
@@ -827,7 +690,7 @@ const VMSVisitors: React.FC = () => {
               value={filters.unitId}
               onChange={(e) => setFilters({ ...filters, unitId: e.target.value })}
               disabled={!filters.floorId}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 bg-white"
             >
               <option value="">Select Unit</option>
               {units.map((unit) => (
@@ -844,7 +707,7 @@ const VMSVisitors: React.FC = () => {
             <select
               value={filters.hostId}
               onChange={(e) => setFilters({ ...filters, hostId: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             >
               <option value="">Select Host</option>
               {hosts.map((host) => (
@@ -861,7 +724,7 @@ const VMSVisitors: React.FC = () => {
             <select
               value={filters.hostApproval}
               onChange={(e) => setFilters({ ...filters, hostApproval: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             >
               <option value="">Select</option>
               <option value="required">Required</option>
