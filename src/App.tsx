@@ -23,6 +23,13 @@ import {
   GoodsCreate,
   VehicleCreate
 } from "./pages/VMS";
+import {
+  FBLayout,
+  RestaurantManagement,
+  PantryManagement,
+  CreateRestaurant,
+  CreatePantry
+} from "./pages/FoodsBeverage";
 import AssetList from "./pages/Asset/AssetList";
 import CreateAsset from "./pages/Asset/CreateAsset";
 import CreateAMC from "./pages/Asset/CreateAMC";
@@ -166,9 +173,18 @@ function App() {
         <Route path="/space-booking" element={<AuthenticatedLayout><PlaceholderPage title="Space Booking" /></AuthenticatedLayout>} />
         <Route path="/space-booking/book" element={<AuthenticatedLayout><PlaceholderPage title="Book Space" /></AuthenticatedLayout>} />
 
-        {/* F&B */}
-        <Route path="/fb" element={<AuthenticatedLayout><PlaceholderPage title="F&B" /></AuthenticatedLayout>} />
-        <Route path="/fb/order" element={<AuthenticatedLayout><PlaceholderPage title="Place Order" /></AuthenticatedLayout>} />
+        {/* F&B - Restaurant & Pantry Management */}
+        <Route path="/fb" element={<AuthenticatedLayout><FBLayout /></AuthenticatedLayout>}>
+          <Route index element={<Navigate to="/fb/restaurant" replace />} />
+          <Route path="restaurant" element={<RestaurantManagement />} />
+          <Route path="pantry" element={<PantryManagement />} />
+        </Route>
+        <Route path="/fb/restaurant/create" element={<AuthenticatedLayout><CreateRestaurant /></AuthenticatedLayout>} />
+        <Route path="/fb/restaurant/:id" element={<AuthenticatedLayout><PlaceholderPage title="Restaurant Details" /></AuthenticatedLayout>} />
+        <Route path="/fb/restaurant/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Restaurant" /></AuthenticatedLayout>} />
+        <Route path="/fb/pantry/create" element={<AuthenticatedLayout><CreatePantry /></AuthenticatedLayout>} />
+        <Route path="/fb/pantry/:id" element={<AuthenticatedLayout><PlaceholderPage title="Pantry Item Details" /></AuthenticatedLayout>} />
+        <Route path="/fb/pantry/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Pantry Item" /></AuthenticatedLayout>} />
 
         {/* Documents */}
         <Route path="/documents" element={<AuthenticatedLayout><PlaceholderPage title="Documents" /></AuthenticatedLayout>} />
