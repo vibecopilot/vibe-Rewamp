@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Loader2, Users, AlertCircle, RefreshCw, Eye, Edit2, Search, Filter, Grid3X3, List, Download, Plus, Calendar, Phone, Building2 } from 'lucide-react';
+import { Loader2, Users, AlertCircle, RefreshCw, Search, Filter, Grid3X3, List, Download, Plus, Calendar, Phone, Building2 } from 'lucide-react';
 import { BsEye } from 'react-icons/bs';
 import { BiEdit } from 'react-icons/bi';
 import { FaCheck } from 'react-icons/fa';
@@ -13,9 +13,9 @@ import axiosInstance from '../../api/axiosInstance';
 import { getItemInLocalStorage } from '../../utils/localStorage';
 import Modal from '../../components/ui/Modal';
 import { commonService } from '../../services/common.service';
-import { vmsService, Visitor, VisitorFilters } from '../../services/vms.service';
+import { vmsService, Visitor } from '../../services/vms.service';
 
-type SubTab = 'all' | 'in' | 'out' | 'approval' | 'history' | 'logs';
+type SubTab = 'all' | 'in' | 'out' | 'approval' | 'history' | 'logs' | 'self-registration';
 
 interface FilterState {
   dateFrom: string;
@@ -30,22 +30,19 @@ interface FilterState {
 
 const VMSVisitors: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const themeColor = useSelector((state: any) => state.theme?.color);
   
-  // Derive active tab from URL path
-  const getTabFromPath = (): SubTab => {
-    const path = location.pathname;
-    if (path.includes('/in')) return 'in';
-    if (path.includes('/out')) return 'out';
-    if (path.includes('/approval')) return 'approval';
-    if (path.includes('/history')) return 'history';
-    if (path.includes('/logs')) return 'logs';
+  // Get active tab from URL query params (default to 'all')
+  const getActiveTab = (): SubTab => {
+    const tab = searchParams.get('tab');
+    if (tab && ['all', 'in', 'out', 'approval', 'history', 'logs', 'self-registration'].includes(tab)) {
+      return tab as SubTab;
+    }
     return 'all';
   };
 
-  const [activeTab, setActiveTab] = useState<SubTab>((searchParams.get('tab') as SubTab) || getTabFromPath());
+  const [activeTab, setActiveTab] = useState<SubTab>(getActiveTab());
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -196,6 +193,12 @@ const VMSVisitors: React.FC = () => {
           // Device logs endpoint
           endpoint = '/visitor_device_logs.json';
           break;
+        case 'self-registration':
+          // Self-registration visitors
+          endpoint = '/visitors.json';
+          params['q[self_registered_eq]'] = 'true';
+          params['q[user_type_not_eq]'] = 'security_guard';
+          break;
       }
 
       const response = await axiosInstance.get(endpoint, { params });
@@ -221,9 +224,16 @@ const VMSVisitors: React.FC = () => {
         setVisitors([]);
         setPagination(prev => ({ ...prev, total: 0, totalPages: 0 }));
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch visitors';
-      setError(errorMessage);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching visitors:', err);
+      // Handle 404 or other errors gracefully
+      if (err?.response?.status === 404) {
+        setError(`Endpoint not available for ${activeTab} tab`);
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch visitors';
+        setError(errorMessage);
+      }
       setVisitors([]);
     } finally {
       setLoading(false);
@@ -234,14 +244,26 @@ const VMSVisitors: React.FC = () => {
     fetchVisitors();
   }, [fetchVisitors]);
 
+  // Sync active tab with URL params (for browser back/forward)
+  useEffect(() => {
+    const tabFromUrl = getActiveTab();
+    if (tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
   // Update URL when tab changes
   useEffect(() => {
-    setSearchParams({ tab: activeTab });
-  }, [activeTab, setSearchParams]);
+    const currentTab = searchParams.get('tab');
+    if (currentTab !== activeTab) {
+      setSearchParams({ tab: activeTab });
+    }
+  }, [activeTab]);
 
   const handleTabChange = (tab: SubTab) => {
     setActiveTab(tab);
     setPagination(prev => ({ ...prev, page: 1 }));
+    setError(null);
   };
 
   const handleSearch = (value: string) => {
@@ -425,9 +447,10 @@ const VMSVisitors: React.FC = () => {
     { key: 'all', label: 'All' },
     { key: 'in', label: 'Visitors In' },
     { key: 'out', label: 'Visitors Out' },
-    { key: 'approval', label: 'Approval' },
+    { key: 'approval', label: 'Approvals' },
     { key: 'history', label: 'History' },
     { key: 'logs', label: 'Logs' },
+    { key: 'self-registration', label: 'Self-Registration' },
   ];
 
   if (loading && visitors.length === 0) {
