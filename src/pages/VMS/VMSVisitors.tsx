@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
@@ -11,9 +11,23 @@ type SubTab = 'all' | 'in' | 'out' | 'approvals' | 'history' | 'logs' | 'self-re
 
 const VMSVisitors: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<SubTab>('all');
+  const location = useLocation();
+  
+  // Derive active tab from URL path
+  const getTabFromPath = (): SubTab => {
+    const path = location.pathname;
+    if (path.includes('/in')) return 'in';
+    if (path.includes('/out')) return 'out';
+    if (path.includes('/approvals')) return 'approvals';
+    if (path.includes('/history')) return 'history';
+    if (path.includes('/logs')) return 'logs';
+    if (path.includes('/self-registration')) return 'self-registration';
+    return 'all';
+  };
+
+  const activeTab = getTabFromPath();
   const [visitorType, setVisitorType] = useState<'expected' | 'unexpected'>('expected');
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -22,7 +36,7 @@ const VMSVisitors: React.FC = () => {
   
   const [pagination, setPagination] = useState({
     page: 1,
-    perPage: 10,
+    perPage: 12,
     total: 0,
     totalPages: 0,
   });
@@ -84,12 +98,7 @@ const VMSVisitors: React.FC = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  const handleTabChange = (tab: SubTab) => {
-    setActiveTab(tab);
-    setSearchValue('');
-    setPagination(prev => ({ ...prev, page: 1 }));
-    setSelectedRows([]);
-  };
+  // Tab changes are now handled via URL navigation
 
   const handleSelectRow = (id: string) => {
     setSelectedRows(prev =>
@@ -138,15 +147,6 @@ const VMSVisitors: React.FC = () => {
     { key: 'expected_time', header: 'EXPECTED TIME', render: (value) => value || '-' },
   ];
 
-  const subTabs: { id: SubTab; label: string }[] = [
-    { id: 'all', label: 'All' },
-    { id: 'in', label: 'Visitor In' },
-    { id: 'out', label: 'Visitor Out' },
-    { id: 'approvals', label: 'Approvals' },
-    { id: 'history', label: 'History' },
-    { id: 'logs', label: 'Logs' },
-    { id: 'self-registration', label: 'Self-Registration' },
-  ];
 
   if (loading && visitors.length === 0) {
     return (
@@ -176,67 +176,53 @@ const VMSVisitors: React.FC = () => {
 
   return (
     <>
-      {/* Sub-tabs */}
-      <div className="flex gap-1 border-b border-border mb-4 overflow-x-auto">
-        {subTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === tab.id
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Toolbar with toggle, search, and add button aligned */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        {/* Left: Expected/Unexpected Toggle */}
-        <div className="flex items-center gap-2 bg-muted rounded-full p-1">
-          <button
-            onClick={() => setVisitorType('expected')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
-              visitorType === 'expected'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Expected visitor
-          </button>
-          <button
-            onClick={() => setVisitorType('unexpected')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
-              visitorType === 'unexpected'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Unexpected visitor
-          </button>
-        </div>
-
-        {/* Right: Add New Visitor Button */}
+      {/* Single line toolbar with all controls */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        {/* Add New Visitor Button */}
         <button
           onClick={() => navigate('/vms/visitors/create')}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           + Add New Visitor
         </button>
-      </div>
 
-      <ListToolbar
-        searchPlaceholder="Search using Visitor name, Host, vehicle number"
-        searchValue={searchValue}
-        onSearchChange={handleSearch}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onFilter={() => console.log('Filter clicked')}
-        showViewToggle={true}
-      />
+        {/* Expected/Unexpected Toggle */}
+        <div className="flex items-center gap-1 bg-muted rounded-full p-1">
+          <button
+            onClick={() => setVisitorType('expected')}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              visitorType === 'expected'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Expected
+          </button>
+          <button
+            onClick={() => setVisitorType('unexpected')}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              visitorType === 'unexpected'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Unexpected
+          </button>
+        </div>
+
+        {/* Search, Filter, View Toggle - all in one toolbar */}
+        <div className="flex-1">
+          <ListToolbar
+            searchPlaceholder="Search using Visitor name, Host, vehicle number"
+            searchValue={searchValue}
+            onSearchChange={handleSearch}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onFilter={() => console.log('Filter clicked')}
+            showViewToggle={true}
+          />
+        </div>
+      </div>
 
       {loading && visitors.length > 0 && (
         <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -339,10 +325,10 @@ const VMSVisitors: React.FC = () => {
               onChange={(e) => setPagination(prev => ({ ...prev, perPage: Number(e.target.value), page: 1 }))}
               className="px-2 py-1.5 text-sm border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+              <option value={48}>48</option>
+              <option value={96}>96</option>
             </select>
           </div>
         </div>
