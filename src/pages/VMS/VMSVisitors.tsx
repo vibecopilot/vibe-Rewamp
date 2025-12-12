@@ -88,6 +88,17 @@ const VMSVisitors: React.FC = () => {
   const token = getItemInLocalStorage<string>('TOKEN');
   const perPage = viewMode === 'grid' ? 12 : 10;
 
+  // Helper to extract array from API response
+  const extractArray = (data: any): any[] => {
+    if (Array.isArray(data)) return data;
+    if (data?.data && Array.isArray(data.data)) return data.data;
+    if (data?.buildings && Array.isArray(data.buildings)) return data.buildings;
+    if (data?.floors && Array.isArray(data.floors)) return data.floors;
+    if (data?.units && Array.isArray(data.units)) return data.units;
+    if (data?.hosts && Array.isArray(data.hosts)) return data.hosts;
+    return [];
+  };
+
   // Fetch dropdown data
   useEffect(() => {
     const fetchDropdowns = async () => {
@@ -96,10 +107,12 @@ const VMSVisitors: React.FC = () => {
           commonService.getBuildings(),
           vmsService.getHosts(getItemInLocalStorage<string>('SITEID') || ''),
         ]);
-        setBuildings(buildingsRes.data || []);
-        setHosts(hostsRes.data || []);
+        setBuildings(extractArray(buildingsRes.data));
+        setHosts(extractArray(hostsRes.data));
       } catch (error) {
         console.error('Error fetching dropdowns:', error);
+        setBuildings([]);
+        setHosts([]);
       }
     };
     fetchDropdowns();
@@ -109,9 +122,9 @@ const VMSVisitors: React.FC = () => {
   useEffect(() => {
     if (filters.buildingId) {
       commonService.getFloors(filters.buildingId).then((res) => {
-        setFloors(res.data || []);
+        setFloors(extractArray(res.data));
         setFilters(prev => ({ ...prev, floorId: '', unitId: '' }));
-      });
+      }).catch(() => setFloors([]));
     } else {
       setFloors([]);
       setFilters(prev => ({ ...prev, floorId: '', unitId: '' }));
@@ -122,9 +135,9 @@ const VMSVisitors: React.FC = () => {
   useEffect(() => {
     if (filters.floorId) {
       commonService.getUnits(filters.floorId).then((res) => {
-        setUnits(res.data || []);
+        setUnits(extractArray(res.data));
         setFilters(prev => ({ ...prev, unitId: '' }));
-      });
+      }).catch(() => setUnits([]));
     } else {
       setUnits([]);
       setFilters(prev => ({ ...prev, unitId: '' }));
