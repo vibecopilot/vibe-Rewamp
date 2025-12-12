@@ -100,7 +100,12 @@ const modules = [
           { name: 'Pantry Management', path: '/fb/pantry' },
         ]
       },
-      { id: 'amenities', name: 'Amenities Booking', path: '/amenities' },
+      { id: 'amenities', name: 'Amenities Booking', path: '/amenities',
+        children: [
+          { name: 'Amenities Bookings', path: '/amenities' },
+          { name: 'Hotel Bookings', path: '/amenities/hotel' },
+        ]
+      },
       { id: 'space', name: 'Space Booking', path: '/space-booking' },
     ]
   },
