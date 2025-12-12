@@ -15,7 +15,7 @@ const CreateOutboundPackage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getVendors().then(res => setVendors(res.data || []));
+    getVendors().then(res => setVendors(Array.isArray(res?.data) ? res.data : [])).catch(() => setVendors([]));
     if (isEditMode && id) getOutboundDetail(id).then(res => { const p = res.data; setFormData({ vendor_id: p.vendor_id?.toString() || '', sending_date: p.sending_date?.split('T')[0] || '', recipient_name: p.recipient_name || '', recipient_email_id: p.recipient_email_id || '', sender_id: p.sender_id || '', mobile_number: p.mobile_number || '', awb_number: p.awb_number || '', entity: p.entity || '', unit: p.unit || '', company: p.company || '', company_address_1: p.company_address_1 || '', company_address_2: p.company_address_2 || '', state: p.state || '', city: p.city || '', mail_outbound_type: p.mail_outbound_type || '' }); });
   }, [id, isEditMode]);
 
@@ -33,7 +33,7 @@ const CreateOutboundPackage: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <div className="bg-card border border-border rounded-lg p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div><label className="block text-sm font-medium text-foreground mb-2">Select Vendor *</label><select name="vendor_id" value={formData.vendor_id} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-border rounded-lg bg-background text-foreground"><option value="">Select</option>{vendors.map(v => <option key={v.id} value={v.id}>{v.vendor_name}</option>)}</select></div>
+            <div><label className="block text-sm font-medium text-foreground mb-2">Select Vendor *</label><select name="vendor_id" value={formData.vendor_id} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-border rounded-lg bg-background text-foreground"><option value="">Select</option>{Array.isArray(vendors) && vendors.map(v => <option key={v.id} value={v.id}>{v.vendor_name}</option>)}</select></div>
             <div><label className="block text-sm font-medium text-foreground mb-2">Sending Date *</label><input type="date" name="sending_date" value={formData.sending_date} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-border rounded-lg bg-background text-foreground" /></div>
           </div>
         </div>
