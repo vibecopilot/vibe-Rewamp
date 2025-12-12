@@ -8,7 +8,7 @@ import {
   postSoftServices, 
   EditSoftServices, 
   getSoftServicesDetails,
-  getBuilding,
+  getBuildings,
   getFloors,
   getUnits,
   getGenericGroup
@@ -82,7 +82,7 @@ const CreateService: React.FC = () => {
   const fetchDropdownData = async () => {
     try {
       const [buildingRes, groupsRes] = await Promise.all([
-        getBuilding(),
+        getBuildings(),
         getGenericGroup(),
       ]);
       
