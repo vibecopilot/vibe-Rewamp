@@ -1,0 +1,10 @@
+export { default as MailRoomLayout } from './MailRoomLayout';
+export { default as DeliveryVendorList } from './DeliveryVendor/DeliveryVendorList';
+export { default as CreateVendor } from './DeliveryVendor/CreateVendor';
+export { default as ViewVendor } from './DeliveryVendor/ViewVendor';
+export { default as InboundList } from './Inbound/InboundList';
+export { default as CreateInboundPackage } from './Inbound/CreateInboundPackage';
+export { default as ViewInbound } from './Inbound/ViewInbound';
+export { default as OutboundList } from './Outbound/OutboundList';
+export { default as CreateOutboundPackage } from './Outbound/CreateOutboundPackage';
+export { default as ViewOutbound } from './Outbound/ViewOutbound';
