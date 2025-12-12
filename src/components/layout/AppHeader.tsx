@@ -20,7 +20,7 @@ const featureToModuleMap: Record<string, string[]> = {
   'assets': ['asset'],
   'soft_services': ['soft-services'],
   'items': ['inventory'],
-  'vendors': ['supplier-vendor'],
+  'vendors': ['supplier'],
   'audits': ['audit'],
   'mailroom': ['mail-room'],
   'incidents': ['incident'],
@@ -63,7 +63,7 @@ const modules = [
         ]
       },
       { id: 'inventory', name: 'Inventory', path: '/inventory' },
-      { id: 'supplier-vendor', name: 'Supplier/Vendor', path: '/supplier-vendor' },
+      { id: 'supplier', name: 'Supplier/Vendor', path: '/supplier' },
       { id: 'audit', name: 'Audit', path: '/audit' },
       { id: 'mail-room', name: 'Mail Room', path: '/mail-room' },
     ]
