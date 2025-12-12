@@ -51,6 +51,7 @@ import {
 import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
 import { DocumentsList } from "./pages/Documents";
+import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
 
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -179,10 +180,11 @@ function App() {
         <Route path="/service-desk/:id" element={<AuthenticatedLayout><TicketView /></AuthenticatedLayout>} />
         <Route path="/service-desk/:id/edit" element={<AuthenticatedLayout><TicketEdit /></AuthenticatedLayout>} />
 
-        {/* Incident Management */}
-        <Route path="/incident" element={<AuthenticatedLayout><PlaceholderPage title="Incident Management" /></AuthenticatedLayout>} />
-        <Route path="/incident/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Incident" /></AuthenticatedLayout>} />
-        <Route path="/incident/:id" element={<AuthenticatedLayout><PlaceholderPage title="Incident Details" /></AuthenticatedLayout>} />
+        {/* Incident Management - Safety Module */}
+        <Route path="/incident" element={<AuthenticatedLayout><IncidentList /></AuthenticatedLayout>} />
+        <Route path="/incident/create" element={<AuthenticatedLayout><CreateIncident /></AuthenticatedLayout>} />
+        <Route path="/incident/:id" element={<AuthenticatedLayout><ViewIncident /></AuthenticatedLayout>} />
+        <Route path="/incident/:id/edit" element={<AuthenticatedLayout><CreateIncident /></AuthenticatedLayout>} />
 
         {/* Amenities Booking - standalone pages */}
         <Route path="/amenities" element={<AuthenticatedLayout><AmenitiesList /></AuthenticatedLayout>} />
