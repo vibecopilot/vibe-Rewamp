@@ -9,19 +9,20 @@ import { dateFormat, formatTime } from '../../utils/dateUtils';
 interface GoodsItem {
   id: number;
   ward_type?: 'in' | 'out';
-  person_name?: { name: string };
+  person_name?: { name: string } | string;
   vehicle_no?: string;
   goods_in_time?: string;
   goods_out_time?: string;
   created_at?: string;
 }
 
+type SubTab = 'inwards' | 'outwards';
+
 const VMSGoodsInOut: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'inwards' | 'outwards'>('inwards');
+  const [activeTab, setActiveTab] = useState<SubTab>('inwards');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [allGoods, setAllGoods] = useState<GoodsItem[]>([]);
   const [goodsIn, setGoodsIn] = useState<GoodsItem[]>([]);
   const [goodsOut, setGoodsOut] = useState<GoodsItem[]>([]);
   const [filteredData, setFilteredData] = useState<GoodsItem[]>([]);
@@ -34,7 +35,6 @@ const VMSGoodsInOut: React.FC = () => {
     try {
       const response = await getGoods();
       const data = response.data || [];
-      setAllGoods(data);
       
       const inwards = data.filter((g: GoodsItem) => g.ward_type === 'in');
       const outwards = data.filter((g: GoodsItem) => g.ward_type === 'out');
@@ -59,10 +59,13 @@ const VMSGoodsInOut: React.FC = () => {
     if (searchValue.trim() === '') {
       setFilteredData(sourceData);
     } else {
-      const filtered = sourceData.filter((item) =>
-        item.person_name?.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        item.vehicle_no?.toLowerCase().includes(searchValue.toLowerCase())
-      );
+      const filtered = sourceData.filter((item) => {
+        const personName = typeof item.person_name === 'object' ? item.person_name?.name : item.person_name;
+        return (
+          personName?.toLowerCase().includes(searchValue.toLowerCase()) ||
+          item.vehicle_no?.toLowerCase().includes(searchValue.toLowerCase())
+        );
+      });
       setFilteredData(filtered);
     }
   }, [activeTab, goodsIn, goodsOut, searchValue]);
@@ -71,16 +74,23 @@ const VMSGoodsInOut: React.FC = () => {
     setSearchValue(value);
   };
 
-  const handleTabChange = (tab: 'inwards' | 'outwards') => {
+  const handleTabChange = (tab: SubTab) => {
     setActiveTab(tab);
     setSearchValue('');
     setSelectedRows([]);
   };
 
+  const getPersonName = (item: GoodsItem): string => {
+    if (typeof item.person_name === 'object') {
+      return item.person_name?.name || '-';
+    }
+    return item.person_name || '-';
+  };
+
   const columns: TableColumn<GoodsItem>[] = [
     {
       key: 'actions',
-      header: 'Action',
+      header: 'ACTION',
       width: '80px',
       render: (_, row) => (
         <Link to={`/vms/goods-in-out/${row.id}`} className="text-muted-foreground hover:text-primary">
@@ -90,7 +100,7 @@ const VMSGoodsInOut: React.FC = () => {
     },
     {
       key: 'ward_type',
-      header: 'Type',
+      header: 'TYPE',
       sortable: true,
       render: (value) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -102,29 +112,34 @@ const VMSGoodsInOut: React.FC = () => {
     },
     {
       key: 'person_name',
-      header: 'Person Name',
+      header: 'PERSON NAME',
       sortable: true,
-      render: (value) => value?.name || '-',
+      render: (_, row) => getPersonName(row),
     },
-    { key: 'vehicle_no', header: 'Vehicle Number', sortable: true, render: (v) => v || '-' },
+    { key: 'vehicle_no', header: 'VEHICLE NUMBER', sortable: true, render: (v) => v || '-' },
     {
       key: 'goods_in_time',
-      header: 'Goods In Time',
+      header: 'GOODS IN TIME',
       sortable: true,
       render: (value) => value ? formatTime(value) : '-',
     },
     {
       key: 'goods_out_time',
-      header: 'Goods Out Time',
+      header: 'GOODS OUT TIME',
       sortable: true,
       render: (value) => value ? formatTime(value) : '-',
     },
     {
       key: 'created_at',
-      header: 'Created On',
+      header: 'CREATED ON',
       sortable: true,
       render: (value) => value ? dateFormat(value) : '-',
     },
+  ];
+
+  const subTabs: { id: SubTab; label: string; count: number }[] = [
+    { id: 'inwards', label: 'Inwards', count: goodsIn.length },
+    { id: 'outwards', label: 'Outwards', count: goodsOut.length },
   ];
 
   if (loading) {
@@ -156,37 +171,30 @@ const VMSGoodsInOut: React.FC = () => {
   return (
     <>
       {/* Sub-tabs */}
-      <div className="flex gap-4 border-b border-border mb-4">
-        <button
-          onClick={() => handleTabChange('inwards')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'inwards'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Inwards ({goodsIn.length})
-        </button>
-        <button
-          onClick={() => handleTabChange('outwards')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'outwards'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Outwards ({goodsOut.length})
-        </button>
+      <div className="flex gap-1 border-b border-border mb-4">
+        {subTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab.label} ({tab.count})
+          </button>
+        ))}
       </div>
 
       <ListToolbar
-        searchPlaceholder="Search by name, vehicle number..."
+        searchPlaceholder="Search by name, vehicle number"
         searchValue={searchValue}
         onSearchChange={handleSearch}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/goods-in-out/create')}
-        addLabel="Add Goods"
+        addLabel="Add"
       />
 
       {filteredData.length === 0 ? (

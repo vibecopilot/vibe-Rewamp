@@ -1,42 +1,48 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ListToolbar from '../../components/ui/ListToolbar';
-import DataCard from '../../components/ui/DataCard';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
 import { vmsService, Visitor, VisitorFilters } from '../../services/vms.service';
-import { Loader2, Users, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, Users, AlertCircle, RefreshCw, Eye, Edit2 } from 'lucide-react';
+
+type SubTab = 'all' | 'in' | 'out' | 'approvals' | 'history' | 'logs' | 'self-registration';
 
 const VMSVisitors: React.FC = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [activeTab, setActiveTab] = useState<SubTab>('all');
+  const [visitorType, setVisitorType] = useState<'expected' | 'unexpected'>('expected');
   const [searchValue, setSearchValue] = useState('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const getPerPage = (mode: 'grid' | 'table') => mode === 'grid' ? 12 : 10;
   const [pagination, setPagination] = useState({
     page: 1,
-    perPage: getPerPage('grid'),
+    perPage: 10,
     total: 0,
     totalPages: 0,
   });
   const [filters, setFilters] = useState<VisitorFilters>({});
 
-  useEffect(() => {
-    setPagination(prev => ({ ...prev, perPage: getPerPage(viewMode), page: 1 }));
-  }, [viewMode]);
-
   const fetchVisitors = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const filterParams: VisitorFilters = { ...filters, search: searchValue };
+      
+      // Apply tab-specific filters
+      if (activeTab === 'in') {
+        filterParams.visitorInOut = 'in';
+      } else if (activeTab === 'out') {
+        filterParams.visitorInOut = 'out';
+      }
+      
       const response = await vmsService.getVisitors(
         pagination.page,
         pagination.perPage,
-        { ...filters, search: searchValue }
+        filterParams
       );
       
       const data = response.data;
@@ -65,7 +71,7 @@ const VMSVisitors: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.perPage, filters, searchValue]);
+  }, [pagination.page, pagination.perPage, filters, searchValue, activeTab]);
 
   useEffect(() => {
     fetchVisitors();
@@ -74,6 +80,13 @@ const VMSVisitors: React.FC = () => {
   const handleSearch = (value: string) => {
     setSearchValue(value);
     setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleTabChange = (tab: SubTab) => {
+    setActiveTab(tab);
+    setSearchValue('');
+    setPagination(prev => ({ ...prev, page: 1 }));
+    setSelectedRows([]);
   };
 
   const handleSelectRow = (id: string) => {
@@ -98,26 +111,39 @@ const VMSVisitors: React.FC = () => {
     return 'pending';
   };
 
-  const getHostName = (visitor: Visitor): string => {
-    if (visitor.host?.user) {
-      const { firstname, lastname } = visitor.host.user;
-      return [firstname, lastname].filter(Boolean).join(' ') || 'N/A';
-    }
-    return 'N/A';
-  };
-
   const columns: TableColumn<Visitor>[] = [
-    { key: 'id', header: 'Serial No', sortable: true, width: '100px', render: (_, __, index) => (index || 0) + 1 },
-    { key: 'name', header: 'Visitor Name', sortable: true },
-    { key: 'contact_no', header: 'Phone' },
-    { key: 'company_name', header: 'Company', render: (value) => value || '-' },
-    { 
-      key: 'status', 
-      header: 'Status', 
-      render: (_, row) => <StatusBadge status={getVisitorStatus(row)} showDropdown />
+    {
+      key: 'actions',
+      header: 'ACTION',
+      width: '100px',
+      render: (_, row) => (
+        <div className="flex items-center gap-3">
+          <Link to={`/vms/visitors/${row.id}`} className="text-muted-foreground hover:text-primary">
+            <Eye className="w-4 h-4" />
+          </Link>
+          <Link to={`/vms/visitors/${row.id}/edit`} className="text-muted-foreground hover:text-primary">
+            <Edit2 className="w-4 h-4" />
+          </Link>
+        </div>
+      ),
     },
-    { key: 'host', header: 'Host', sortable: true, render: (_, row) => getHostName(row) },
-    { key: 'expected_date', header: 'Expected Date', render: (value) => value || '-' },
+    { key: 'user_type', header: 'VISITOR TYPE', sortable: true, render: (value) => value || 'Guest' },
+    { key: 'name', header: 'NAME', sortable: true },
+    { key: 'contact_no', header: 'CONTACT NO.' },
+    { key: 'purpose', header: 'PURPOSE', render: (value) => value || '-' },
+    { key: 'company_name', header: 'COMING FROM', render: (value) => value || '-' },
+    { key: 'expected_date', header: 'EXPECTED DATE', sortable: true, render: (value) => value || '-' },
+    { key: 'expected_time', header: 'EXPECTED TIME', render: (value) => value || '-' },
+  ];
+
+  const subTabs: { id: SubTab; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'in', label: 'Visitor In' },
+    { id: 'out', label: 'Visitor Out' },
+    { id: 'approvals', label: 'Approvals' },
+    { id: 'history', label: 'History' },
+    { id: 'logs', label: 'Logs' },
+    { id: 'self-registration', label: 'Self-Registration' },
   ];
 
   if (loading && visitors.length === 0) {
@@ -148,18 +174,56 @@ const VMSVisitors: React.FC = () => {
 
   return (
     <>
+      {/* Sub-tabs */}
+      <div className="flex gap-1 border-b border-border mb-4 overflow-x-auto">
+        {subTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === tab.id
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Toggle Expected/Unexpected */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-2 bg-muted rounded-full p-1">
+          <button
+            onClick={() => setVisitorType('expected')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              visitorType === 'expected'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Expected visitor
+          </button>
+          <button
+            onClick={() => setVisitorType('unexpected')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              visitorType === 'unexpected'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Unexpected visitor
+          </button>
+        </div>
+      </div>
+
       <ListToolbar
-        searchPlaceholder="Search by Name, Phone, or Company..."
+        searchPlaceholder="Search using Visitor name, Host, vehicle number"
         searchValue={searchValue}
         onSearchChange={handleSearch}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         onFilter={() => console.log('Filter clicked')}
-        onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/visitors/create')}
-        addLabel="Add Visitor"
-        showQrCode
-        onQrCode={() => console.log('QR Code clicked')}
+        addLabel="Add New Visitor"
       />
 
       {loading && visitors.length > 0 && (
@@ -180,31 +244,12 @@ const VMSVisitors: React.FC = () => {
             to="/vms/visitors/create"
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm font-medium"
           >
-            + Add Visitor
+            + Add New Visitor
           </Link>
         </div>
       )}
 
-      {viewMode === 'grid' && visitors.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {visitors.map((visitor) => (
-            <DataCard
-              key={visitor.id}
-              title={visitor.name}
-              subtitle={visitor.contact_no}
-              status={getVisitorStatus(visitor)}
-              fields={[
-                { label: 'Company', value: visitor.company_name || '-' },
-                { label: 'Host', value: getHostName(visitor) },
-                { label: 'Expected', value: visitor.expected_date || '-' },
-                { label: 'Purpose', value: visitor.purpose || '-' },
-              ]}
-              viewPath={`/vms/visitors/${visitor.id}`}
-              editPath={`/vms/visitors/${visitor.id}/edit`}
-            />
-          ))}
-        </div>
-      ) : visitors.length > 0 && (
+      {visitors.length > 0 && (
         <DataTable
           columns={columns}
           data={visitors}
@@ -239,45 +284,6 @@ const VMSVisitors: React.FC = () => {
             >
               ‹ Prev
             </button>
-
-            <div className="flex items-center gap-1 mx-2">
-              {(() => {
-                const pages: (number | string)[] = [];
-                const totalPages = pagination.totalPages || 1;
-                const currentPage = pagination.page;
-                
-                if (totalPages <= 7) {
-                  for (let i = 1; i <= totalPages; i++) pages.push(i);
-                } else {
-                  if (currentPage <= 3) {
-                    pages.push(1, 2, 3, 4, '...', totalPages);
-                  } else if (currentPage >= totalPages - 2) {
-                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-                  } else {
-                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-                  }
-                }
-                
-                return pages.map((page, idx) => (
-                  page === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">...</span>
-                  ) : (
-                    <button
-                      key={page}
-                      onClick={() => setPagination(prev => ({ ...prev, page: page as number }))}
-                      className={`min-w-[36px] h-9 text-sm rounded-md border transition-colors ${
-                        pagination.page === page
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'border-border hover:bg-accent'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                ));
-              })()}
-            </div>
-
             <button
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
               disabled={pagination.page === pagination.totalPages || pagination.totalPages === 0}
