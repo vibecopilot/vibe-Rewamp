@@ -50,6 +50,7 @@ import {
 } from "./pages/Amenities";
 import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
+import { DocumentsList } from "./pages/Documents";
 
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -212,8 +213,9 @@ function App() {
         <Route path="/fb/pantry/:id/edit" element={<AuthenticatedLayout><EditPantry /></AuthenticatedLayout>} />
 
         {/* Documents */}
-        <Route path="/documents" element={<AuthenticatedLayout><PlaceholderPage title="Documents" /></AuthenticatedLayout>} />
-        <Route path="/documents/upload" element={<AuthenticatedLayout><PlaceholderPage title="Upload Document" /></AuthenticatedLayout>} />
+        <Route path="/documents" element={<AuthenticatedLayout><DocumentsList /></AuthenticatedLayout>} />
+        <Route path="/documents/common" element={<AuthenticatedLayout><DocumentsList /></AuthenticatedLayout>} />
+        <Route path="/documents/shared" element={<AuthenticatedLayout><DocumentsList /></AuthenticatedLayout>} />
 
         {/* Fitout */}
         <Route path="/fitout" element={<AuthenticatedLayout><FitoutList /></AuthenticatedLayout>} />
