@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
 import DataCard from '../../components/ui/DataCard';
 import { getHotelRequest } from '../../api';
-import { Loader2, Hotel, AlertCircle, RefreshCw, Eye, Check, X } from 'lucide-react';
+import { Loader2, Hotel, AlertCircle, RefreshCw, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 
@@ -235,7 +236,15 @@ const HotelBookingsList: React.FC = () => {
   }
 
   return (
-    <>
+    <div className="p-6">
+      <Breadcrumb 
+        items={[
+          { label: 'Booking Management' }, 
+          { label: 'Amenities Booking', path: '/amenities' },
+          { label: 'Hotel Bookings' }
+        ]} 
+      />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <button
@@ -340,7 +349,7 @@ const HotelBookingsList: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -43,7 +43,6 @@ import TicketView from "./pages/ServiceDesk/TicketView";
 import TicketEdit from "./pages/ServiceDesk/TicketEdit";
 import SoftServiceList from "./pages/SoftService/SoftServiceList";
 import {
-  AmenitiesLayout,
   AmenitiesList,
   HotelBookingsList,
   BookAmenity,
@@ -172,13 +171,13 @@ function App() {
         <Route path="/incident/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Incident" /></AuthenticatedLayout>} />
         <Route path="/incident/:id" element={<AuthenticatedLayout><PlaceholderPage title="Incident Details" /></AuthenticatedLayout>} />
 
-        {/* Amenities Booking - with toggle layout */}
-        <Route path="/amenities" element={<AuthenticatedLayout><AmenitiesLayout /></AuthenticatedLayout>}>
-          <Route index element={<AmenitiesList />} />
-          <Route path="hotel" element={<HotelBookingsList />} />
-        </Route>
+        {/* Amenities Booking - standalone pages */}
+        <Route path="/amenities" element={<AuthenticatedLayout><AmenitiesList /></AuthenticatedLayout>} />
         <Route path="/amenities/book" element={<AuthenticatedLayout><BookAmenity /></AuthenticatedLayout>} />
         <Route path="/amenities/bookings/:id" element={<AuthenticatedLayout><PlaceholderPage title="Booking Details" /></AuthenticatedLayout>} />
+        
+        {/* Hotel Bookings */}
+        <Route path="/amenities/hotel" element={<AuthenticatedLayout><HotelBookingsList /></AuthenticatedLayout>} />
         <Route path="/amenities/hotel/book" element={<AuthenticatedLayout><BookHotel /></AuthenticatedLayout>} />
         <Route path="/amenities/hotel/:id" element={<AuthenticatedLayout><PlaceholderPage title="Hotel Booking Details" /></AuthenticatedLayout>} />
 
