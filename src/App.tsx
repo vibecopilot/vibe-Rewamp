@@ -48,6 +48,7 @@ import {
   BookAmenity,
   BookHotel
 } from "./pages/Amenities";
+import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
 
 // Placeholder pages for other modules
@@ -182,8 +183,9 @@ function App() {
         <Route path="/amenities/hotel/:id" element={<AuthenticatedLayout><PlaceholderPage title="Hotel Booking Details" /></AuthenticatedLayout>} />
 
         {/* Space Booking */}
-        <Route path="/space-booking" element={<AuthenticatedLayout><PlaceholderPage title="Space Booking" /></AuthenticatedLayout>} />
-        <Route path="/space-booking/book" element={<AuthenticatedLayout><PlaceholderPage title="Book Space" /></AuthenticatedLayout>} />
+        <Route path="/space-booking" element={<AuthenticatedLayout><SpaceBookingsList /></AuthenticatedLayout>} />
+        <Route path="/space-booking/book" element={<AuthenticatedLayout><BookSpace /></AuthenticatedLayout>} />
+        <Route path="/space-booking/:id" element={<AuthenticatedLayout><PlaceholderPage title="Space Booking Details" /></AuthenticatedLayout>} />
 
         {/* F&B - Restaurant & Pantry Management */}
         <Route path="/fb" element={<AuthenticatedLayout><FBLayout /></AuthenticatedLayout>}>
