@@ -319,11 +319,12 @@ const VMSVisitors: React.FC = () => {
 
   const getVisitorStatus = (visitor: Visitor): string => {
     const status = visitor.visitor_in_out || visitor.status || '-';
-    return status;
+    return typeof status === 'string' ? status : String(status || '-');
   };
 
-  const getStatusClass = (status: string) => {
-    switch (status?.toUpperCase()) {
+  const getStatusClass = (status: any): string => {
+    const statusStr = typeof status === 'string' ? status : String(status || '');
+    switch (statusStr.toUpperCase()) {
       case 'IN':
         return 'bg-green-100 text-green-700';
       case 'OUT':
