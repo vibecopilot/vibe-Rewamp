@@ -53,6 +53,7 @@ import { DocumentsList } from "./pages/Documents";
 import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
 import { CalendarPage, PlanMyCalendar } from "./pages/Calendar/index";
 import { MailRoomLayout, DeliveryVendorList, CreateVendor, ViewVendor, InboundList, CreateInboundPackage, ViewInbound, OutboundList, CreateOutboundPackage, ViewOutbound } from "./pages/MailRoom/index";
+import { SupplierList, CreateSupplier, ViewSupplier } from "./pages/Supplier";
 
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -246,6 +247,12 @@ function App() {
         <Route path="/mail-room/outbound/create" element={<AuthenticatedLayout><CreateOutboundPackage /></AuthenticatedLayout>} />
         <Route path="/mail-room/outbound/:id" element={<AuthenticatedLayout><ViewOutbound /></AuthenticatedLayout>} />
         <Route path="/mail-room/outbound/:id/edit" element={<AuthenticatedLayout><CreateOutboundPackage /></AuthenticatedLayout>} />
+
+        {/* Supplier/Vendor - FM Module */}
+        <Route path="/supplier" element={<AuthenticatedLayout><SupplierList /></AuthenticatedLayout>} />
+        <Route path="/supplier/create" element={<AuthenticatedLayout><CreateSupplier /></AuthenticatedLayout>} />
+        <Route path="/supplier/:id" element={<AuthenticatedLayout><ViewSupplier /></AuthenticatedLayout>} />
+        <Route path="/supplier/:id/edit" element={<AuthenticatedLayout><CreateSupplier /></AuthenticatedLayout>} />
 
         {/* Catch all - redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
