@@ -56,10 +56,15 @@ const IncidentList: React.FC = () => {
     try {
       setLoading(true);
       const res = await getIncidents();
-      setIncidents(res.data || []);
-      setFilteredIncidents(res.data || []);
+      // Handle different API response formats
+      const data = res.data;
+      const incidentArray = Array.isArray(data) ? data : (data?.incidents || data?.data || []);
+      setIncidents(incidentArray);
+      setFilteredIncidents(incidentArray);
     } catch (error) {
       console.error('Error fetching incidents:', error);
+      setIncidents([]);
+      setFilteredIncidents([]);
     } finally {
       setLoading(false);
     }
