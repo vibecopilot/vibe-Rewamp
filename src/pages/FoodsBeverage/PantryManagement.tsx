@@ -49,7 +49,7 @@ const PantryManagement: React.FC = () => {
     setError(null);
     try {
       const response = await getPantry();
-      const data = response.data || [];
+      const data = Array.isArray(response?.data) ? response.data : [];
       const sortedData = data.sort((a: PantryItem, b: PantryItem) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -64,6 +64,7 @@ const PantryManagement: React.FC = () => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch pantry items';
       setError(errorMessage);
       setPantryItems([]);
+      setFilteredItems([]);
     } finally {
       setLoading(false);
     }
