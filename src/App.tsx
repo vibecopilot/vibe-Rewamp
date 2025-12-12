@@ -54,7 +54,7 @@ import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
 import { CalendarPage, PlanMyCalendar } from "./pages/Calendar/index";
 import { MailRoomLayout, DeliveryVendorList, CreateVendor, ViewVendor, InboundList, CreateInboundPackage, ViewInbound, OutboundList, CreateOutboundPackage, ViewOutbound } from "./pages/MailRoom/index";
 import { SupplierList, CreateSupplier, ViewSupplier } from "./pages/Supplier";
-
+import { AuditLayout, OperationalScheduled, OperationalConducted, OperationalChecklists, VendorScheduled, VendorConducted, ScheduleAuditForm, ChecklistAuditForm } from "./pages/Audit";
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="p-6">
@@ -253,6 +253,19 @@ function App() {
         <Route path="/supplier/create" element={<AuthenticatedLayout><CreateSupplier /></AuthenticatedLayout>} />
         <Route path="/supplier/:id" element={<AuthenticatedLayout><ViewSupplier /></AuthenticatedLayout>} />
         <Route path="/supplier/:id/edit" element={<AuthenticatedLayout><CreateSupplier /></AuthenticatedLayout>} />
+
+        {/* Audit - FM Module */}
+        <Route path="/audit" element={<AuthenticatedLayout><AuditLayout /></AuthenticatedLayout>}>
+          <Route index element={<Navigate to="/audit/operational/scheduled" replace />} />
+          <Route path="operational/scheduled" element={<OperationalScheduled />} />
+          <Route path="operational/conducted" element={<OperationalConducted />} />
+          <Route path="operational/checklists" element={<OperationalChecklists />} />
+          <Route path="vendor/scheduled" element={<VendorScheduled />} />
+          <Route path="vendor/conducted" element={<VendorConducted />} />
+        </Route>
+        <Route path="/audit/operational/scheduled/create" element={<AuthenticatedLayout><ScheduleAuditForm /></AuthenticatedLayout>} />
+        <Route path="/audit/operational/checklists/create" element={<AuthenticatedLayout><ChecklistAuditForm /></AuthenticatedLayout>} />
+        <Route path="/audit/vendor/scheduled/create" element={<AuthenticatedLayout><ScheduleAuditForm /></AuthenticatedLayout>} />
 
         {/* Catch all - redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

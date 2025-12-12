@@ -64,7 +64,12 @@ const modules = [
       },
       { id: 'inventory', name: 'Inventory', path: '/inventory' },
       { id: 'supplier', name: 'Supplier/Vendor', path: '/supplier' },
-      { id: 'audit', name: 'Audit', path: '/audit' },
+      { id: 'audit', name: 'Audit', path: '/audit/operational/scheduled',
+        children: [
+          { name: 'Operational', path: '/audit/operational/scheduled' },
+          { name: 'Vendor', path: '/audit/vendor/scheduled' },
+        ]
+      },
       { id: 'mail-room', name: 'Mail Room', path: '/mail-room' },
     ]
   },
