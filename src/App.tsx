@@ -41,7 +41,7 @@ import TicketList from "./pages/ServiceDesk/TicketList";
 import TicketCreate from "./pages/ServiceDesk/TicketCreate";
 import TicketView from "./pages/ServiceDesk/TicketView";
 import TicketEdit from "./pages/ServiceDesk/TicketEdit";
-import SoftServiceList from "./pages/SoftService/SoftServiceList";
+import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist, ViewChecklist, TaskList } from "./pages/SoftService";
 import {
   AmenitiesList,
   HotelBookingsList,
@@ -154,12 +154,23 @@ function App() {
         <Route path="/asset/stock-items/:id" element={<AuthenticatedLayout><PlaceholderPage title="Stock Item Details" /></AuthenticatedLayout>} />
         <Route path="/asset/stock-items/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Stock Item" /></AuthenticatedLayout>} />
         
-        {/* Soft Services */}
-        <Route path="/soft-services" element={<AuthenticatedLayout><SoftServiceList /></AuthenticatedLayout>} />
+        {/* Soft Services - Service Tab */}
+        <Route path="/soft-services" element={<AuthenticatedLayout><ServiceList /></AuthenticatedLayout>} />
+        <Route path="/soft-services/create" element={<AuthenticatedLayout><CreateService /></AuthenticatedLayout>} />
+        <Route path="/soft-services/:id" element={<AuthenticatedLayout><ViewService /></AuthenticatedLayout>} />
+        <Route path="/soft-services/:id/edit" element={<AuthenticatedLayout><CreateService /></AuthenticatedLayout>} />
+        
+        {/* Soft Services - Checklist Tab */}
+        <Route path="/soft-services/checklist" element={<AuthenticatedLayout><ChecklistList /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/create" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/:id" element={<AuthenticatedLayout><ViewChecklist /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/:id/edit" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
+        
+        {/* Soft Services - Task Tab */}
+        <Route path="/soft-services/task" element={<AuthenticatedLayout><TaskList /></AuthenticatedLayout>} />
+        <Route path="/soft-services/task/:id" element={<AuthenticatedLayout><PlaceholderPage title="Task Details" /></AuthenticatedLayout>} />
+        
         <Route path="/soft-service" element={<Navigate to="/soft-services" replace />} />
-        <Route path="/soft-service/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Service" /></AuthenticatedLayout>} />
-        <Route path="/soft-service/:id" element={<AuthenticatedLayout><PlaceholderPage title="Service Details" /></AuthenticatedLayout>} />
-        <Route path="/soft-service/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Service" /></AuthenticatedLayout>} />
 
         {/* Service Desk */}
         <Route path="/service-desk" element={<AuthenticatedLayout><TicketList /></AuthenticatedLayout>} />

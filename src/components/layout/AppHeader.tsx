@@ -55,7 +55,13 @@ const modules = [
           { name: 'Stock Items', path: '/asset/stock-items' },
         ]
       },
-      { id: 'soft-services', name: 'Soft Services', path: '/soft-services' },
+      { id: 'soft-services', name: 'Soft Services', path: '/soft-services',
+        children: [
+          { name: 'Service', path: '/soft-services' },
+          { name: 'Checklist', path: '/soft-services/checklist' },
+          { name: 'Task', path: '/soft-services/task' },
+        ]
+      },
       { id: 'inventory', name: 'Inventory', path: '/inventory' },
       { id: 'supplier-vendor', name: 'Supplier/Vendor', path: '/supplier-vendor' },
       { id: 'audit', name: 'Audit', path: '/audit' },
