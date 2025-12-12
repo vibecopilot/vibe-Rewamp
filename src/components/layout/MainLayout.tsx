@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
       { name: 'Asset', path: '/assets' },
       { name: 'Soft Services', path: '/services' },
       { name: 'Inventory', path: '/materials' },
-      { name: 'Supplier/Vendor', path: '/suppliers' },
+      { name: 'Supplier/Vendor', path: '/supplier' },
       { name: 'Audit', path: '/audit' },
       { name: 'Mail Room', path: '/mail-room' },
     ]
