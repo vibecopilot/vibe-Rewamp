@@ -6,3 +6,6 @@ export { default as VMSPatrolling } from './VMSPatrolling';
 export { default as VMSGoodsInOut } from './VMSGoodsInOut';
 export { default as CreateVisitor } from './CreateVisitor';
 export { default as ViewVisitor } from './ViewVisitor';
+export { default as StaffCreate } from './StaffCreate';
+export { default as GoodsCreate } from './GoodsCreate';
+export { default as VehicleCreate } from './VehicleCreate';

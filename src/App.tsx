@@ -18,7 +18,10 @@ import {
   VMSPatrolling, 
   VMSGoodsInOut,
   CreateVisitor, 
-  ViewVisitor 
+  ViewVisitor,
+  StaffCreate,
+  GoodsCreate,
+  VehicleCreate
 } from "./pages/VMS";
 import AssetList from "./pages/Asset/AssetList";
 import CreateAsset from "./pages/Asset/CreateAsset";
@@ -78,15 +81,15 @@ function App() {
         <Route path="/vms/visitors/create" element={<AuthenticatedLayout><CreateVisitor /></AuthenticatedLayout>} />
         <Route path="/vms/visitors/:id" element={<AuthenticatedLayout><ViewVisitor /></AuthenticatedLayout>} />
         <Route path="/vms/visitors/:id/edit" element={<AuthenticatedLayout><CreateVisitor /></AuthenticatedLayout>} />
-        <Route path="/vms/registered-vehicles/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Vehicle" /></AuthenticatedLayout>} />
+        <Route path="/vms/registered-vehicles/create" element={<AuthenticatedLayout><VehicleCreate /></AuthenticatedLayout>} />
         <Route path="/vms/registered-vehicles/:id" element={<AuthenticatedLayout><PlaceholderPage title="Vehicle Details" /></AuthenticatedLayout>} />
-        <Route path="/vms/registered-vehicles/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Vehicle" /></AuthenticatedLayout>} />
-        <Route path="/vms/staff/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Staff" /></AuthenticatedLayout>} />
+        <Route path="/vms/registered-vehicles/:id/edit" element={<AuthenticatedLayout><VehicleCreate /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/create" element={<AuthenticatedLayout><StaffCreate /></AuthenticatedLayout>} />
         <Route path="/vms/staff/:id" element={<AuthenticatedLayout><PlaceholderPage title="Staff Details" /></AuthenticatedLayout>} />
-        <Route path="/vms/staff/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Staff" /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/:id/edit" element={<AuthenticatedLayout><StaffCreate /></AuthenticatedLayout>} />
         <Route path="/vms/patrolling/:id" element={<AuthenticatedLayout><PlaceholderPage title="Patrolling Details" /></AuthenticatedLayout>} />
         <Route path="/vms/patrolling/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Patrolling" /></AuthenticatedLayout>} />
-        <Route path="/vms/goods-in-out/create" element={<AuthenticatedLayout><PlaceholderPage title="Add Goods" /></AuthenticatedLayout>} />
+        <Route path="/vms/goods-in-out/create" element={<AuthenticatedLayout><GoodsCreate /></AuthenticatedLayout>} />
         <Route path="/vms/goods-in-out/:id" element={<AuthenticatedLayout><PlaceholderPage title="Goods Details" /></AuthenticatedLayout>} />
 
         {/* Asset Module */}
