@@ -41,7 +41,7 @@ import TicketList from "./pages/ServiceDesk/TicketList";
 import TicketCreate from "./pages/ServiceDesk/TicketCreate";
 import TicketView from "./pages/ServiceDesk/TicketView";
 import TicketEdit from "./pages/ServiceDesk/TicketEdit";
-import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist, ViewChecklist, TaskList } from "./pages/SoftService";
+import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist as SoftServiceCreateChecklist, ViewChecklist, TaskList } from "./pages/SoftService";
 import {
   AmenitiesList,
   HotelBookingsList,
@@ -162,9 +162,9 @@ function App() {
         
         {/* Soft Services - Checklist Tab */}
         <Route path="/soft-services/checklist" element={<AuthenticatedLayout><ChecklistList /></AuthenticatedLayout>} />
-        <Route path="/soft-services/checklist/create" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/create" element={<AuthenticatedLayout><SoftServiceCreateChecklist /></AuthenticatedLayout>} />
         <Route path="/soft-services/checklist/:id" element={<AuthenticatedLayout><ViewChecklist /></AuthenticatedLayout>} />
-        <Route path="/soft-services/checklist/:id/edit" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/:id/edit" element={<AuthenticatedLayout><SoftServiceCreateChecklist /></AuthenticatedLayout>} />
         
         {/* Soft Services - Task Tab */}
         <Route path="/soft-services/task" element={<AuthenticatedLayout><TaskList /></AuthenticatedLayout>} />
