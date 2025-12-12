@@ -51,7 +51,7 @@ import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
 import { DocumentsList } from "./pages/Documents";
 import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
-import { CalendarPage, PlanMyCalendar } from "./pages/Calendar";
+import { CalendarPage, PlanMyCalendar } from "./pages/Calendar/index";
 
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
