@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Eye, Plus, Upload, Download, Filter, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { BsEye } from 'react-icons/bs';
+import { IoAddCircleOutline } from 'react-icons/io5';
+import { FaDownload, FaUpload, FaRegFileAlt } from 'react-icons/fa';
+import { BiFilterAlt } from 'react-icons/bi';
+import Table from '@/components/table/Table';
 import {
   getInvoiceReceipt,
   getFloors,
@@ -15,15 +17,6 @@ import {
 import toast from 'react-hot-toast';
 import { getItemInLocalStorage } from '@/utils/localStorage';
 import ReceiptInvoiceModal from '@/containers/modals/ReceiptInvoiceModal';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface ReceiptItem {
   id: number;
@@ -47,7 +40,6 @@ const ReceiptInvoiceList: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [filterSearchData, setFilterSearchData] = useState<ReceiptItem[]>([]);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const buildings = getItemInLocalStorage('Building') || [];
   const [floors, setFloors] = useState<any[]>([]);
@@ -62,15 +54,12 @@ const ReceiptInvoiceList: React.FC = () => {
   });
 
   const fetchInvoiceReceipt = async () => {
-    setLoading(true);
     try {
       const response = await getInvoiceReceipt();
       setInvoiceReceipt(response.data);
       setFilterSearchData(response.data);
     } catch (err) {
       console.error('Failed to fetch Receipt Invoice data:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -95,6 +84,35 @@ const ReceiptInvoiceList: React.FC = () => {
       toast.error('Error downloading receipt');
     }
   };
+
+  const columns = [
+    {
+      name: 'Action',
+      cell: (row: ReceiptItem) => (
+        <Link to={`/finance/cam/receipt-invoice/${row.id}`}>
+          <BsEye size={15} className="cursor-pointer hover:text-primary" />
+        </Link>
+      ),
+      width: '80px',
+    },
+    { name: 'Receipt No.', selector: (row: ReceiptItem) => row.receipt_number, sortable: true },
+    { name: 'Invoice No.', selector: (row: ReceiptItem) => row.invoice_number, sortable: true },
+    { name: 'Block', selector: (row: ReceiptItem) => row.building?.name || 'N/A', sortable: true },
+    { name: 'Flat', selector: (row: ReceiptItem) => row.unit?.name || 'N/A', sortable: true },
+    { name: 'Amount Received', selector: (row: ReceiptItem) => row.amount_received, sortable: true },
+    { name: 'Payment Mode', selector: (row: ReceiptItem) => row.payment_mode, sortable: true },
+    { name: 'Transaction No.', selector: (row: ReceiptItem) => row.transaction_or_cheque_number, sortable: true },
+    { name: 'Payment Date', selector: (row: ReceiptItem) => row.payment_date, sortable: true },
+    { name: 'Receipt Date', selector: (row: ReceiptItem) => row.receipt_date, sortable: true },
+    {
+      name: 'Attachments',
+      cell: (row: ReceiptItem) => (
+        <button onClick={() => handleDownloadReceipt(row.id)}>
+          <FaRegFileAlt className="cursor-pointer hover:text-primary" />
+        </button>
+      ),
+    },
+  ];
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -137,20 +155,9 @@ const ReceiptInvoiceList: React.FC = () => {
     }
   };
 
-  const handleSelectedRows = (id: number, checked: boolean) => {
-    if (checked) {
-      setSelectedRows([...selectedRows, id]);
-    } else {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRows(filterSearchData.map((item) => item.id));
-    } else {
-      setSelectedRows([]);
-    }
+  const handleSelectedRows = (rows: ReceiptItem[]) => {
+    const selectedId = rows.map((row) => row.id);
+    setSelectedRows(selectedId);
   };
 
   const handleDownload = async () => {
@@ -199,38 +206,54 @@ const ReceiptInvoiceList: React.FC = () => {
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <Input
+        <input
           type="text"
           onChange={handleSearch}
           value={searchText}
           placeholder="Search By Invoice No, Receipt No, Payment Mode"
-          className="md:w-96"
+          className="p-2 md:w-96 border border-gray-300 rounded-md placeholder:text-sm outline-none"
         />
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => navigate('/finance/cam/receipt-invoice/add')} style={{ background: themeColor }}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Link
+            to="/finance/cam/receipt-invoice/add"
+            style={{ background: themeColor }}
+            className="px-4 py-2 font-medium text-white rounded-md flex gap-2 items-center justify-center"
+          >
+            <IoAddCircleOutline />
             Add
-          </Button>
-          <Button onClick={() => setImportModal(true)} style={{ background: themeColor }}>
-            <Upload className="h-4 w-4 mr-2" />
+          </Link>
+          <button
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setImportModal(true)}
+          >
+            <FaUpload />
             Import
-          </Button>
-          <Button onClick={handleDownload} style={{ background: themeColor }}>
-            <Download className="h-4 w-4 mr-2" />
+          </button>
+          <button
+            onClick={handleDownload}
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+          >
+            <FaDownload />
             Export
-          </Button>
-          <Button onClick={() => setFilter(!filter)} style={{ background: themeColor }}>
-            <Filter className="h-4 w-4 mr-2" />
+          </button>
+          <button
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setFilter(!filter)}
+          >
+            <BiFilterAlt />
             Filter
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Filter Panel */}
       {filter && (
-        <div className="flex flex-wrap items-center gap-3 p-4 bg-muted/50 rounded-lg">
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-100 rounded-lg">
           <select
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
             onChange={handleChange}
             value={formData.block}
             name="block"
@@ -241,7 +264,7 @@ const ReceiptInvoiceList: React.FC = () => {
             ))}
           </select>
           <select
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
             onChange={handleChange}
             value={formData.floor_name}
             name="floor_name"
@@ -257,108 +280,59 @@ const ReceiptInvoiceList: React.FC = () => {
             value={formData.flat}
             onChange={handleChange}
             disabled={isFlatDisabled}
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           >
             <option value="">Select Flat</option>
             {units.map((unit) => (
               <option key={unit.id} value={unit.id}>{unit.name}</option>
             ))}
           </select>
-          <Input
+          <input
             type="text"
             name="invoiceNumber"
             value={formData.invoiceNumber}
             onChange={handleChange}
             placeholder="Invoice Number"
-            className="w-40"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           />
-          <Input
+          <input
             type="text"
             name="receiptNumber"
             value={formData.receiptNumber}
             onChange={handleChange}
             placeholder="Receipt Number"
-            className="w-40"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           />
           <input
             type="date"
             name="receiptDate"
             value={formData.receiptDate}
             onChange={handleChange}
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           />
-          <Button onClick={handleFilterData} style={{ background: themeColor }}>Apply</Button>
-          <Button variant="destructive" onClick={() => { fetchInvoiceReceipt(); setFilter(false); }}>Reset</Button>
+          <button
+            onClick={handleFilterData}
+            className="p-2 px-4 text-white rounded-md"
+            style={{ background: themeColor }}
+          >
+            Apply
+          </button>
+          <button
+            className="bg-red-400 p-2 px-4 text-white rounded-md"
+            onClick={() => { fetchInvoiceReceipt(); setFilter(false); }}
+          >
+            Reset
+          </button>
         </div>
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={selectedRows.length === filterSearchData.length && filterSearchData.length > 0}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Receipt No</TableHead>
-              <TableHead>Invoice No</TableHead>
-              <TableHead>Block</TableHead>
-              <TableHead>Flat</TableHead>
-              <TableHead>Amount Received</TableHead>
-              <TableHead>Payment Mode</TableHead>
-              <TableHead>Transaction No</TableHead>
-              <TableHead>Payment Date</TableHead>
-              <TableHead>Receipt Date</TableHead>
-              <TableHead>Attachments</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center py-8">Loading...</TableCell>
-              </TableRow>
-            ) : filterSearchData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center py-8">No records found</TableCell>
-              </TableRow>
-            ) : (
-              filterSearchData.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedRows.includes(row.id)}
-                      onCheckedChange={(checked) => handleSelectedRows(row.id, checked as boolean)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Link to={`/finance/cam/receipt-invoice/${row.id}`}>
-                      <Eye className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
-                    </Link>
-                  </TableCell>
-                  <TableCell>{row.receipt_number}</TableCell>
-                  <TableCell>{row.invoice_number}</TableCell>
-                  <TableCell>{row.building?.name || 'N/A'}</TableCell>
-                  <TableCell>{row.unit?.name || 'N/A'}</TableCell>
-                  <TableCell>{row.amount_received}</TableCell>
-                  <TableCell>{row.payment_mode}</TableCell>
-                  <TableCell>{row.transaction_or_cheque_number}</TableCell>
-                  <TableCell>{row.payment_date}</TableCell>
-                  <TableCell>{row.receipt_date}</TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="ghost" onClick={() => handleDownloadReceipt(row.id)}>
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <Table
+        columns={columns}
+        data={filterSearchData}
+        selectableRow={true}
+        onSelectedRows={handleSelectedRows}
+      />
 
       {importModal && (
         <ReceiptInvoiceModal onclose={() => setImportModal(false)} fetchInvoiceReceipt={fetchInvoiceReceipt} />

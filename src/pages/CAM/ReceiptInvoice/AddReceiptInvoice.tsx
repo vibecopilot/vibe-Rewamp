@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ArrowLeft, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import { getCamBillingData, postInvoiceReceipt } from '@/api';
 import toast from 'react-hot-toast';
@@ -50,30 +44,12 @@ const AddReceiptInvoice: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.receiptNumber) {
-      toast.error('Receipt Number is required');
-      return;
-    }
-    if (!formData.invoiceNumber) {
-      toast.error('Invoice Number is required');
-      return;
-    }
-    if (!formData.paymentMode) {
-      toast.error('Payment Mode is required');
-      return;
-    }
-    if (!formData.transactionChequeNumber) {
-      toast.error('Transaction/Cheque Number is required');
-      return;
-    }
-    if (!formData.paymentDate) {
-      toast.error('Payment Date is required');
-      return;
-    }
-    if (!formData.receiptDate) {
-      toast.error('Receipt Date is required');
-      return;
-    }
+    if (!formData.receiptNumber) { toast.error('Receipt Number is required'); return; }
+    if (!formData.invoiceNumber) { toast.error('Invoice Number is required'); return; }
+    if (!formData.paymentMode) { toast.error('Payment Mode is required'); return; }
+    if (!formData.transactionChequeNumber) { toast.error('Transaction/Cheque Number is required'); return; }
+    if (!formData.paymentDate) { toast.error('Payment Date is required'); return; }
+    if (!formData.receiptDate) { toast.error('Receipt Date is required'); return; }
 
     const sendData = new FormData();
     sendData.append('invoice_receipt[receipt_number]', formData.receiptNumber);
@@ -98,38 +74,45 @@ const AddReceiptInvoice: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <Breadcrumb
-        items={[
-          { label: 'Finance', path: '/finance/cam' },
-          { label: 'CAM', path: '/finance/cam/receipt-invoice' },
-          { label: 'Create Invoice Receipt' },
-        ]}
-      />
+    <div className="w-full flex flex-col overflow-hidden">
+      <div className="p-6">
+        <Breadcrumb
+          items={[
+            { label: 'Finance', path: '/finance/cam' },
+            { label: 'CAM', path: '/finance/cam/receipt-invoice' },
+            { label: 'Create Invoice Receipt' },
+          ]}
+        />
+      </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-3 border-b">
-          <FileText className="h-5 w-5 text-primary" />
-          <CardTitle>Create Invoice Receipt</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Receipt Number</Label>
-              <Input
+      <h2
+        style={{ background: themeColor }}
+        className="text-center text-xl font-bold my-5 p-2 rounded-full text-white mx-10"
+      >
+        Create Invoice Receipt
+      </h2>
+
+      <div className="flex justify-center">
+        <div className="sm:border border-gray-400 p-1 md:px-10 rounded-lg w-4/5 mb-14">
+          <div className="md:grid grid-cols-3 gap-5 my-3">
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Receipt Number</label>
+              <input
+                type="text"
                 name="receiptNumber"
                 value={formData.receiptNumber}
                 onChange={handleChange}
                 placeholder="Enter Receipt Number"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Invoice Number</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Invoice Number</label>
               <select
                 name="invoiceNumber"
                 value={formData.invoiceNumber}
                 onChange={handleChange}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Invoice Number</option>
                 {camBilling.map((invoiceNumber, index) => (
@@ -137,13 +120,13 @@ const AddReceiptInvoice: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Payment Mode</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Payment Mode</label>
               <select
                 name="paymentMode"
                 value={formData.paymentMode}
                 onChange={handleChange}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Mode</option>
                 <option value="online">Online</option>
@@ -154,83 +137,100 @@ const AddReceiptInvoice: React.FC = () => {
                 <option value="rtgs">RTGS</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Amount Received</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Amount Received</label>
+              <input
+                type="text"
                 name="amountReceived"
                 value={formData.amountReceived}
                 onChange={handleChange}
                 placeholder="Enter Amount"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Transaction / Cheque Number</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Transaction / Cheque Number</label>
+              <input
+                type="text"
                 name="transactionChequeNumber"
                 value={formData.transactionChequeNumber}
                 onChange={handleChange}
                 placeholder="Enter Transaction/Cheque Number"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Bank Name</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Bank Name</label>
+              <input
+                type="text"
                 name="bankName"
                 value={formData.bankName}
                 onChange={handleChange}
                 placeholder="Enter Bank Name"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Branch Name</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Branch Name</label>
+              <input
+                type="text"
                 name="branchName"
                 value={formData.branchName}
                 onChange={handleChange}
                 placeholder="Enter Branch Name"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Payment Date</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Payment Date</label>
+              <input
                 type="date"
                 name="paymentDate"
                 value={formData.paymentDate}
                 onChange={handleChange}
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Receipt Date</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Receipt Date</label>
+              <input
                 type="date"
                 name="receiptDate"
                 value={formData.receiptDate}
                 onChange={handleChange}
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2 md:col-span-3">
-              <Label>Notes</Label>
-              <Textarea
+            <div className="flex flex-col col-span-3">
+              <label className="font-semibold my-2">Notes</label>
+              <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                placeholder="Enter Notes"
                 rows={3}
+                placeholder="Enter Notes"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => navigate('/finance/cam/receipt-invoice')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className="flex justify-center gap-4 my-5">
+            <button
+              onClick={() => navigate('/finance/cam/receipt-invoice')}
+              className="p-2 px-6 border-2 rounded-md font-medium"
+            >
               Cancel
-            </Button>
-            <Button onClick={handleSubmit} style={{ background: themeColor }}>
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="p-2 px-6 border-2 rounded-md text-white font-medium"
+              style={{ background: themeColor }}
+            >
               Submit
-            </Button>
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
