@@ -267,6 +267,26 @@ function App() {
         <Route path="/audit/operational/checklists/create" element={<AuthenticatedLayout><ChecklistAuditForm /></AuthenticatedLayout>} />
         <Route path="/audit/vendor/scheduled/create" element={<AuthenticatedLayout><ScheduleAuditForm /></AuthenticatedLayout>} />
 
+        {/* Safety Module - Under Development Pages */}
+        <Route path="/safety/module" element={<AuthenticatedLayout><PlaceholderPage title="Safety Module" /></AuthenticatedLayout>} />
+        <Route path="/safety/permit" element={<AuthenticatedLayout><PlaceholderPage title="Permit" /></AuthenticatedLayout>} />
+        <Route path="/safety/training" element={<AuthenticatedLayout><PlaceholderPage title="Training" /></AuthenticatedLayout>} />
+
+        {/* Finance Module - Under Development Pages */}
+        <Route path="/finance/procurement" element={<AuthenticatedLayout><PlaceholderPage title="Procurement" /></AuthenticatedLayout>} />
+        <Route path="/finance/other-bills" element={<AuthenticatedLayout><PlaceholderPage title="Other Bills" /></AuthenticatedLayout>} />
+        <Route path="/finance/cam" element={<AuthenticatedLayout><PlaceholderPage title="CAM" /></AuthenticatedLayout>} />
+        <Route path="/finance/wallet" element={<AuthenticatedLayout><PlaceholderPage title="Wallet" /></AuthenticatedLayout>} />
+        <Route path="/finance/wbs" element={<AuthenticatedLayout><PlaceholderPage title="WBS" /></AuthenticatedLayout>} />
+
+        {/* CRM Module - Under Development Pages */}
+        <Route path="/crm/opportunity" element={<AuthenticatedLayout><PlaceholderPage title="Opportunity" /></AuthenticatedLayout>} />
+        <Route path="/crm/communications" element={<AuthenticatedLayout><PlaceholderPage title="Communications" /></AuthenticatedLayout>} />
+        <Route path="/crm/campaign" element={<AuthenticatedLayout><PlaceholderPage title="Campaign" /></AuthenticatedLayout>} />
+
+        {/* Booking Management - On Demand Service */}
+        <Route path="/booking/on-demand-service" element={<AuthenticatedLayout><PlaceholderPage title="On Demand Service" /></AuthenticatedLayout>} />
+
         {/* Catch all - redirect to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

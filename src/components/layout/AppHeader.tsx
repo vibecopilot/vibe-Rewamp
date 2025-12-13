@@ -36,7 +36,18 @@ const featureToModuleMap: Record<string, string[]> = {
 };
 
 // Module configuration with sub-modules
+// Navigation Order: SAFETY | FM MODULE | SECURITY | BOOKING MANAGEMENT | DOCUMENTS | FINANCE | CRM | FITOUT | CALENDAR
 const modules = [
+  {
+    id: 'safety',
+    name: 'Safety',
+    subModules: [
+      { id: 'incident', name: 'Incident Management', path: '/incident' },
+      { id: 'safety-module', name: 'Safety Module', path: '/safety/module' },
+      { id: 'permit', name: 'Permit', path: '/safety/permit' },
+      { id: 'training', name: 'Training', path: '/safety/training' },
+    ]
+  },
   {
     id: 'fm-module',
     name: 'FM Module',
@@ -74,27 +85,10 @@ const modules = [
     ]
   },
   {
-    id: 'safety',
-    name: 'Safety',
-    subModules: [
-      { id: 'incident', name: 'Incident Management', path: '/incident' },
-    ]
-  },
-  {
     id: 'security',
     name: 'Security',
     subModules: [
-      { id: 'visitors', name: 'Visitors', path: '/vms/visitors',
-        children: [
-          { name: 'All', path: '/vms/visitors' },
-          { name: 'Visitor In', path: '/vms/visitors/in' },
-          { name: 'Visitor Out', path: '/vms/visitors/out' },
-          { name: 'Approvals', path: '/vms/visitors/approvals' },
-          { name: 'History', path: '/vms/visitors/history' },
-          { name: 'Logs', path: '/vms/visitors/logs' },
-          { name: 'Self-Registration', path: '/vms/visitors/self-registration' },
-        ]
-      },
+      { id: 'visitors', name: 'Visitors', path: '/vms/visitors' },
       { id: 'registered-vehicles', name: 'Registered Vehicles', path: '/vms/registered-vehicles' },
       { id: 'staff', name: 'Staff', path: '/vms/staff' },
       { id: 'patrolling', name: 'Patrolling', path: '/vms/patrolling' },
@@ -118,6 +112,7 @@ const modules = [
         ]
       },
       { id: 'space', name: 'Space Booking', path: '/space-booking' },
+      { id: 'on-demand-service', name: 'On Demand Service', path: '/booking/on-demand-service' },
     ]
   },
   {
@@ -125,6 +120,26 @@ const modules = [
     name: 'Documents',
     path: '/documents',
     subModules: []
+  },
+  {
+    id: 'finance',
+    name: 'Finance',
+    subModules: [
+      { id: 'procurement', name: 'Procurement', path: '/finance/procurement' },
+      { id: 'other-bills', name: 'Other Bills', path: '/finance/other-bills' },
+      { id: 'cam', name: 'CAM', path: '/finance/cam' },
+      { id: 'wallet', name: 'Wallet', path: '/finance/wallet' },
+      { id: 'wbs', name: 'WBS', path: '/finance/wbs' },
+    ]
+  },
+  {
+    id: 'crm',
+    name: 'CRM',
+    subModules: [
+      { id: 'opportunity', name: 'Opportunity', path: '/crm/opportunity' },
+      { id: 'communications', name: 'Communications', path: '/crm/communications' },
+      { id: 'campaign', name: 'Campaign', path: '/crm/campaign' },
+    ]
   },
   {
     id: 'fitout',
