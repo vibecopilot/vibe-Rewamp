@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Trash2, Plus, FileText, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RiDeleteBin5Line } from 'react-icons/ri';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -43,7 +38,7 @@ const AddCamBilling: React.FC = () => {
   const [invoiceAdd, setInvoiceAdd] = useState<any[]>([]);
   const [previousDueAmount, setPreviousDueAmount] = useState<number>(0);
   const [previousDueAmountInterest, setPreviousDueAmountInterest] = useState<number>(0);
-  
+
   const [formData, setFormData] = useState({
     invoice_type: '',
     invoiceAddress: '',
@@ -125,7 +120,6 @@ const AddCamBilling: React.FC = () => {
 
     (camBilling as any)[name] = value;
 
-    // Calculate totalValue when qty or rate changes
     if (name === 'qty' || name === 'rate') {
       const qty = name === 'qty' ? parseFloat(value) || 0 : parseFloat(camBilling.qty) || 0;
       const rate = name === 'rate' ? parseFloat(value) || 0 : parseFloat(camBilling.rate) || 0;
@@ -141,7 +135,6 @@ const AddCamBilling: React.FC = () => {
       }
     }
 
-    // Handle discount
     if (name === 'discount') {
       const discount = value ? parseFloat(value) : 0;
       camBilling.discount = discount;
@@ -149,7 +142,6 @@ const AddCamBilling: React.FC = () => {
       camBilling.taxableValue = camBilling.totalValue - discount;
     }
 
-    // Handle percentage
     if (name === 'percentage') {
       const percentage = value ? parseFloat(value) : 0;
       camBilling.percentage = percentage;
@@ -157,7 +149,6 @@ const AddCamBilling: React.FC = () => {
       camBilling.taxableValue = camBilling.totalValue - camBilling.discount;
     }
 
-    // Calculate CGST
     if (name === 'cgstRate') {
       const rateValue = parseFloat(value) || 0;
       camBilling.cgstRate = rateValue;
@@ -166,7 +157,6 @@ const AddCamBilling: React.FC = () => {
       camBilling.sgstAmount = (camBilling.taxableValue * rateValue) / 100;
     }
 
-    // Calculate SGST
     if (name === 'sgstRate') {
       const rateValue = parseFloat(value) || 0;
       camBilling.sgstRate = rateValue;
@@ -175,14 +165,12 @@ const AddCamBilling: React.FC = () => {
       camBilling.cgstAmount = (camBilling.taxableValue * rateValue) / 100;
     }
 
-    // Calculate IGST
     if (name === 'igstRate') {
       const rateValue = parseFloat(value) || 0;
       camBilling.igstRate = rateValue;
       camBilling.igstAmount = (camBilling.taxableValue * rateValue) / 100;
     }
 
-    // Calculate total
     camBilling.total =
       (camBilling.taxableValue || 0) +
       (camBilling.cgstAmount || 0) +
@@ -226,34 +214,13 @@ const AddCamBilling: React.FC = () => {
     previousDueAmountInterest;
 
   const handleSubmit = async () => {
-    if (!formData.invoice_type) {
-      toast.error('Invoice Type is required');
-      return;
-    }
-    if (!formData.invoiceAddress) {
-      toast.error('Invoice Address is required');
-      return;
-    }
-    if (!formData.invoice_number) {
-      toast.error('Invoice Number is required');
-      return;
-    }
-    if (!formData.dueDate) {
-      toast.error('Due Date is required');
-      return;
-    }
-    if (!formData.block) {
-      toast.error('Block is required');
-      return;
-    }
-    if (!formData.floor_name) {
-      toast.error('Floor is required');
-      return;
-    }
-    if (!formData.flat) {
-      toast.error('Flat is required');
-      return;
-    }
+    if (!formData.invoice_type) { toast.error('Invoice Type is required'); return; }
+    if (!formData.invoiceAddress) { toast.error('Invoice Address is required'); return; }
+    if (!formData.invoice_number) { toast.error('Invoice Number is required'); return; }
+    if (!formData.dueDate) { toast.error('Due Date is required'); return; }
+    if (!formData.block) { toast.error('Block is required'); return; }
+    if (!formData.floor_name) { toast.error('Floor is required'); return; }
+    if (!formData.flat) { toast.error('Flat is required'); return; }
 
     const sendData = new FormData();
     sendData.append('cam_bill[invoice_type]', formData.invoice_type);
@@ -271,9 +238,6 @@ const AddCamBilling: React.FC = () => {
     if (billingPeriod[0] && billingPeriod[1]) {
       sendData.append('cam_bill[bill_period_start_date]', billingPeriod[0].toISOString().split('T')[0]);
       sendData.append('cam_bill[bill_period_end_date]', billingPeriod[1].toISOString().split('T')[0]);
-    } else {
-      sendData.append('cam_bill[bill_period_start_date]', '');
-      sendData.append('cam_bill[bill_period_end_date]', '');
     }
 
     fields.forEach((item) => {
@@ -308,42 +272,46 @@ const AddCamBilling: React.FC = () => {
   const isFlatDisabled = !formData.block || !formData.floor_name || !units.length;
 
   return (
-    <div className="p-6 space-y-6">
-      <Breadcrumb
-        items={[
-          { label: 'Finance', path: '/finance/cam' },
-          { label: 'CAM', path: '/finance/cam/billing' },
-          { label: 'Add CAM Billing' },
-        ]}
-      />
+    <div className="w-full flex flex-col overflow-hidden">
+      <div className="p-6">
+        <Breadcrumb
+          items={[
+            { label: 'Finance', path: '/finance/cam' },
+            { label: 'CAM', path: '/finance/cam/billing' },
+            { label: 'Add CAM Billing' },
+          ]}
+        />
+      </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-3 border-b">
-          <FileText className="h-5 w-5 text-primary" />
-          <CardTitle>Add CAM Billing</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Invoice Type</Label>
+      <h2
+        style={{ background: themeColor }}
+        className="text-center text-xl font-bold my-5 p-2 rounded-full text-white mx-10"
+      >
+        Add CAM Billing
+      </h2>
+
+      <div className="flex justify-center">
+        <div className="sm:border border-gray-400 p-1 md:px-10 rounded-lg w-4/5 mb-14">
+          <div className="md:grid grid-cols-3 gap-5 my-3">
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Invoice Type</label>
               <select
                 name="invoice_type"
                 value={formData.invoice_type}
                 onChange={handleFormChange}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Invoice Type</option>
                 <option value="cam">CAM</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Invoice Address</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Invoice Address</label>
               <select
                 name="invoiceAddress"
                 value={formData.invoiceAddress}
                 onChange={handleFormChange}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Address</option>
                 {invoiceAdd.map((address) => (
@@ -351,52 +319,56 @@ const AddCamBilling: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Invoice Number</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Invoice Number</label>
+              <input
+                type="text"
                 name="invoice_number"
                 value={formData.invoice_number}
                 onChange={handleFormChange}
                 placeholder="Enter Invoice Number"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Due Date</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Due Date</label>
+              <input
                 type="date"
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleFormChange}
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Date of Supply</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Date of Supply</label>
+              <input
                 type="date"
                 name="dateSupply"
                 value={formData.dateSupply}
                 onChange={handleFormChange}
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Billing Period</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Billing Period</label>
               <DatePicker
                 selectsRange
                 startDate={billingPeriod[0]}
                 endDate={billingPeriod[1]}
                 onChange={handleDateChange}
                 placeholderText="Select Billing Period"
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md w-full"
                 isClearable
               />
             </div>
-            <div className="space-y-2">
-              <Label>Block</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Block</label>
               <select
                 name="block"
                 value={formData.block}
                 onChange={handleFormChange}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Building</option>
                 {buildings?.map((building: any) => (
@@ -404,14 +376,14 @@ const AddCamBilling: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Floor</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Floor</label>
               <select
                 name="floor_name"
                 value={formData.floor_name}
                 onChange={handleFormChange}
                 disabled={!floors.length}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Floor</option>
                 {floors.map((floor) => (
@@ -419,14 +391,14 @@ const AddCamBilling: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Flat</Label>
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Flat</label>
               <select
                 name="flat"
                 value={formData.flat}
                 onChange={handleFormChange}
                 disabled={isFlatDisabled}
-                className="w-full p-2 border border-border rounded-md bg-background"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               >
                 <option value="">Select Flat</option>
                 {units.map((unit) => (
@@ -434,237 +406,252 @@ const AddCamBilling: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Previous Due Amount</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Previous Due Amount</label>
+              <input
                 type="number"
                 value={previousDueAmount}
                 onChange={(e) => setPreviousDueAmount(parseFloat(e.target.value) || 0)}
                 placeholder="Enter Previous Due Amount"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Previous Due Amount Interest</Label>
-              <Input
+            <div className="flex flex-col">
+              <label className="font-semibold my-2">Previous Due Amount Interest</label>
+              <input
                 type="number"
                 value={previousDueAmountInterest}
                 onChange={(e) => setPreviousDueAmountInterest(parseFloat(e.target.value) || 0)}
                 placeholder="Enter Interest"
+                className="border p-1 px-4 border-gray-500 rounded-md"
               />
             </div>
           </div>
 
-          {/* Charges Section */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Charges</h3>
-            {fields.map((field, index) => (
-              <div key={index} className="border rounded-lg p-4 mb-4 bg-muted/30">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Input
-                      name="description"
-                      value={field.description}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter Description"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SAC/HSN Code</Label>
-                    <Input
-                      name="sacHsnCode"
-                      value={field.sacHsnCode}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter SAC/HSN Code"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Qty</Label>
-                    <Input
-                      type="number"
-                      name="qty"
-                      value={field.qty}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter Qty"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Unit</Label>
-                    <Input
-                      name="unit"
-                      value={field.unit}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter Unit"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Rate</Label>
-                    <Input
-                      type="number"
-                      name="rate"
-                      value={field.rate}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter Rate"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Total Value</Label>
-                    <Input
-                      type="number"
-                      name="totalValue"
-                      value={field.totalValue}
-                      readOnly
-                      placeholder="Total Value"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Discount %</Label>
-                    <Input
-                      type="number"
-                      name="percentage"
-                      value={field.percentage}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter %"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Discount Amount</Label>
-                    <Input
-                      type="number"
-                      name="discount"
-                      value={field.discount}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="Enter Amount"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Taxable Value</Label>
-                    <Input
-                      type="number"
-                      name="taxableValue"
-                      value={field.taxableValue}
-                      readOnly
-                      placeholder="Taxable Value"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>CGST Rate</Label>
-                    <Input
-                      type="number"
-                      name="cgstRate"
-                      value={field.cgstRate}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="CGST Rate"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>CGST Amount</Label>
-                    <Input
-                      type="number"
-                      name="cgstAmount"
-                      value={field.cgstAmount}
-                      readOnly
-                      placeholder="CGST Amount"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SGST Rate</Label>
-                    <Input
-                      type="number"
-                      name="sgstRate"
-                      value={field.sgstRate}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="SGST Rate"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SGST Amount</Label>
-                    <Input
-                      type="number"
-                      name="sgstAmount"
-                      value={field.sgstAmount}
-                      readOnly
-                      placeholder="SGST Amount"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>IGST Rate</Label>
-                    <Input
-                      type="number"
-                      name="igstRate"
-                      value={field.igstRate}
-                      onChange={(e) => handleChargeChange(e, index)}
-                      placeholder="IGST Rate"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>IGST Amount</Label>
-                    <Input
-                      type="number"
-                      name="igstAmount"
-                      value={field.igstAmount}
-                      readOnly
-                      placeholder="IGST Amount"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Total</Label>
-                    <Input
-                      type="number"
-                      name="total"
-                      value={field.total}
-                      readOnly
-                      placeholder="Total"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleRemove(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+          <h2 className="border-b border-black my-5 font-semibold text-xl">Charges</h2>
+
+          {fields.map((field, index) => (
+            <div key={index} className="md:grid grid-cols-3 gap-5 my-3 border p-5 rounded-md">
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Description</label>
+                <input
+                  type="text"
+                  name="description"
+                  value={field.description}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter Description"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
               </div>
-            ))}
-            <div className="flex justify-between items-center">
-              <Button onClick={handleAdd} style={{ background: themeColor }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Charge
-              </Button>
-              <div className="text-lg font-semibold">
-                Total Amount: ₹{totalAmount.toFixed(2)}
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">SAC/HSN Code</label>
+                <input
+                  type="text"
+                  name="sacHsnCode"
+                  value={field.sacHsnCode}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter SAC/HSN Code"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
               </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Qty</label>
+                <input
+                  type="number"
+                  name="qty"
+                  value={field.qty}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter Qty"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Unit</label>
+                <input
+                  type="text"
+                  name="unit"
+                  value={field.unit}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter Unit"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Rate</label>
+                <input
+                  type="number"
+                  name="rate"
+                  value={field.rate}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter Rate"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Total Value</label>
+                <input
+                  type="number"
+                  value={field.totalValue}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Discount %</label>
+                <input
+                  type="number"
+                  name="percentage"
+                  value={field.percentage}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter %"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Discount Amount</label>
+                <input
+                  type="number"
+                  name="discount"
+                  value={field.discount}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="Enter Amount"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Taxable Value</label>
+                <input
+                  type="number"
+                  value={field.taxableValue}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">CGST Rate</label>
+                <input
+                  type="number"
+                  name="cgstRate"
+                  value={field.cgstRate}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="CGST Rate"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">CGST Amount</label>
+                <input
+                  type="number"
+                  value={field.cgstAmount}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">SGST Rate</label>
+                <input
+                  type="number"
+                  name="sgstRate"
+                  value={field.sgstRate}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="SGST Rate"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">SGST Amount</label>
+                <input
+                  type="number"
+                  value={field.sgstAmount}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">IGST Rate</label>
+                <input
+                  type="number"
+                  name="igstRate"
+                  value={field.igstRate}
+                  onChange={(e) => handleChargeChange(e, index)}
+                  placeholder="IGST Rate"
+                  className="border p-1 px-4 border-gray-500 rounded-md"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">IGST Amount</label>
+                <input
+                  type="number"
+                  value={field.igstAmount}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="font-semibold my-2">Total</label>
+                <input
+                  type="number"
+                  value={field.total}
+                  readOnly
+                  className="border p-1 px-4 border-gray-500 rounded-md bg-gray-100"
+                />
+              </div>
+              <div className="flex justify-start items-center mt-8">
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="px-3 py-1 bg-red-500 text-white rounded-md"
+                >
+                  <RiDeleteBin5Line />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <div className="flex justify-between gap-2">
+            <button
+              style={{ background: themeColor }}
+              className="text-white p-2 px-4 rounded-md font-medium"
+              onClick={handleAdd}
+            >
+              Add
+            </button>
+            <button className="bg-black text-white p-2 px-4 rounded-md font-medium">
+              Total Amount: {totalAmount.toFixed(2)}
+            </button>
+          </div>
+
+          <div className="md:grid grid-cols-2 gap-5 my-3">
+            <div className="flex flex-col col-span-2">
+              <label className="font-semibold my-2">Notes</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleFormChange}
+                rows={3}
+                placeholder="Enter extra notes"
+                className="border p-1 px-4 border-gray-500 rounded-md"
+              />
             </div>
           </div>
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label>Notes</Label>
-            <Textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleFormChange}
-              placeholder="Enter extra notes"
-              rows={3}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => navigate('/finance/cam/billing')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className="flex justify-center gap-4 my-5">
+            <button
+              onClick={() => navigate('/finance/cam/billing')}
+              className="p-2 px-6 border-2 rounded-md font-medium"
+            >
               Cancel
-            </Button>
-            <Button onClick={handleSubmit} style={{ background: themeColor }}>
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="p-2 px-6 border-2 rounded-md text-white font-medium"
+              style={{ background: themeColor }}
+            >
               Submit
-            </Button>
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

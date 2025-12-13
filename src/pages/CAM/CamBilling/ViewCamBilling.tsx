@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ArrowLeft, Download, FileText, Receipt, CreditCard, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FaDownload, FaRegFileAlt } from 'react-icons/fa';
 import Breadcrumb from '@/components/ui/Breadcrumb';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import Table from '@/components/table/Table';
 import {
   domainPrefix,
   getAddressSetupDetails,
@@ -41,7 +32,6 @@ const ViewCamBilling: React.FC = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalAmountPaid, setTotalAmountPaid] = useState(0);
   const [receivePaymentDetails, setReceivePaymentDetails] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchAddressSetupDetails = async (addressId: number) => {
     try {
@@ -53,7 +43,6 @@ const ViewCamBilling: React.FC = () => {
   };
 
   const fetchCamBilling = async () => {
-    setLoading(true);
     try {
       const response = await getCamBillingDataDetails(id);
       setCamBillingAllData(response.data);
@@ -70,8 +59,6 @@ const ViewCamBilling: React.FC = () => {
       );
     } catch (err) {
       console.error('Failed to fetch CAM Billing data:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -127,293 +114,237 @@ const ViewCamBilling: React.FC = () => {
 
   const getStatusBadge = () => {
     if (totalAmountPaid === 0) {
-      return <span className="px-3 py-1.5 bg-red-500 text-white rounded-md font-medium">Unpaid</span>;
+      return <button className="bg-black text-white p-2 px-5 w-fit rounded-md">Unpaid</button>;
     } else if (totalAmountPaid < totalAmount) {
-      return <span className="px-3 py-1.5 bg-yellow-500 text-white rounded-md font-medium">Partial Paid</span>;
+      return <button className="bg-yellow-500 text-white p-2 px-5 w-fit rounded-md">Partial Paid</button>;
     } else if (totalAmountPaid > totalAmount) {
-      return <span className="px-3 py-1.5 bg-blue-500 text-white rounded-md font-medium">Paid Extra</span>;
+      return <button className="bg-blue-500 text-white p-2 px-5 w-fit rounded-md">Paid Extra</button>;
     }
-    return <span className="px-3 py-1.5 bg-green-500 text-white rounded-md font-medium">Paid</span>;
+    return <button className="bg-green-500 text-white p-2 px-5 w-fit rounded-md">Paid</button>;
   };
+
+  const columnsPaymentDetails = [
+    { name: 'Previous Amount Due', selector: (row: any) => row.due_amount, sortable: true },
+    { name: 'Current Charges', selector: (row: any) => row.total_charge, sortable: true },
+    { name: 'Interest Amt on previous dues', selector: (row: any) => row.due_amount_interst, sortable: true },
+    { name: 'Total Amount Due', selector: (row: any) => row.total_amount, sortable: true },
+    { name: 'Due Date', selector: (row: any) => row.due_date, sortable: true },
+  ];
+
+  const columnsReceipts = [
+    { name: 'Receipt No.', selector: (row: any) => row.receipt_number, sortable: true },
+    { name: 'Invoice No.', selector: (row: any) => row.invoice_number, sortable: true },
+    { name: 'Customer Name', selector: (row: any) => row.customer_name, sortable: true },
+    { name: 'Amount Received', selector: (row: any) => row.amount_received, sortable: true },
+    { name: 'Payment Mode', selector: (row: any) => row.payment_mode, sortable: true },
+    { name: 'Transaction No.', selector: (row: any) => row.transaction_or_cheque_number, sortable: true },
+    { name: 'Payment Date', selector: (row: any) => row.payment_date, sortable: true },
+    { name: 'Receipt Date', selector: (row: any) => row.receipt_date, sortable: true },
+    {
+      name: 'Attachments',
+      cell: (row: any) => (
+        <button onClick={() => downloadReceipt(row.id)}>
+          <FaRegFileAlt className="cursor-pointer" />
+        </button>
+      ),
+    },
+  ];
+
+  const columnsTransaction = [
+    { name: 'Date', selector: (row: any) => row.created_at, sortable: true },
+    { name: 'Amount', selector: (row: any) => row.total_amount, sortable: true },
+    { name: 'Payment Mode', selector: (row: any) => row.payment_method, sortable: true },
+    { name: 'Transaction No.', selector: (row: any) => row.transaction_id, sortable: true },
+    { name: 'Payment Date', selector: (row: any) => row.paymen_date, sortable: true },
+    {
+      name: 'Images',
+      cell: (row: any) => (
+        <button onClick={() => window.open(`${domainPrefix}${row.image_url}`, '_blank')}>
+          <FaRegFileAlt className="cursor-pointer" />
+        </button>
+      ),
+    },
+  ];
 
   const amount = camBilling.total_amount || 0;
   const amountInWords = Number.isFinite(amount) ? toWords(amount) : 'Invalid Amount';
 
-  if (loading) {
-    return (
-      <div className="p-6 flex justify-center items-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 space-y-6">
-      <Breadcrumb
-        items={[
-          { label: 'Finance', path: '/finance/cam' },
-          { label: 'CAM', path: '/finance/cam/billing' },
-          { label: 'CAM Billing Details' },
-        ]}
-      />
-
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-2 justify-end">
-        <Button variant="outline" onClick={() => navigate('/finance/cam/billing')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <Button onClick={() => setRecallModal(true)} style={{ background: themeColor }}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Recall
-        </Button>
-        <Link to={`/finance/cam/billing/${id}/create-receipt`}>
-          <Button style={{ background: themeColor }}>
-            <Receipt className="h-4 w-4 mr-2" />
-            Create Invoice Receipt
-          </Button>
-        </Link>
-        <Button onClick={() => setReceivePayment(true)} style={{ background: themeColor }}>
-          <CreditCard className="h-4 w-4 mr-2" />
-          Receive Payment
-        </Button>
-        <Button onClick={handleDownload} style={{ background: themeColor }}>
-          <Download className="h-4 w-4 mr-2" />
-          Download Invoice
-        </Button>
+    <div className="w-full flex flex-col overflow-hidden">
+      <div className="p-6">
+        <Breadcrumb
+          items={[
+            { label: 'Finance', path: '/finance/cam' },
+            { label: 'CAM', path: '/finance/cam/billing' },
+            { label: 'CAM Billing Details' },
+          ]}
+        />
       </div>
 
-      {/* Invoice Header */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              {getStatusBadge()}
-              {logo?.logo_url ? (
-                <img
-                  src={`${domainPrefix}${logo.logo_url}`}
-                  className="w-60 h-40 rounded-md object-contain"
-                  alt="Invoice Logo"
-                />
-              ) : (
-                <div className="w-60 h-40 bg-muted rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">No logo available</p>
-                </div>
-              )}
+      <h2
+        style={{ background: themeColor }}
+        className="text-center text-xl font-bold my-5 p-2 rounded-full text-white mx-10"
+      >
+        CAM Billing Details
+      </h2>
+
+      <div className="flex justify-end mx-5">
+        <div className="md:flex grid grid-cols-2 sm:flex-row flex-col gap-2">
+          <button
+            className="font-semibold text-white px-4 p-1 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setRecallModal(true)}
+          >
+            Recall
+          </button>
+          <Link
+            to={`/finance/cam/billing/${id}/create-receipt`}
+            style={{ background: themeColor }}
+            className="px-4 py-2 font-medium text-white rounded-md flex gap-2 items-center justify-center"
+          >
+            Create Invoice Receipt
+          </Link>
+          <button
+            className="font-semibold text-white px-4 p-1 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setReceivePayment(true)}
+          >
+            Receive Payment
+          </button>
+          <button
+            onClick={handleDownload}
+            className="font-semibold text-white px-4 p-1 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+          >
+            <FaDownload />
+            Download Invoice
+          </button>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 mx-5 my-5">
+        <div className="space-y-2">
+          {getStatusBadge()}
+          <div>
+            {logo?.logo_url ? (
+              <img
+                src={`${domainPrefix}${logo.logo_url}`}
+                className="w-60 h-40 rounded-md"
+                alt="Invoice Logo"
+              />
+            ) : (
+              <p>No image available</p>
+            )}
+          </div>
+        </div>
+        <div className="my-5">
+          <h2 className="font-bold text-lg">{addressInvoice.title}</h2>
+          <p className="font-normal">{addressInvoice.address}</p>
+          <p className="font-normal">Tel: {addressInvoice.phone_number}</p>
+          <p className="font-normal">Fax: {addressInvoice.fax_number}</p>
+          <p className="font-normal">E-mail: {addressInvoice.email_address}</p>
+        </div>
+      </div>
+
+      <div className="mx-5">
+        <h2 className="border-b text-xl border-black font-semibold">Tax Invoice</h2>
+        <div className="my-5 md:px-5 text-sm font-medium grid gap-4 md:grid-cols-2 md:divide-x-2 divide-black">
+          <div className="space-y-2 px-5">
+            <div className="grid grid-cols-2">
+              <p>GSTIN:</p>
+              <p className="text-sm font-normal">{addressInvoice.gst_number}</p>
             </div>
-            <div className="space-y-2">
-              <h2 className="font-bold text-lg">{addressInvoice.title}</h2>
-              <p className="text-muted-foreground">{addressInvoice.address}</p>
-              <p className="text-muted-foreground">Tel: {addressInvoice.phone_number}</p>
-              <p className="text-muted-foreground">Fax: {addressInvoice.fax_number}</p>
-              <p className="text-muted-foreground">Email: {addressInvoice.email_address}</p>
+            <div className="grid grid-cols-2">
+              <p>PAN:</p>
+              <p className="text-sm font-normal">{addressInvoice.pan_number}</p>
+            </div>
+            <div className="grid grid-cols-2">
+              <p>Invoice No:</p>
+              <p className="text-sm font-normal">{camBillingAllData.invoice_number}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Tax Invoice Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Tax Invoice</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="font-medium w-40">GSTIN:</span>
-                <span>{addressInvoice.gst_number}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">PAN:</span>
-                <span>{addressInvoice.pan_number}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">Invoice No:</span>
-                <span>{camBillingAllData.invoice_number}</span>
-              </div>
+          <div className="space-y-2 px-5">
+            <div className="grid grid-cols-2">
+              <p>Date of Supply:</p>
+              <p className="text-sm font-normal">{camBillingAllData.supply_date}</p>
             </div>
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="font-medium w-40">Date of Supply:</span>
-                <span>{camBillingAllData.supply_date}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">Billing Period:</span>
-                <span>{camBillingAllData.bill_period_start_date} to {camBillingAllData.bill_period_end_date}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">Place of Supply:</span>
-                <span>{addressInvoice.state}</span>
-              </div>
+            <div className="grid grid-cols-2">
+              <p>Billing Period:</p>
+              <p className="text-sm font-normal">
+                {camBillingAllData.bill_period_start_date} to {camBillingAllData.bill_period_end_date}
+              </p>
+            </div>
+            <div className="grid grid-cols-2">
+              <p>Place of Supply:</p>
+              <p className="text-sm font-normal">{addressInvoice.state}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Receiver Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Receiver Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="font-medium w-40">Name:</span>
-                <span>{receiver?.firstname} {receiver?.lastname}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">Address:</span>
-                <span>{receiver?.user_address}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">PAN:</span>
-                <span>{receiver?.pan_number}</span>
-              </div>
+      <div className="mx-5">
+        <h2 className="border-b text-xl border-black font-semibold">Details of Receiver of supply:</h2>
+        <div className="my-5 md:px-5 text-sm font-medium grid gap-4 md:grid-cols-2 md:divide-x-2 divide-black">
+          <div className="space-y-2 px-5">
+            <div className="grid grid-cols-2">
+              <p>Name:</p>
+              <p className="text-sm font-normal">{receiver?.firstname} {receiver?.lastname}</p>
             </div>
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="font-medium w-40">GSTIN:</span>
-                <span>{receiver?.gst_number}</span>
-              </div>
-              <div className="flex">
-                <span className="font-medium w-40">State:</span>
-                <span>{receiver?.state}</span>
-              </div>
+            <div className="grid grid-cols-2">
+              <p>Address:</p>
+              <p className="text-sm font-normal">{receiver?.user_address}</p>
+            </div>
+            <div className="grid grid-cols-2">
+              <p>PAN:</p>
+              <p className="text-sm font-normal">{receiver?.pan_number}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Charges Table */}
-      {camBilling?.charges && camBilling.charges.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Charges</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>S.N.</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>SAC/HSN</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead>Rate</TableHead>
-                  <TableHead>Total Value</TableHead>
-                  <TableHead>Discount</TableHead>
-                  <TableHead>Taxable Value</TableHead>
-                  <TableHead>CGST</TableHead>
-                  <TableHead>SGST</TableHead>
-                  <TableHead>IGST</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {camBilling.charges.map((charge: any, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{charge.description}</TableCell>
-                    <TableCell>{charge.hsn_id}</TableCell>
-                    <TableCell>{charge.quantity}</TableCell>
-                    <TableCell>{charge.rate}</TableCell>
-                    <TableCell>{charge.total_value}</TableCell>
-                    <TableCell>{charge.discount_percent}%</TableCell>
-                    <TableCell>{charge.taxable_value}</TableCell>
-                    <TableCell>{charge.cgst_rate}% ({charge.cgst_amount})</TableCell>
-                    <TableCell>{charge.sgst_rate}% ({charge.sgst_amount})</TableCell>
-                    <TableCell>{charge.igst_rate}% ({charge.igst_amount})</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex justify-end mt-4">
-              <div className="text-lg font-semibold">
-                Total Amount: ₹{totalAmount}
-              </div>
+          <div className="space-y-2 px-5">
+            <div className="grid grid-cols-2">
+              <p>GSTIN:</p>
+              <p className="text-sm font-normal">{receiver?.gst_number}</p>
             </div>
-            <p className="text-muted-foreground mt-2">Amount in words: {amountInWords}</p>
-          </CardContent>
-        </Card>
-      )}
+            <div className="grid grid-cols-2">
+              <p>State:</p>
+              <p className="text-sm font-normal">{receiver?.state}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Invoice Receipts */}
+      <div className="mx-5 my-5">
+        <h2 className="mb-2 text-lg text-gray-950 font-semibold">Payment Details</h2>
+        <Table columns={columnsPaymentDetails} data={[camBillingAllData]} />
+      </div>
+
       {invoiceReceipt.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Receipts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Receipt No</TableHead>
-                  <TableHead>Invoice No</TableHead>
-                  <TableHead>Amount Received</TableHead>
-                  <TableHead>Payment Mode</TableHead>
-                  <TableHead>Transaction No</TableHead>
-                  <TableHead>Payment Date</TableHead>
-                  <TableHead>Receipt Date</TableHead>
-                  <TableHead>Download</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoiceReceipt.map((receipt: any) => (
-                  <TableRow key={receipt.id}>
-                    <TableCell>{receipt.receipt_number}</TableCell>
-                    <TableCell>{receipt.invoice_number}</TableCell>
-                    <TableCell>{receipt.amount_received}</TableCell>
-                    <TableCell>{receipt.payment_mode}</TableCell>
-                    <TableCell>{receipt.transaction_or_cheque_number}</TableCell>
-                    <TableCell>{receipt.payment_date}</TableCell>
-                    <TableCell>{receipt.receipt_date}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="ghost" onClick={() => downloadReceipt(receipt.id)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="mx-5 my-5">
+          <h2 className="mb-2 text-lg text-gray-950 font-semibold">Invoice Receipts</h2>
+          <Table columns={columnsReceipts} data={invoiceReceipt} />
+        </div>
       )}
 
-      {/* Payment Transactions */}
       {receivePaymentDetails.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Payment Mode</TableHead>
-                  <TableHead>Transaction No</TableHead>
-                  <TableHead>Payment Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {receivePaymentDetails.map((payment: any, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{payment.created_at}</TableCell>
-                    <TableCell>{payment.total_amount}</TableCell>
-                    <TableCell>{payment.payment_method}</TableCell>
-                    <TableCell>{payment.transaction_id}</TableCell>
-                    <TableCell>{payment.paymen_date}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="mx-5 my-5">
+          <h2 className="mb-2 text-lg text-gray-950 font-semibold">Payment Transactions</h2>
+          <Table columns={columnsTransaction} data={receivePaymentDetails} />
+        </div>
       )}
 
-      {/* Modals */}
+      <div className="mx-5 my-5">
+        <p className="text-lg font-semibold">Total Amount: ₹{totalAmount}</p>
+        <p className="text-muted-foreground">Amount in words: {amountInWords}</p>
+      </div>
+
+      <div className="flex justify-start mx-5 my-5">
+        <button
+          onClick={() => navigate('/finance/cam/billing')}
+          className="p-2 px-6 border-2 rounded-md font-medium"
+        >
+          Back
+        </button>
+      </div>
+
       {recallModal && (
         <RecallInvoiceModal onclose={() => setRecallModal(false)} fetchCamBilling={fetchCamBilling} />
       )}

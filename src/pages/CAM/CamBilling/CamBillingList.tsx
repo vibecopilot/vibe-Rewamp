@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Eye, Plus, Upload, Download, Filter, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { BsEye } from 'react-icons/bs';
+import { IoAddCircleOutline } from 'react-icons/io5';
+import { FaDownload, FaUpload } from 'react-icons/fa';
+import { BiFilterAlt } from 'react-icons/bi';
+import Table from '@/components/table/Table';
 import {
   getCamBillingData,
   getCamBillingDownload,
@@ -16,15 +18,6 @@ import { getItemInLocalStorage } from '@/utils/localStorage';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import InvoiceImportModal from '@/containers/modals/InvoiceImportModal';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface CamBillingItem {
   id: number;
@@ -50,8 +43,7 @@ const CamBillingList: React.FC = () => {
   const [filteredData, setFilteredData] = useState<CamBillingItem[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [loading, setLoading] = useState(true);
-  
+
   const buildings = getItemInLocalStorage('Building') || [];
   const [floors, setFloors] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);
@@ -64,15 +56,12 @@ const CamBillingList: React.FC = () => {
   });
 
   const fetchCamBilling = async () => {
-    setLoading(true);
     try {
       const response = await getCamBillingData();
       setCamBilling(response.data);
       setFilteredData(response.data);
     } catch (err) {
       console.error('Failed to fetch CAM Billing data:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -80,24 +69,44 @@ const CamBillingList: React.FC = () => {
     fetchCamBilling();
   }, []);
 
+  const columns = [
+    {
+      name: 'Action',
+      cell: (row: CamBillingItem) => (
+        <Link to={`/finance/cam/billing/${row.id}`}>
+          <BsEye size={15} className="cursor-pointer hover:text-primary" />
+        </Link>
+      ),
+      width: '80px',
+    },
+    { name: 'Flat', selector: (row: CamBillingItem) => row.flat_id, sortable: true },
+    { name: 'Start Date', selector: (row: CamBillingItem) => row.bill_period_start_date, sortable: true },
+    { name: 'End Date', selector: (row: CamBillingItem) => row.bill_period_end_date, sortable: true },
+    { name: 'Amount', selector: (row: CamBillingItem) => row.total_amount, sortable: true },
+    { name: 'Due Date', selector: (row: CamBillingItem) => row.due_date, sortable: true },
+    { name: 'Invoice No.', selector: (row: CamBillingItem) => row.invoice_number, sortable: true },
+    { name: 'Amount Paid', selector: (row: CamBillingItem) => row.amount_paid, sortable: true },
+    {
+      name: 'Payment Status',
+      cell: (row: CamBillingItem) => {
+        if (row.status === 'pending' || row.status === 'recall' || row.status === null) {
+          return <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Unpaid</span>;
+        }
+        return <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Paid</span>;
+      },
+      sortable: true,
+    },
+    { name: 'Recall', selector: (row: CamBillingItem) => row.status, sortable: true },
+    { name: 'Created On', selector: (row: CamBillingItem) => row.created_at, sortable: true },
+  ];
+
   const handleDateChange = (dates: [Date | null, Date | null]) => {
     setBillingPeriod(dates);
   };
 
-  const handleSelectedRows = (id: number, checked: boolean) => {
-    if (checked) {
-      setSelectedRows([...selectedRows, id]);
-    } else {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRows(filteredData.map((item) => item.id));
-    } else {
-      setSelectedRows([]);
-    }
+  const handleSelectedRows = (rows: CamBillingItem[]) => {
+    const selectedId = rows.map((row) => row.id);
+    setSelectedRows(selectedId);
   };
 
   const handleDownload = async () => {
@@ -182,51 +191,60 @@ const CamBillingList: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string, paymentStatus: string) => {
-    if (status === 'pending' || status === 'recall' || status === null) {
-      return <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Unpaid</span>;
-    }
-    return <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Paid</span>;
-  };
-
   const isFlatDisabled = !formData.block || !formData.floor_name || !units.length;
 
   return (
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <Input
+        <input
           type="text"
           onChange={handleSearch}
           value={searchText}
           placeholder="Search By Invoice No, Payment Status"
-          className="md:w-96"
+          className="p-2 md:w-96 border border-gray-300 rounded-md placeholder:text-sm outline-none"
         />
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => navigate('/finance/cam/billing/add')} style={{ background: themeColor }}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Link
+            to="/finance/cam/billing/add"
+            style={{ background: themeColor }}
+            className="px-4 py-2 font-medium text-white rounded-md flex gap-2 items-center justify-center"
+          >
+            <IoAddCircleOutline />
             Add
-          </Button>
-          <Button onClick={() => setImportModal(true)} style={{ background: themeColor }}>
-            <Upload className="h-4 w-4 mr-2" />
+          </Link>
+          <button
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setImportModal(true)}
+          >
+            <FaUpload />
             Import
-          </Button>
-          <Button onClick={handleDownload} style={{ background: themeColor }}>
-            <Download className="h-4 w-4 mr-2" />
+          </button>
+          <button
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={handleDownload}
+          >
+            <FaDownload />
             Export
-          </Button>
-          <Button onClick={() => setFilter(!filter)} style={{ background: themeColor }}>
-            <Filter className="h-4 w-4 mr-2" />
+          </button>
+          <button
+            className="font-semibold text-white px-4 py-2 flex gap-2 items-center justify-center rounded-md"
+            style={{ background: themeColor }}
+            onClick={() => setFilter(!filter)}
+          >
+            <BiFilterAlt />
             Filter
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Filter Panel */}
       {filter && (
-        <div className="flex flex-wrap items-center gap-3 p-4 bg-muted/50 rounded-lg">
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-100 rounded-lg">
           <select
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
             onChange={handleChange}
             value={formData.block}
             name="block"
@@ -237,7 +255,7 @@ const CamBillingList: React.FC = () => {
             ))}
           </select>
           <select
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
             onChange={handleChange}
             value={formData.floor_name}
             name="floor_name"
@@ -253,7 +271,7 @@ const CamBillingList: React.FC = () => {
             value={formData.flat}
             onChange={handleChange}
             disabled={isFlatDisabled}
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           >
             <option value="">Select Flat</option>
             {units.map((unit) => (
@@ -264,7 +282,7 @@ const CamBillingList: React.FC = () => {
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           >
             <option value="">Select Payment Status</option>
             <option value="paid">Paid</option>
@@ -276,7 +294,7 @@ const CamBillingList: React.FC = () => {
             name="dueDate"
             value={formData.dueDate}
             onChange={handleChange}
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
           />
           <DatePicker
             selectsRange
@@ -284,77 +302,32 @@ const CamBillingList: React.FC = () => {
             endDate={billingPeriod[1]}
             onChange={handleDateChange}
             placeholderText="Select Billing Period"
-            className="border p-2 px-4 border-border rounded-md bg-background"
+            className="border p-2 px-4 border-gray-500 rounded-md"
             isClearable
           />
-          <Button onClick={handleFilterData} style={{ background: themeColor }}>Apply</Button>
-          <Button variant="destructive" onClick={() => { fetchCamBilling(); setFilter(false); }}>Reset</Button>
+          <button
+            onClick={handleFilterData}
+            className="p-2 px-4 text-white rounded-md"
+            style={{ background: themeColor }}
+          >
+            Apply
+          </button>
+          <button
+            className="bg-red-400 p-2 px-4 text-white rounded-md"
+            onClick={() => { fetchCamBilling(); setFilter(false); }}
+          >
+            Reset
+          </button>
         </div>
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={selectedRows.length === filteredData.length && filteredData.length > 0}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Flat</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Invoice No</TableHead>
-              <TableHead>Amount Paid</TableHead>
-              <TableHead>Payment Status</TableHead>
-              <TableHead>Recall</TableHead>
-              <TableHead>Created On</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center py-8">Loading...</TableCell>
-              </TableRow>
-            ) : filteredData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center py-8">No records found</TableCell>
-              </TableRow>
-            ) : (
-              filteredData.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedRows.includes(row.id)}
-                      onCheckedChange={(checked) => handleSelectedRows(row.id, checked as boolean)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Link to={`/finance/cam/billing/${row.id}`}>
-                      <Eye className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
-                    </Link>
-                  </TableCell>
-                  <TableCell>{row.flat_id}</TableCell>
-                  <TableCell>{row.bill_period_start_date}</TableCell>
-                  <TableCell>{row.bill_period_end_date}</TableCell>
-                  <TableCell>{row.total_amount}</TableCell>
-                  <TableCell>{row.due_date}</TableCell>
-                  <TableCell>{row.invoice_number}</TableCell>
-                  <TableCell>{row.amount_paid}</TableCell>
-                  <TableCell>{getStatusBadge(row.status, row.payment_status)}</TableCell>
-                  <TableCell>{row.status}</TableCell>
-                  <TableCell>{row.created_at}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <Table
+        columns={columns}
+        data={filteredData}
+        selectableRow={true}
+        onSelectedRows={handleSelectedRows}
+      />
 
       {importModal && (
         <InvoiceImportModal onclose={() => setImportModal(false)} fetchCamBilling={fetchCamBilling} />
