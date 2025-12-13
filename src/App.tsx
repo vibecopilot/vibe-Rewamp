@@ -58,6 +58,7 @@ import { SupplierList, CreateSupplier, ViewSupplier } from "./pages/Supplier";
 import { AuditLayout, OperationalScheduled, OperationalConducted, OperationalChecklists, VendorScheduled, VendorConducted, ScheduleAuditForm, ChecklistAuditForm } from "./pages/Audit";
 import { CommunicationsLayout, EventsList, CreateEvent, ViewEvent, BroadcastList, CreateBroadcast, ViewBroadcast, PollsList, CreatePoll, ForumFeed, CreateForum, GroupsList } from "./pages/Communications";
 import { CAMLayout, CamBillingList, AddCamBilling, ViewCamBilling, ReceiptInvoiceList, AddReceiptInvoice, ViewReceiptInvoice } from "./pages/CAM";
+import { OtherBillsList, CreateOtherBill, ViewOtherBill } from "./pages/OtherBills";
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="p-6">
@@ -282,7 +283,12 @@ function App() {
 
         {/* Finance Module - Under Development Pages */}
         <Route path="/finance/procurement" element={<AuthenticatedLayout><PlaceholderPage title="Procurement" /></AuthenticatedLayout>} />
-        <Route path="/finance/other-bills" element={<AuthenticatedLayout><PlaceholderPage title="Other Bills" /></AuthenticatedLayout>} />
+        
+        {/* Other Bills - Finance Module */}
+        <Route path="/finance/other-bills" element={<AuthenticatedLayout><OtherBillsList /></AuthenticatedLayout>} />
+        <Route path="/finance/other-bills/create" element={<AuthenticatedLayout><CreateOtherBill /></AuthenticatedLayout>} />
+        <Route path="/finance/other-bills/:id" element={<AuthenticatedLayout><ViewOtherBill /></AuthenticatedLayout>} />
+        <Route path="/finance/other-bills/:id/edit" element={<AuthenticatedLayout><CreateOtherBill /></AuthenticatedLayout>} />
         {/* Finance CAM - Tabbed Layout */}
         <Route path="/finance/cam" element={<AuthenticatedLayout><CAMLayout /></AuthenticatedLayout>}>
           <Route index element={<Navigate to="/finance/cam/billing" replace />} />
