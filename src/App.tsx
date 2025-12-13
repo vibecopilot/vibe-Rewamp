@@ -282,7 +282,16 @@ function App() {
         {/* Finance Module - Under Development Pages */}
         <Route path="/finance/procurement" element={<AuthenticatedLayout><PlaceholderPage title="Procurement" /></AuthenticatedLayout>} />
         <Route path="/finance/other-bills" element={<AuthenticatedLayout><PlaceholderPage title="Other Bills" /></AuthenticatedLayout>} />
-        <Route path="/finance/cam" element={<AuthenticatedLayout><PlaceholderPage title="CAM" /></AuthenticatedLayout>} />
+        {/* Finance CAM - Tabbed Layout */}
+        <Route path="/finance/cam" element={<AuthenticatedLayout><CAMLayout /></AuthenticatedLayout>}>
+          <Route index element={<Navigate to="/finance/cam/billing" replace />} />
+          <Route path="billing" element={<CamBillingList />} />
+          <Route path="receipt-invoice" element={<ReceiptInvoiceList />} />
+        </Route>
+        <Route path="/finance/cam/billing/add" element={<AuthenticatedLayout><AddCamBilling /></AuthenticatedLayout>} />
+        <Route path="/finance/cam/billing/:id" element={<AuthenticatedLayout><ViewCamBilling /></AuthenticatedLayout>} />
+        <Route path="/finance/cam/receipt-invoice/add" element={<AuthenticatedLayout><AddReceiptInvoice /></AuthenticatedLayout>} />
+        <Route path="/finance/cam/receipt-invoice/:id" element={<AuthenticatedLayout><ViewReceiptInvoice /></AuthenticatedLayout>} />
         <Route path="/finance/wallet" element={<AuthenticatedLayout><PlaceholderPage title="Wallet" /></AuthenticatedLayout>} />
         <Route path="/finance/wbs" element={<AuthenticatedLayout><PlaceholderPage title="WBS" /></AuthenticatedLayout>} />
 
