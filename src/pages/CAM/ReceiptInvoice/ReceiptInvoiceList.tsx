@@ -53,13 +53,24 @@ const ReceiptInvoiceList: React.FC = () => {
     receiptDate: '',
   });
 
+  const ensureArray = (data: any): ReceiptItem[] => {
+    if (Array.isArray(data)) return data;
+    if (data?.receipts) return data.receipts;
+    if (data?.invoice_receipts) return data.invoice_receipts;
+    if (data?.data) return Array.isArray(data.data) ? data.data : [];
+    return [];
+  };
+
   const fetchInvoiceReceipt = async () => {
     try {
       const response = await getInvoiceReceipt();
-      setInvoiceReceipt(response.data);
-      setFilterSearchData(response.data);
+      const dataArray = ensureArray(response.data);
+      setInvoiceReceipt(dataArray);
+      setFilterSearchData(dataArray);
     } catch (err) {
       console.error('Failed to fetch Receipt Invoice data:', err);
+      setInvoiceReceipt([]);
+      setFilterSearchData([]);
     }
   };
 
@@ -148,7 +159,7 @@ const ReceiptInvoiceList: React.FC = () => {
         formData.receiptNumber,
         formData.receiptDate
       );
-      setFilterSearchData(resp.data);
+      setFilterSearchData(ensureArray(resp.data));
       setFilter(false);
     } catch (error) {
       console.error('Error filtering data:', error);

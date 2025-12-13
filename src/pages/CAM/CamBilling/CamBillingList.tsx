@@ -55,13 +55,24 @@ const CamBillingList: React.FC = () => {
     dueDate: '',
   });
 
+  const ensureArray = (data: any): CamBillingItem[] => {
+    if (Array.isArray(data)) return data;
+    if (data?.cam_billings) return data.cam_billings;
+    if (data?.billings) return data.billings;
+    if (data?.data) return Array.isArray(data.data) ? data.data : [];
+    return [];
+  };
+
   const fetchCamBilling = async () => {
     try {
       const response = await getCamBillingData();
-      setCamBilling(response.data);
-      setFilteredData(response.data);
+      const dataArray = ensureArray(response.data);
+      setCamBilling(dataArray);
+      setFilteredData(dataArray);
     } catch (err) {
       console.error('Failed to fetch CAM Billing data:', err);
+      setCamBilling([]);
+      setFilteredData([]);
     }
   };
 
@@ -169,7 +180,7 @@ const CamBillingList: React.FC = () => {
         endDate,
         formData.dueDate
       );
-      setFilteredData(resp.data);
+      setFilteredData(ensureArray(resp.data));
       setFilter(false);
     } catch (error) {
       console.error('Error filtering data:', error);
