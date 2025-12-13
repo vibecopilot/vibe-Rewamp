@@ -51,7 +51,7 @@ import { SpaceBookingsList, BookSpace } from "./pages/SpaceBooking";
 import FitoutList from "./pages/Fitout/FitoutList";
 import { DocumentsList } from "./pages/Documents";
 import { IncidentList, CreateIncident, ViewIncident } from "./pages/Incident";
-import { PermitList, CreatePermit, ViewPermit } from "./pages/Permit";
+import { PermitList, CreatePermit, ViewPermit } from "./pages/Permit/index";
 import { CalendarPage, PlanMyCalendar } from "./pages/Calendar/index";
 import { MailRoomLayout, DeliveryVendorList, CreateVendor, ViewVendor, InboundList, CreateInboundPackage, ViewInbound, OutboundList, CreateOutboundPackage, ViewOutbound } from "./pages/MailRoom/index";
 import { SupplierList, CreateSupplier, ViewSupplier } from "./pages/Supplier";
