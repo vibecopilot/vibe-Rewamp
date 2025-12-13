@@ -56,7 +56,7 @@ import { CalendarPage, PlanMyCalendar } from "./pages/Calendar/index";
 import { MailRoomLayout, DeliveryVendorList, CreateVendor, ViewVendor, InboundList, CreateInboundPackage, ViewInbound, OutboundList, CreateOutboundPackage, ViewOutbound } from "./pages/MailRoom/index";
 import { SupplierList, CreateSupplier, ViewSupplier } from "./pages/Supplier";
 import { AuditLayout, OperationalScheduled, OperationalConducted, OperationalChecklists, VendorScheduled, VendorConducted, ScheduleAuditForm, ChecklistAuditForm } from "./pages/Audit";
-import { CommunicationsLayout, EventsList, CreateEvent, ViewEvent, BroadcastList, CreateBroadcast, ViewBroadcast, PollsList, ForumFeed, GroupsList } from "./pages/Communications";
+import { CommunicationsLayout, EventsList, CreateEvent, ViewEvent, BroadcastList, CreateBroadcast, ViewBroadcast, PollsList, CreatePoll, ForumFeed, CreateForum, GroupsList } from "./pages/Communications";
 // Placeholder pages for other modules
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="p-6">
@@ -308,9 +308,9 @@ function App() {
         <Route path="/crm/communications/broadcast/:id" element={<AuthenticatedLayout><ViewBroadcast /></AuthenticatedLayout>} />
         <Route path="/crm/communications/broadcast/:id/edit" element={<AuthenticatedLayout><CreateBroadcast /></AuthenticatedLayout>} />
         {/* Polls Detail Routes */}
-        <Route path="/crm/communications/polls/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Poll" /></AuthenticatedLayout>} />
+        <Route path="/crm/communications/polls/create" element={<AuthenticatedLayout><CreatePoll /></AuthenticatedLayout>} />
         {/* Forum Detail Routes */}
-        <Route path="/crm/communications/forum/create" element={<AuthenticatedLayout><PlaceholderPage title="Create Forum" /></AuthenticatedLayout>} />
+        <Route path="/crm/communications/forum/create" element={<AuthenticatedLayout><CreateForum /></AuthenticatedLayout>} />
         <Route path="/crm/communications/forum/saved" element={<AuthenticatedLayout><PlaceholderPage title="Saved Forum" /></AuthenticatedLayout>} />
         <Route path="/crm/communications/forum/reported" element={<AuthenticatedLayout><PlaceholderPage title="Reported Forum" /></AuthenticatedLayout>} />
         <Route path="/crm/communications/forum/hidden" element={<AuthenticatedLayout><PlaceholderPage title="Hidden Forum" /></AuthenticatedLayout>} />

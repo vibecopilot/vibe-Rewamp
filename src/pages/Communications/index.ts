@@ -6,5 +6,7 @@ export { default as BroadcastList } from './Broadcast/BroadcastList';
 export { default as CreateBroadcast } from './Broadcast/CreateBroadcast';
 export { default as ViewBroadcast } from './Broadcast/ViewBroadcast';
 export { default as PollsList } from './Polls/PollsList';
+export { default as CreatePoll } from './Polls/CreatePoll';
 export { default as ForumFeed } from './Forum/ForumFeed';
+export { default as CreateForum } from './Forum/CreateForum';
 export { default as GroupsList } from './Groups/GroupsList';

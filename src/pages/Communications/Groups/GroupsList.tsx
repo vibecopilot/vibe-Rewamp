@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Plus, Users, Calendar } from 'lucide-react';
 import { getGroups } from '../../../api/index';
 import { dateFormatSTD } from '../../../utils/dateUtils';
+import CreateGroupModal from './CreateGroupModal';
 
 const GroupsList: React.FC = () => {
-  const navigate = useNavigate();
   const [groups, setGroups] = useState<any[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,6 +57,12 @@ const GroupsList: React.FC = () => {
         </div>
       )}
       {!loading && filteredGroups.length === 0 && <div className="text-center py-16"><p className="text-muted-foreground">No groups found</p></div>}
+      
+      <CreateGroupModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+        onSuccess={fetchGroups}
+      />
     </div>
   );
 };
