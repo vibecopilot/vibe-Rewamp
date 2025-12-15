@@ -38,11 +38,11 @@ import CreateChecklist from "./pages/Asset/CreateChecklist";
 import CreatePPMActivity from "./pages/Asset/CreatePPMActivity";
 import ViewAsset from "./pages/Asset/ViewAsset";
 import EditAsset from "./pages/Asset/EditAsset";
-import { ViewAMC, ViewMeter, ViewChecklist, ViewRoutineTask, ViewPPMChecklist, ViewPPMActivity, ViewStockItem } from "./pages/Asset/submodules";
+import { ViewAMC, ViewMeter, ViewChecklist as ViewAssetChecklist, ViewRoutineTask, ViewPPMChecklist, ViewPPMActivity, ViewStockItem } from "./pages/Asset/submodules";
 import TicketCreate from "./pages/ServiceDesk/TicketCreate";
 import TicketView from "./pages/ServiceDesk/TicketView";
 import TicketEdit from "./pages/ServiceDesk/TicketEdit";
-import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist as SoftServiceCreateChecklist, ViewChecklist, TaskList } from "./pages/SoftService";
+import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist as SoftServiceCreateChecklist, ViewChecklist as ViewSoftServiceChecklist, TaskList } from "./pages/SoftService";
 import {
   AmenitiesList,
   HotelBookingsList,
@@ -137,7 +137,7 @@ function App() {
         {/* Checklist */}
         <Route path="/asset/checklist" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
         <Route path="/asset/checklist/create" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
-        <Route path="/asset/checklist/:id" element={<AuthenticatedLayout><ViewChecklist /></AuthenticatedLayout>} />
+        <Route path="/asset/checklist/:id" element={<AuthenticatedLayout><ViewAssetChecklist /></AuthenticatedLayout>} />
         <Route path="/asset/checklist/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Checklist" /></AuthenticatedLayout>} />
         
         {/* Routine Task */}
@@ -170,7 +170,7 @@ function App() {
         {/* Soft Services - Checklist Tab */}
         <Route path="/soft-services/checklist" element={<AuthenticatedLayout><ChecklistList /></AuthenticatedLayout>} />
         <Route path="/soft-services/checklist/create" element={<AuthenticatedLayout><SoftServiceCreateChecklist /></AuthenticatedLayout>} />
-        <Route path="/soft-services/checklist/:id" element={<AuthenticatedLayout><ViewChecklist /></AuthenticatedLayout>} />
+        <Route path="/soft-services/checklist/:id" element={<AuthenticatedLayout><ViewSoftServiceChecklist /></AuthenticatedLayout>} />
         <Route path="/soft-services/checklist/:id/edit" element={<AuthenticatedLayout><SoftServiceCreateChecklist /></AuthenticatedLayout>} />
         
         {/* Soft Services - Task Tab */}
