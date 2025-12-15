@@ -4,7 +4,7 @@ import Breadcrumb from '../../components/ui/Breadcrumb';
 import FormSection from '../../components/ui/FormSection';
 import FormGrid from '../../components/ui/FormGrid';
 import { getSoftServicesDetails } from '../../api';
-import { Loader2, Wrench, AlertCircle, RefreshCw, Edit2, ArrowLeft } from 'lucide-react';
+import { Loader2, Wrench, AlertCircle, RefreshCw, Edit2, ArrowLeft, Paperclip } from 'lucide-react';
 
 interface ServiceDetails {
   id: number;
@@ -122,7 +122,7 @@ const ViewService: React.FC = () => {
       </div>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <FormSection title="Service Details" icon={<Wrench className="w-5 h-5" />}>
+        <FormSection title="Service Details" icon={Wrench}>
           <FormGrid columns={3}>
             <div>
               <label className="block text-sm text-muted-foreground mb-1">Service Name</label>
@@ -171,7 +171,7 @@ const ViewService: React.FC = () => {
           </FormGrid>
         </FormSection>
 
-        <FormSection title="Cron Setting" icon={<Wrench className="w-5 h-5" />}>
+        <FormSection title="Cron Setting" icon={Wrench}>
           <div className="flex items-center gap-2 text-foreground">
             <span>Every</span>
             <span className="px-3 py-1 bg-accent rounded-md font-medium">{getDayLabel(service.cron_day)}</span>
@@ -183,7 +183,7 @@ const ViewService: React.FC = () => {
         </FormSection>
 
         {service.attachments && service.attachments.length > 0 && (
-          <FormSection title="Attachments" icon={<Wrench className="w-5 h-5" />}>
+          <FormSection title="Attachments" icon={Paperclip}>
             <div className="flex flex-wrap gap-2">
               {service.attachments.map((att, idx) => (
                 <a 
