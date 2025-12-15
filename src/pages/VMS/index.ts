@@ -7,5 +7,6 @@ export { default as VMSGoodsInOut } from './VMSGoodsInOut';
 export { default as CreateVisitor } from './CreateVisitor';
 export { default as ViewVisitor } from './ViewVisitor';
 export { default as StaffCreate } from './StaffCreate';
+export { default as StaffView } from './StaffView';
 export { default as GoodsCreate } from './GoodsCreate';
 export { default as VehicleCreate } from './VehicleCreate';
