@@ -21,6 +21,7 @@ import {
   StaffCreate,
   StaffView,
   GoodsCreate,
+  GoodsView,
   VehicleCreate
 } from "./pages/VMS";
 import {
@@ -115,7 +116,8 @@ function App() {
         <Route path="/vms/patrolling/:id" element={<AuthenticatedLayout><PlaceholderPage title="Patrolling Details" /></AuthenticatedLayout>} />
         <Route path="/vms/patrolling/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Patrolling" /></AuthenticatedLayout>} />
         <Route path="/vms/goods-in-out/create" element={<AuthenticatedLayout><GoodsCreate /></AuthenticatedLayout>} />
-        <Route path="/vms/goods-in-out/:id" element={<AuthenticatedLayout><PlaceholderPage title="Goods Details" /></AuthenticatedLayout>} />
+        <Route path="/vms/goods-in-out/:id" element={<AuthenticatedLayout><GoodsView /></AuthenticatedLayout>} />
+        <Route path="/vms/goods-in-out/:id/edit" element={<AuthenticatedLayout><GoodsCreate /></AuthenticatedLayout>} />
 
         {/* Asset Module */}
         <Route path="/asset" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
