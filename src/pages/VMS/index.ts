@@ -9,4 +9,5 @@ export { default as ViewVisitor } from './ViewVisitor';
 export { default as StaffCreate } from './StaffCreate';
 export { default as StaffView } from './StaffView';
 export { default as GoodsCreate } from './GoodsCreate';
+export { default as GoodsView } from './GoodsView';
 export { default as VehicleCreate } from './VehicleCreate';

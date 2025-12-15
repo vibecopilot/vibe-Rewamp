@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
-import { Loader2, Package, AlertCircle, RefreshCw, Eye } from 'lucide-react';
+import { Loader2, Package, AlertCircle, RefreshCw, Eye, Edit2, Truck, User, Clock } from 'lucide-react';
 import { getGoods } from '../../api';
 import { dateFormat, formatTime } from '../../utils/dateUtils';
 
@@ -18,6 +18,9 @@ interface GoodsItem {
 
 type SubTab = 'inwards' | 'outwards';
 
+const GRID_PAGE_SIZE = 12;
+const LIST_PAGE_SIZE = 10;
+
 const VMSGoodsInOut: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<SubTab>('inwards');
@@ -28,6 +31,10 @@ const VMSGoodsInOut: React.FC = () => {
   const [filteredData, setFilteredData] = useState<GoodsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const pageSize = viewMode === 'grid' ? GRID_PAGE_SIZE : LIST_PAGE_SIZE;
 
   const fetchGoods = useCallback(async () => {
     setLoading(true);
@@ -68,7 +75,12 @@ const VMSGoodsInOut: React.FC = () => {
       });
       setFilteredData(filtered);
     }
+    setCurrentPage(1);
   }, [activeTab, goodsIn, goodsOut, searchValue]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [viewMode]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -78,6 +90,7 @@ const VMSGoodsInOut: React.FC = () => {
     setActiveTab(tab);
     setSearchValue('');
     setSelectedRows([]);
+    setCurrentPage(1);
   };
 
   const getPersonName = (item: GoodsItem): string => {
@@ -87,13 +100,32 @@ const VMSGoodsInOut: React.FC = () => {
     return item.person_name || '-';
   };
 
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const paginatedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSelectRow = (id: string) => {
+    setSelectedRows(prev =>
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const currentPageIds = paginatedData.map(g => String(g.id));
+    const allSelected = currentPageIds.every(id => selectedRows.includes(id));
+    if (allSelected) {
+      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
+    } else {
+      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
+    }
+  };
+
   const columns: TableColumn<GoodsItem>[] = [
     {
       key: 'actions',
       header: 'ACTION',
       width: '80px',
       render: (_, row) => (
-        <Link to={`/vms/goods-in-out/${row.id}`} className="text-muted-foreground hover:text-primary">
+        <Link to={`/vms/goods-in-out/${row.id}`} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors inline-flex">
           <Eye className="w-4 h-4" />
         </Link>
       ),
@@ -104,7 +136,7 @@ const VMSGoodsInOut: React.FC = () => {
       sortable: true,
       render: (value) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value === 'in' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+          value === 'in' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'
         }`}>
           {value === 'in' ? 'Inward' : 'Outward'}
         </span>
@@ -191,6 +223,9 @@ const VMSGoodsInOut: React.FC = () => {
         searchPlaceholder="Search by name, vehicle number"
         searchValue={searchValue}
         onSearchChange={handleSearch}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showViewToggle={true}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/goods-in-out/create')}
@@ -214,15 +249,124 @@ const VMSGoodsInOut: React.FC = () => {
           </Link>
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          selectable
-          selectedRows={selectedRows}
-          onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])}
-          onSelectAll={() => setSelectedRows(prev => prev.length === filteredData.length ? [] : filteredData.map(g => String(g.id)))}
-          viewPath={(row) => `/vms/goods-in-out/${row.id}`}
-        />
+        <>
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {paginatedData.map((item) => {
+                const personName = getPersonName(item);
+                return (
+                  <div key={item.id} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Package className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-foreground truncate">{personName}</h3>
+                          <p className="text-xs text-muted-foreground">ID: {item.id}</p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                        item.ward_type === 'in' ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'
+                      }`}>
+                        {item.ward_type === 'in' ? 'Inward' : 'Outward'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Truck className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{item.vehicle_no || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">
+                          In: {item.goods_in_time ? formatTime(item.goods_in_time) : '-'} | Out: {item.goods_out_time ? formatTime(item.goods_out_time) : '-'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-3 border-t border-border">
+                      <Link
+                        to={`/vms/goods-in-out/${item.id}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </Link>
+                      <Link
+                        to={`/vms/goods-in-out/${item.id}/edit`}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Edit
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={paginatedData}
+              selectable
+              selectedRows={selectedRows}
+              onSelectRow={handleSelectRow}
+              onSelectAll={handleSelectAll}
+            />
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-sm text-muted-foreground">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} entries
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1.5 text-sm rounded-lg ${
+                        currentPage === pageNum
+                          ? 'bg-primary text-primary-foreground'
+                          : 'border border-border hover:bg-accent'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );
