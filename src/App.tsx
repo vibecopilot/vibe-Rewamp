@@ -38,6 +38,7 @@ import CreateChecklist from "./pages/Asset/CreateChecklist";
 import CreatePPMActivity from "./pages/Asset/CreatePPMActivity";
 import ViewAsset from "./pages/Asset/ViewAsset";
 import EditAsset from "./pages/Asset/EditAsset";
+import EditStockItem from "./pages/Asset/EditStockItem";
 import { ViewAMC, ViewMeter, ViewChecklist as ViewAssetChecklist, ViewRoutineTask, ViewPPMChecklist, ViewPPMActivity, ViewStockItem } from "./pages/Asset/submodules";
 import { TicketList, TicketCreate, TicketView, TicketEdit } from "./pages/ServiceDesk";
 import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist as SoftServiceCreateChecklist, ViewChecklist as ViewSoftServiceChecklist, TaskList } from "./pages/SoftService";
@@ -136,15 +137,16 @@ function App() {
         <Route path="/asset/checklist" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
         <Route path="/asset/checklist/create" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
         <Route path="/asset/checklist/:id" element={<AuthenticatedLayout><ViewAssetChecklist /></AuthenticatedLayout>} />
-        <Route path="/asset/checklist/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Checklist" /></AuthenticatedLayout>} />
+        <Route path="/asset/checklist/:id/edit" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
         
         {/* Routine Task */}
         <Route path="/asset/routine-task" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
-        <Route path="/asset/routine-task/:id" element={<AuthenticatedLayout><ViewRoutineTask /></AuthenticatedLayout>} />
+        <Route path="/asset/routine-task/:assetId/:id" element={<AuthenticatedLayout><ViewRoutineTask /></AuthenticatedLayout>} />
         
         {/* PPM Checklist */}
         <Route path="/asset/ppm-checklist" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
         <Route path="/asset/ppm-checklist/:id" element={<AuthenticatedLayout><ViewPPMChecklist /></AuthenticatedLayout>} />
+        <Route path="/asset/ppm-checklist/:id/edit" element={<AuthenticatedLayout><CreateChecklist /></AuthenticatedLayout>} />
         
         {/* PPM Activity */}
         <Route path="/asset/ppm-activity" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
@@ -157,7 +159,7 @@ function App() {
         {/* Stock Items */}
         <Route path="/asset/stock-items" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
         <Route path="/asset/stock-items/:id" element={<AuthenticatedLayout><ViewStockItem /></AuthenticatedLayout>} />
-        <Route path="/asset/stock-items/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Stock Item" /></AuthenticatedLayout>} />
+        <Route path="/asset/stock-items/:id/edit" element={<AuthenticatedLayout><EditStockItem /></AuthenticatedLayout>} />
         
         {/* Soft Services - Service Tab */}
         <Route path="/soft-services" element={<AuthenticatedLayout><ServiceList /></AuthenticatedLayout>} />

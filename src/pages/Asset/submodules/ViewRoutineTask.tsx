@@ -21,10 +21,10 @@ const ViewRoutineTask: React.FC = () => {
   }, [id, assetId]);
 
   const fetchTaskDetails = async () => {
-    if (!id) return;
+    if (!id || !assetId) return;
     setLoading(true);
     try {
-      const res = await routineTaskService.getRoutineTaskById(assetId || '', id);
+      const res = await routineTaskService.getRoutineTaskById(assetId, id);
       const data = Array.isArray(res.data) ? res.data : [res.data];
       if (data.length > 0) {
         setTask({ ...data[0], submissions: data });

@@ -121,12 +121,12 @@ const PPMActivityList: React.FC<PPMActivityListProps> = ({ viewMode, searchValue
                 { label: 'Frequency', value: activity.frequency || '-' },
                 { label: 'Due Date', value: activity.due_date ? new Date(activity.due_date).toLocaleDateString() : '-' },
               ]}
-              viewPath={`/asset/ppm-activity/${activity.id}`}
+              viewPath={`/asset/ppm-activity/${activity.asset_id || 0}/${activity.id}`}
             />
           ))}
         </div>
       ) : (
-        <DataTable columns={columns} data={filteredActivities} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === filteredActivities.length ? [] : filteredActivities.map(a => String(a.id)))} viewPath={(row) => `/asset/ppm-activity/${row.id}`} />
+        <DataTable columns={columns} data={filteredActivities} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === filteredActivities.length ? [] : filteredActivities.map(a => String(a.id)))} viewPath={(row) => `/asset/ppm-activity/${row.asset_id || 0}/${row.id}`} />
       )}
 
       {filteredActivities.length > 0 && (

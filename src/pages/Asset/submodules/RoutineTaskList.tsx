@@ -121,12 +121,12 @@ const RoutineTaskList: React.FC<RoutineTaskListProps> = ({ viewMode, searchValue
                 { label: 'Frequency', value: task.frequency || '-' },
                 { label: 'Start', value: task.start_time ? new Date(task.start_time).toLocaleDateString() : '-' },
               ]}
-              viewPath={`/asset/routine-task/${task.id}`}
+              viewPath={`/asset/routine-task/${task.asset_id || 0}/${task.id}`}
             />
           ))}
         </div>
       ) : (
-        <DataTable columns={columns} data={filteredTasks} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === filteredTasks.length ? [] : filteredTasks.map(t => String(t.id)))} viewPath={(row) => `/asset/routine-task/${row.id}`} />
+        <DataTable columns={columns} data={filteredTasks} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === filteredTasks.length ? [] : filteredTasks.map(t => String(t.id)))} viewPath={(row) => `/asset/routine-task/${row.asset_id || 0}/${row.id}`} />
       )}
 
       {filteredTasks.length > 0 && (
