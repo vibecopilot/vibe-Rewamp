@@ -31,7 +31,9 @@ import {
   CreateRestaurant,
   CreatePantry,
   ViewPantry,
-  EditPantry
+  EditPantry,
+  ViewRestaurant,
+  EditRestaurant
 } from "./pages/FoodsBeverage";
 import AssetList from "./pages/Asset/AssetList";
 import CreateAsset from "./pages/Asset/CreateAsset";
@@ -216,8 +218,8 @@ function App() {
           <Route path="pantry" element={<PantryManagement />} />
         </Route>
         <Route path="/fb/restaurant/create" element={<AuthenticatedLayout><CreateRestaurant /></AuthenticatedLayout>} />
-        <Route path="/fb/restaurant/:id" element={<AuthenticatedLayout><PlaceholderPage title="Restaurant Details" /></AuthenticatedLayout>} />
-        <Route path="/fb/restaurant/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Restaurant" /></AuthenticatedLayout>} />
+        <Route path="/fb/restaurant/:id" element={<AuthenticatedLayout><ViewRestaurant /></AuthenticatedLayout>} />
+        <Route path="/fb/restaurant/:id/edit" element={<AuthenticatedLayout><EditRestaurant /></AuthenticatedLayout>} />
         <Route path="/fb/pantry/create" element={<AuthenticatedLayout><CreatePantry /></AuthenticatedLayout>} />
         <Route path="/fb/pantry/:id" element={<AuthenticatedLayout><ViewPantry /></AuthenticatedLayout>} />
         <Route path="/fb/pantry/:id/edit" element={<AuthenticatedLayout><EditPantry /></AuthenticatedLayout>} />
