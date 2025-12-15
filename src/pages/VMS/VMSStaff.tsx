@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ListToolbar from '../../components/ui/ListToolbar';
 import DataTable, { TableColumn } from '../../components/ui/DataTable';
-import { Loader2, Users, AlertCircle, RefreshCw, Eye, Edit2 } from 'lucide-react';
+import { Loader2, Users, AlertCircle, RefreshCw, Eye, Edit2, Phone, Briefcase, Building } from 'lucide-react';
 import { getStaff, domainPrefix } from '../../api';
 
 interface Staff {
@@ -15,7 +15,11 @@ interface Staff {
   work_type?: string;
   profile_picture?: { url: string };
   created_at?: string;
+  status?: boolean;
 }
+
+const GRID_PAGE_SIZE = 12;
+const LIST_PAGE_SIZE = 10;
 
 const VMSStaff: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +29,10 @@ const VMSStaff: React.FC = () => {
   const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const pageSize = viewMode === 'grid' ? GRID_PAGE_SIZE : LIST_PAGE_SIZE;
 
   const fetchStaff = useCallback(async () => {
     setLoading(true);
@@ -52,6 +60,10 @@ const VMSStaff: React.FC = () => {
     fetchStaff();
   }, [fetchStaff]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [viewMode, searchValue]);
+
   const handleSearch = (value: string) => {
     setSearchValue(value);
     if (value.trim() === '') {
@@ -76,25 +88,28 @@ const VMSStaff: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedRows.length === filteredStaff.length) {
-      setSelectedRows([]);
+    const currentPageData = paginatedData;
+    const currentPageIds = currentPageData.map(s => String(s.id));
+    const allSelected = currentPageIds.every(id => selectedRows.includes(id));
+    if (allSelected) {
+      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
     } else {
-      setSelectedRows(filteredStaff.map(s => String(s.id)));
+      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
     }
   };
+
+  const totalPages = Math.ceil(filteredStaff.length / pageSize);
+  const paginatedData = filteredStaff.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const columns: TableColumn<Staff>[] = [
     {
       key: 'actions',
       header: 'ACTION',
-      width: '100px',
+      width: '80px',
       render: (_, row) => (
-        <div className="flex items-center gap-3">
-          <Link to={`/vms/staff/${row.id}`} className="text-muted-foreground hover:text-primary">
+        <div className="flex items-center gap-2">
+          <Link to={`/vms/staff/${row.id}`} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-colors">
             <Eye className="w-4 h-4" />
-          </Link>
-          <Link to={`/vms/staff/${row.id}/edit`} className="text-muted-foreground hover:text-primary">
-            <Edit2 className="w-4 h-4" />
           </Link>
         </div>
       ),
@@ -163,6 +178,9 @@ const VMSStaff: React.FC = () => {
         searchPlaceholder="Search by name, unit, or mobile"
         searchValue={searchValue}
         onSearchChange={handleSearch}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showViewToggle={true}
         onFilter={() => console.log('Filter clicked')}
         onExport={() => console.log('Export clicked')}
         onAdd={() => navigate('/vms/staff/create')}
@@ -192,16 +210,133 @@ const VMSStaff: React.FC = () => {
         </div>
       )}
 
-      {filteredStaff.length > 0 && (
+      {filteredStaff.length > 0 && viewMode === 'grid' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {paginatedData.map((staff) => {
+            const fullName = `${staff.firstname || ''} ${staff.lastname || ''}`.trim() || 'N/A';
+            return (
+              <div key={staff.id} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                      {staff.profile_picture?.url ? (
+                        <img
+                          src={domainPrefix + staff.profile_picture.url}
+                          alt={fullName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img src="/profile.png" alt="Default" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{fullName}</h3>
+                      <p className="text-xs text-muted-foreground">ID: {staff.id}</p>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    staff.status ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                  }`}>
+                    {staff.status ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Building className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{staff.unit_name || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Phone className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{staff.mobile_no || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Briefcase className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{staff.work_type || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-3 border-t border-border">
+                  <Link
+                    to={`/vms/staff/${staff.id}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    View
+                  </Link>
+                  <Link
+                    to={`/vms/staff/${staff.id}/edit`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-accent transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {filteredStaff.length > 0 && viewMode === 'table' && (
         <DataTable
           columns={columns}
-          data={filteredStaff}
+          data={paginatedData}
           selectable
           selectedRows={selectedRows}
           onSelectRow={handleSelectRow}
           onSelectAll={handleSelectAll}
-          viewPath={(row) => `/vms/staff/${row.id}`}
         />
+      )}
+
+      {/* Pagination */}
+      {filteredStaff.length > 0 && totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredStaff.length)} of {filteredStaff.length} entries
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-1.5 text-sm rounded-lg ${
+                    currentPage === pageNum
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-border hover:bg-accent'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

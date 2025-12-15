@@ -19,6 +19,7 @@ import {
   CreateVisitor, 
   ViewVisitor,
   StaffCreate,
+  StaffView,
   GoodsCreate,
   VehicleCreate
 } from "./pages/VMS";
@@ -109,7 +110,7 @@ function App() {
         <Route path="/vms/registered-vehicles/:id" element={<AuthenticatedLayout><PlaceholderPage title="Vehicle Details" /></AuthenticatedLayout>} />
         <Route path="/vms/registered-vehicles/:id/edit" element={<AuthenticatedLayout><VehicleCreate /></AuthenticatedLayout>} />
         <Route path="/vms/staff/create" element={<AuthenticatedLayout><StaffCreate /></AuthenticatedLayout>} />
-        <Route path="/vms/staff/:id" element={<AuthenticatedLayout><PlaceholderPage title="Staff Details" /></AuthenticatedLayout>} />
+        <Route path="/vms/staff/:id" element={<AuthenticatedLayout><StaffView /></AuthenticatedLayout>} />
         <Route path="/vms/staff/:id/edit" element={<AuthenticatedLayout><StaffCreate /></AuthenticatedLayout>} />
         <Route path="/vms/patrolling/:id" element={<AuthenticatedLayout><PlaceholderPage title="Patrolling Details" /></AuthenticatedLayout>} />
         <Route path="/vms/patrolling/:id/edit" element={<AuthenticatedLayout><PlaceholderPage title="Edit Patrolling" /></AuthenticatedLayout>} />
