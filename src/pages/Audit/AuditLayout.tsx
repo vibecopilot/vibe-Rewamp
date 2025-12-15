@@ -38,25 +38,6 @@ const AuditLayout: React.FC = () => {
   return (
     <div className="p-6">
       <Breadcrumb items={breadcrumbItems} />
-      
-      {/* Main Tab Navigation (Operational / Vendor) */}
-      <div className="border-b border-border mb-4">
-        <nav className="flex gap-1 overflow-x-auto scrollbar-hide">
-          {mainTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => navigate(tab.id === 'operational' ? '/audit/operational/scheduled' : '/audit/vendor/scheduled')}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                location.pathname.startsWith(tab.path)
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
 
       {/* Sub-Tab Navigation (Scheduled / Conducted / Checklists) */}
       {subTabs.length > 0 && (
