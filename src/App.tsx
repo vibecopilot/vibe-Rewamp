@@ -39,9 +39,7 @@ import CreatePPMActivity from "./pages/Asset/CreatePPMActivity";
 import ViewAsset from "./pages/Asset/ViewAsset";
 import EditAsset from "./pages/Asset/EditAsset";
 import { ViewAMC, ViewMeter, ViewChecklist as ViewAssetChecklist, ViewRoutineTask, ViewPPMChecklist, ViewPPMActivity, ViewStockItem } from "./pages/Asset/submodules";
-import TicketCreate from "./pages/ServiceDesk/TicketCreate";
-import TicketView from "./pages/ServiceDesk/TicketView";
-import TicketEdit from "./pages/ServiceDesk/TicketEdit";
+import { TicketList, TicketCreate, TicketView, TicketEdit } from "./pages/ServiceDesk";
 import { ServiceList, CreateService, ViewService, ChecklistList, CreateChecklist as SoftServiceCreateChecklist, ViewChecklist as ViewSoftServiceChecklist, TaskList } from "./pages/SoftService";
 import {
   AmenitiesList,
