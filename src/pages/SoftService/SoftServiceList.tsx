@@ -101,7 +101,7 @@ const SoftServiceList: React.FC = () => {
         onViewModeChange={setViewMode}
         onFilter={() => {}}
         onExport={() => {}}
-        onAdd={() => navigate('/soft-service/create')}
+        onAdd={() => navigate('/soft-services/create')}
         addLabel="Add Service"
         showQrCode
         onQrCode={() => {}}
@@ -123,11 +123,11 @@ const SoftServiceList: React.FC = () => {
             <DataCard key={service.id} title={service.name} subtitle={service.service_type || '-'} status={getServiceStatus(service)} fields={[
               { label: 'Building', value: service.building_name || '-' },
               { label: 'Frequency', value: service.frequency || '-' },
-            ]} viewPath={`/soft-service/${service.id}`} editPath={`/soft-service/${service.id}/edit`} />
+            ]} viewPath={`/soft-services/${service.id}`} editPath={`/soft-services/${service.id}/edit`} />
           ))}
         </div>
       ) : services.length > 0 && (
-        <DataTable columns={columns} data={services} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === services.length ? [] : services.map(s => String(s.id)))} viewPath={(row) => `/soft-service/${row.id}`} />
+        <DataTable columns={columns} data={services} selectable selectedRows={selectedRows} onSelectRow={(id) => setSelectedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id])} onSelectAll={() => setSelectedRows(selectedRows.length === services.length ? [] : services.map(s => String(s.id)))} viewPath={(row) => `/soft-services/${row.id}`} editPath={(row) => `/soft-services/${row.id}/edit`} />
       )}
 
       {services.length > 0 && (
