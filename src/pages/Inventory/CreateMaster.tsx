@@ -72,24 +72,21 @@ const CreateMaster: React.FC = () => {
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const [groupsRes, unitsRes, sacRes] = await Promise.all([
+        const [groupsRes, unitsRes, sacRes, categoriesRes] = await Promise.all([
           getStockGroupsList(),
           getStandardUnits?.() || Promise.resolve({ data: [] }),
           getHSNSetup?.() || Promise.resolve({ data: [] }),
+          import('../../api').then(api => api.getGenericCategory?.() || Promise.resolve({ data: [] })),
         ]);
         setGroups(Array.isArray(groupsRes?.data) ? groupsRes.data : []);
         setUnits(Array.isArray(unitsRes?.data) ? unitsRes.data : []);
-        // Static categories for inventory
-        setCategories([
-          { id: 1, name: 'Electrical' },
-          { id: 2, name: 'Mechanical' },
-          { id: 3, name: 'Plumbing' },
-          { id: 4, name: 'HVAC' },
-          { id: 5, name: 'Civil' },
-          { id: 6, name: 'Safety' },
-          { id: 7, name: 'IT Equipment' },
-          { id: 8, name: 'Office Supplies' },
-        ]);
+        // Dynamic categories from API
+        const catData = Array.isArray(categoriesRes?.data) ? categoriesRes.data : [];
+        // Filter for inventory-related categories if available, otherwise use all
+        const inventoryCategories = catData.filter((c: any) => 
+          c.info_type === 'InventoryCategory' || c.info_type === 'ItemCategory'
+        );
+        setCategories(inventoryCategories.length > 0 ? inventoryCategories : catData);
         setSacCodes(Array.isArray(sacRes?.data) ? sacRes.data : []);
       } catch (error) {
         console.error('Error fetching dropdowns:', error);
