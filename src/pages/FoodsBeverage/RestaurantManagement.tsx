@@ -232,6 +232,12 @@ const RestaurantManagement: React.FC = () => {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <button
+          onClick={() => navigate('/fb/restaurant/pos')}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-accent-foreground border border-primary rounded-lg hover:bg-accent/90 transition-colors"
+        >
+          🖥️ POS System
+        </button>
+        <button
           onClick={() => navigate('/fb/restaurant/create')}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
