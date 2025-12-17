@@ -33,7 +33,8 @@ import {
   ViewPantry,
   EditPantry,
   ViewRestaurant,
-  EditRestaurant
+  EditRestaurant,
+  RestaurantPOS
 } from "./pages/FoodsBeverage";
 import AssetList from "./pages/Asset/AssetList";
 import CreateAsset from "./pages/Asset/CreateAsset";
@@ -216,6 +217,7 @@ function App() {
         <Route path="/fb" element={<AuthenticatedLayout><FBLayout /></AuthenticatedLayout>}>
           <Route index element={<Navigate to="/fb/restaurant" replace />} />
           <Route path="restaurant" element={<RestaurantManagement />} />
+          <Route path="restaurant/pos" element={<RestaurantPOS />} />
           <Route path="pantry" element={<PantryManagement />} />
         </Route>
         <Route path="/fb/restaurant/create" element={<AuthenticatedLayout><CreateRestaurant /></AuthenticatedLayout>} />

@@ -7,3 +7,4 @@ export { default as ViewPantry } from './ViewPantry';
 export { default as EditPantry } from './EditPantry';
 export { default as ViewRestaurant } from './ViewRestaurant';
 export { default as EditRestaurant } from './EditRestaurant';
+export { default as RestaurantPOS } from './RestaurantPOS';
