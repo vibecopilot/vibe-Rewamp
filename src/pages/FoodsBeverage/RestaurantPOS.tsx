@@ -1,41 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Minus, Trash2, Clock, Printer, ShoppingCart, Utensils, Leaf, Drumstick, Construction } from 'lucide-react';
+import { Search, Plus, Minus, Printer, Construction } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Types
 interface MenuItem {
   id: number;
   name: string;
-  code: string;
   price: number;
-  category: string;
-  isVeg: boolean;
 }
 
 interface CartItem extends MenuItem {
-  quantity: number;
+  qty: number;
+  checked: boolean;
 }
 
 type OrderType = 'dine-in' | 'delivery' | 'pickup';
-type PaymentMode = 'cash' | 'due' | 'card' | 'part-payment' | 'other';
 
-// Static menu data
-const staticMenuItems: MenuItem[] = [
-  // Veg Items
-  { id: 1, name: 'Paneer Tikka', code: 'VEG001', price: 280, category: 'Favourite Items', isVeg: true },
-  { id: 2, name: 'Paneer Kabab', code: 'VEG002', price: 250, category: 'Favourite Items', isVeg: true },
-  { id: 3, name: 'Veg Spring Rolls', code: 'VEG003', price: 180, category: 'Favourite Items', isVeg: true },
-  { id: 4, name: 'Mushroom Manchurian', code: 'VEG004', price: 220, category: 'Favourite Items', isVeg: true },
-  { id: 5, name: 'Veg Momos', code: 'VEG005', price: 150, category: 'Favourite Items', isVeg: true },
-  { id: 6, name: 'Aloo Tikki', code: 'VEG006', price: 120, category: 'Favourite Items', isVeg: true },
-  // Non-Veg Items
-  { id: 7, name: 'Chicken Lollipop', code: 'NV001', price: 320, category: 'Favourite Items', isVeg: false },
-  { id: 8, name: 'Hara Bhara Kabab', code: 'NV002', price: 290, category: 'Favourite Items', isVeg: false },
-  { id: 9, name: 'Fish Fingers', code: 'NV003', price: 350, category: 'Favourite Items', isVeg: false },
-  { id: 10, name: 'Chicken Wings', code: 'NV004', price: 300, category: 'Favourite Items', isVeg: false },
-  { id: 11, name: 'Mutton Seekh Kabab', code: 'NV005', price: 380, category: 'Favourite Items', isVeg: false },
-  { id: 12, name: 'Prawns Fry', code: 'NV006', price: 420, category: 'Favourite Items', isVeg: false },
+// Static menu data - exactly as specified
+const vegItems: MenuItem[] = [
+  { id: 1, name: "Paneer Tikka", price: 80 },
+  { id: 2, name: "Paneer Kabab", price: 90 },
+  { id: 3, name: "Veg Spring Roles", price: 70 }
+];
+
+const nonVegItems: MenuItem[] = [
+  { id: 4, name: "Chicken Lollipop", price: 240 },
+  { id: 5, name: "Hara Bhara Kabab", price: 180 },
+  { id: 6, name: "Fish Fingers", price: 200 }
 ];
 
 // Category tabs
@@ -56,19 +48,19 @@ const categoryTabs = [
   { id: 'fastfood', label: 'Fastfood', active: false },
 ];
 
-// Level 3 tabs for Restaurant Management
+// Level 3 tabs
 const level3Tabs = [
-  { id: 'pos', label: 'POS', path: '/fb/restaurant/pos', active: true },
-  { id: 'pantry', label: 'Pantry Management', path: '', active: false },
-  { id: 'restaurant', label: 'Restaurant', path: '', active: false },
-  { id: 'status', label: 'Status Setup', path: '', active: false },
-  { id: 'categories', label: 'Categories Setup', path: '', active: false },
-  { id: 'subcategories', label: 'Sub Categories Setup', path: '', active: false },
-  { id: 'menu', label: 'Restaurant Menu', path: '', active: false },
-  { id: 'bookings', label: 'Restaurant Bookings', path: '', active: false },
+  { id: 'pos', label: 'POS', active: true },
+  { id: 'pantry', label: 'Pantry Management', active: false },
+  { id: 'restaurant', label: 'Restaurant', active: false },
+  { id: 'status', label: 'Status Setup', active: false },
+  { id: 'categories', label: 'Categories Setup', active: false },
+  { id: 'subcategories', label: 'Sub Categories Setup', active: false },
+  { id: 'menu', label: 'Restaurant Menu', active: false },
+  { id: 'bookings', label: 'Restaurant Bookings', active: false },
 ];
 
-// Level 4 tabs for POS
+// Level 4 tabs
 const level4Tabs = [
   { id: 'pos-main', label: 'POS', active: true },
   { id: 'new-table', label: 'New Table', active: false },
@@ -85,174 +77,71 @@ const RestaurantPOS: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('favourite');
   const [activeLevel3Tab, setActiveLevel3Tab] = useState('pos');
   const [activeLevel4Tab, setActiveLevel4Tab] = useState('pos-main');
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCartItems, setSelectedCartItems] = useState<number[]>([]);
-  const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
+  
+  // Cart state - initialized with sample items as specified
+  const [cart, setCart] = useState<CartItem[]>([
+    { id: 1, name: "Paneer Tikka", qty: 1, price: 80, checked: true },
+    { id: 3, name: "Veg Spring Roles", qty: 1, price: 70, checked: true },
+    { id: 4, name: "Chicken Lollipop", qty: 1, price: 240, checked: true }
+  ]);
+  
+  const [paymentMode, setPaymentMode] = useState('cash');
   const [isPaid, setIsPaid] = useState(false);
   const [useLoyalty, setUseLoyalty] = useState(false);
   const [sendFeedback, setSendFeedback] = useState(false);
-  const [kotNumber, setKotNumber] = useState(1001);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
 
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (timerRunning && cart.length > 0) {
-      interval = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [timerRunning, cart.length]);
+  // Calculate total from checked items
+  const totalAmount = useMemo(() => {
+    return cart.filter(item => item.checked).reduce((sum, item) => sum + (item.price * item.qty), 0);
+  }, [cart]);
 
-  // Start timer when first item is added
-  useEffect(() => {
-    if (cart.length > 0 && !timerRunning) {
-      setTimerRunning(true);
-    }
-    if (cart.length === 0) {
-      setTimerRunning(false);
-      setElapsedTime(0);
-    }
-  }, [cart.length, timerRunning]);
-
-  // Format time
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Filter menu items based on search
-  const filteredItems = staticMenuItems.filter(item => {
-    const matchesName = item.name.toLowerCase().includes(searchItem.toLowerCase());
-    const matchesCode = item.code.toLowerCase().includes(searchCode.toLowerCase());
-    const matchesCategory = activeCategory === 'favourite' && item.category === 'Favourite Items';
-    
-    return matchesCategory && (searchItem ? matchesName : true) && (searchCode ? matchesCode : true);
-  });
-
-  const vegItems = filteredItems.filter(item => item.isVeg);
-  const nonVegItems = filteredItems.filter(item => !item.isVeg);
-
-  // Cart functions
-  const addToCart = useCallback((item: MenuItem) => {
+  // Add to cart
+  const addToCart = (item: MenuItem) => {
     setCart(prev => {
       const existing = prev.find(cartItem => cartItem.id === item.id);
       if (existing) {
+        toast.success(`${item.name} quantity increased`);
         return prev.map(cartItem =>
           cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            ? { ...cartItem, qty: cartItem.qty + 1 }
             : cartItem
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      toast.success(`${item.name} added to cart`);
+      return [...prev, { ...item, qty: 1, checked: true }];
     });
-    toast.success(`${item.name} added to cart`);
-  }, []);
+  };
 
-  const updateQuantity = useCallback((itemId: number, delta: number) => {
+  // Update quantity
+  const updateQuantity = (itemId: number, delta: number) => {
     setCart(prev => {
       const item = prev.find(i => i.id === itemId);
       if (!item) return prev;
       
-      const newQty = item.quantity + delta;
+      const newQty = item.qty + delta;
       if (newQty <= 0) {
         toast.success(`${item.name} removed from cart`);
         return prev.filter(i => i.id !== itemId);
       }
-      return prev.map(i => i.id === itemId ? { ...i, quantity: newQty } : i);
+      return prev.map(i => i.id === itemId ? { ...i, qty: newQty } : i);
     });
-  }, []);
-
-  const removeSelected = useCallback(() => {
-    if (selectedCartItems.length === 0) {
-      toast.error('Please select items to remove');
-      return;
-    }
-    setCart(prev => prev.filter(item => !selectedCartItems.includes(item.id)));
-    setSelectedCartItems([]);
-    toast.success('Selected items removed');
-  }, [selectedCartItems]);
-
-  const toggleCartItemSelection = (itemId: number) => {
-    setSelectedCartItems(prev =>
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
   };
 
-  const selectAllCartItems = () => {
-    if (selectedCartItems.length === cart.length) {
-      setSelectedCartItems([]);
-    } else {
-      setSelectedCartItems(cart.map(item => item.id));
-    }
+  // Toggle item check
+  const toggleItemCheck = (itemId: number) => {
+    setCart(prev => prev.map(item =>
+      item.id === itemId ? { ...item, checked: !item.checked } : item
+    ));
   };
 
-  // Calculate total
-  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  // Action handlers
-  const handleSave = () => {
-    if (cart.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
-    toast.success('Order saved successfully');
-    resetOrder();
+  // Handle order type change
+  const handleOrderTypeChange = (type: OrderType) => {
+    setOrderType(type);
+    const typeLabels = { 'dine-in': 'Dine In', 'delivery': 'Delivery', 'pickup': 'Pick Up' };
+    toast.success(`Order type changed to ${typeLabels[type]}`);
   };
 
-  const handleSaveAndPrint = () => {
-    if (cart.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
-    toast.success('Order saved and receipt printed');
-    resetOrder();
-  };
-
-  const handleSaveAndKOT = () => {
-    if (cart.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
-    toast.success(`Order saved and KOT #${kotNumber} generated`);
-    setKotNumber(prev => prev + 1);
-    resetOrder();
-  };
-
-  const handleKOT = () => {
-    if (cart.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
-    toast.success(`KOT #${kotNumber} sent to kitchen`);
-    setKotNumber(prev => prev + 1);
-  };
-
-  const handleKOTAndPrint = () => {
-    if (cart.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
-    toast.success(`KOT #${kotNumber} sent to kitchen and printed`);
-    setKotNumber(prev => prev + 1);
-  };
-
-  const resetOrder = () => {
-    setCart([]);
-    setSelectedCartItems([]);
-    setPaymentMode('cash');
-    setIsPaid(false);
-    setUseLoyalty(false);
-    setSendFeedback(false);
-    setElapsedTime(0);
-    setTimerRunning(false);
-  };
-
+  // Handle tab clicks
   const handleLevel3TabClick = (tabId: string) => {
     if (tabId !== 'pos') {
       toast('This section is under construction', { icon: '🚧' });
@@ -269,31 +158,85 @@ const RestaurantPOS: React.FC = () => {
 
   const handleCategoryClick = (categoryId: string) => {
     if (categoryId !== 'favourite') {
-      toast('This category is under construction', { icon: '🚧' });
+      toast('This section is under construction', { icon: '🚧' });
+      return;
     }
     setActiveCategory(categoryId);
   };
 
+  // Action button handlers - static only
+  const handleSave = () => {
+    if (cart.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+    toast.success('Order saved successfully!');
+  };
+
+  const handleSaveAndPrint = () => {
+    if (cart.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+    toast.success('Order saved and sent to printer');
+  };
+
+  const handleSaveAndKOT = () => {
+    if (cart.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+    toast.success('Order saved and kitchen order sent');
+  };
+
+  const handleKOT = () => {
+    if (cart.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+    toast.success('Kitchen order sent');
+  };
+
+  const handleKOTAndPrint = () => {
+    if (cart.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+    toast.success('Kitchen order sent and printed');
+  };
+
   // Render under construction placeholder
   const renderUnderConstruction = (title: string) => (
-    <div className="flex flex-col items-center justify-center h-96 bg-card border border-border rounded-lg">
+    <div className="flex flex-col items-center justify-center h-80 bg-card border border-border rounded-lg">
       <Construction className="w-16 h-16 text-muted-foreground mb-4" />
       <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
       <p className="text-muted-foreground">This section is under construction</p>
     </div>
   );
 
-  // Check if showing under construction
-  const showUnderConstruction = activeLevel3Tab !== 'pos' || activeLevel4Tab !== 'pos-main' || activeCategory !== 'favourite';
+  // Item Card Component
+  const ItemCard = ({ item, isVeg }: { item: MenuItem; isVeg: boolean }) => (
+    <div
+      onClick={() => addToCart(item)}
+      className={`bg-card p-4 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-l-4 ${
+        isVeg ? 'border-l-green-500' : 'border-l-red-500'
+      } border border-border`}
+    >
+      <div className="text-center">
+        <h4 className="text-sm font-medium text-foreground">{item.name}</h4>
+        <p className="text-xs text-muted-foreground mt-1">₹{item.price}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-[calc(100vh-200px)]">
       {/* Breadcrumb */}
       <div className="text-sm text-muted-foreground mb-4">
         Booking Management &gt; F&B &gt; Restaurant Management &gt; POS
       </div>
 
-      {/* Level 3 Tabs - Restaurant Management sections */}
+      {/* Level 3 Tabs */}
       <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 border-b border-border">
         {level3Tabs.map(tab => (
           <button
@@ -306,15 +249,15 @@ const RestaurantPOS: React.FC = () => {
             }`}
           >
             {tab.label}
-            {!tab.active && <span className="ml-1 text-xs">(UC)</span>}
+            {!tab.active && <span className="ml-1 text-xs opacity-70">(UC)</span>}
           </button>
         ))}
       </div>
 
-      {activeLevel3Tab === 'pos' && (
+      {activeLevel3Tab === 'pos' ? (
         <>
-          {/* Level 4 Tabs - POS sub-sections */}
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
+          {/* Level 4 Tabs */}
+          <div className="flex items-center gap-2 mb-4">
             {level4Tabs.map(tab => (
               <button
                 key={tab.id}
@@ -326,53 +269,70 @@ const RestaurantPOS: React.FC = () => {
                 }`}
               >
                 {tab.label}
-                {!tab.active && <span className="ml-1 text-xs">(UC)</span>}
+                {!tab.active && <span className="ml-1 text-xs opacity-70">(UC)</span>}
               </button>
             ))}
           </div>
 
           {activeLevel4Tab === 'pos-main' ? (
-            <div className="flex gap-4 flex-1 min-h-0">
-              {/* LEFT SECTION - Menu Display */}
-              <div className="flex-1 flex flex-col bg-card border border-border rounded-lg p-4 overflow-hidden">
-                {/* Search Controls */}
-                <div className="flex flex-wrap gap-4 mb-4">
-                  <div className="flex-1 min-w-[200px] relative">
+            <div className="flex gap-4 flex-1">
+              {/* LEFT SECTION - 60% */}
+              <div className="w-[60%] flex flex-col bg-card border border-border rounded-lg p-4">
+                {/* Top Controls */}
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <div className="flex-1 min-w-[150px] relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search Item..."
                       value={searchItem}
                       onChange={(e) => setSearchItem(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
-                  <div className="flex-1 min-w-[200px] relative">
+                  <div className="flex-1 min-w-[150px] relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search Code..."
                       value={searchCode}
                       onChange={(e) => setSearchCode(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   
                   {/* Order Type Buttons */}
                   <div className="flex gap-2">
-                    {(['dine-in', 'delivery', 'pickup'] as OrderType[]).map(type => (
-                      <button
-                        key={type}
-                        onClick={() => setOrderType(type)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                          orderType === type
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary text-muted-foreground hover:bg-accent'
-                        }`}
-                      >
-                        {type === 'dine-in' ? 'Dine In' : type === 'delivery' ? 'Delivery' : 'Pick Up'}
-                      </button>
-                    ))}
+                    <button
+                      onClick={() => handleOrderTypeChange('dine-in')}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        orderType === 'dine-in'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-foreground border border-border hover:bg-accent'
+                      }`}
+                    >
+                      Dine In
+                    </button>
+                    <button
+                      onClick={() => handleOrderTypeChange('delivery')}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        orderType === 'delivery'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-foreground border border-border hover:bg-accent'
+                      }`}
+                    >
+                      Delivery
+                    </button>
+                    <button
+                      onClick={() => handleOrderTypeChange('pickup')}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        orderType === 'pickup'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-foreground border border-border hover:bg-accent'
+                      }`}
+                    >
+                      Pick Up
+                    </button>
                   </div>
                 </div>
 
@@ -389,202 +349,133 @@ const RestaurantPOS: React.FC = () => {
                       }`}
                     >
                       {cat.label}
-                      {!cat.active && ' (UC)'}
                     </button>
                   ))}
                 </div>
 
-                {/* Item Display Section */}
-                {activeCategory === 'favourite' ? (
-                  <div className="flex-1 overflow-y-auto">
-                    {/* Veg Section */}
-                    <div className="mb-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Leaf className="w-5 h-5 text-green-600" />
-                        <h3 className="text-lg font-semibold text-foreground">Veg</h3>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {vegItems.map(item => (
-                          <div
-                            key={item.id}
-                            onClick={() => addToCart(item)}
-                            className="p-3 bg-background border-2 border-green-500 rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="w-4 h-4 border-2 border-green-600 flex items-center justify-center">
-                                <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                              </span>
-                              <span className="text-xs text-muted-foreground">{item.code}</span>
-                            </div>
-                            <h4 className="text-sm font-medium text-foreground mb-1">{item.name}</h4>
-                            <p className="text-sm font-bold text-primary">₹{item.price}</p>
-                          </div>
-                        ))}
-                      </div>
+                {/* Menu Items */}
+                <div className="flex-1 overflow-y-auto">
+                  {/* Veg Section */}
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      <h3 className="text-base font-semibold text-foreground">Veg</h3>
                     </div>
-
-                    {/* Non-Veg Section */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Drumstick className="w-5 h-5 text-red-600" />
-                        <h3 className="text-lg font-semibold text-foreground">Non Veg</h3>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {nonVegItems.map(item => (
-                          <div
-                            key={item.id}
-                            onClick={() => addToCart(item)}
-                            className="p-3 bg-background border-2 border-red-500 rounded-lg cursor-pointer hover:shadow-lg transition-shadow"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="w-4 h-4 border-2 border-red-600 flex items-center justify-center">
-                                <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                              </span>
-                              <span className="text-xs text-muted-foreground">{item.code}</span>
-                            </div>
-                            <h4 className="text-sm font-medium text-foreground mb-1">{item.name}</h4>
-                            <p className="text-sm font-bold text-primary">₹{item.price}</p>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {vegItems.map(item => (
+                        <ItemCard key={item.id} item={item} isVeg={true} />
+                      ))}
                     </div>
                   </div>
-                ) : (
-                  renderUnderConstruction(categoryTabs.find(c => c.id === activeCategory)?.label || 'Category')
-                )}
+
+                  {/* Non-Veg Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                      <h3 className="text-base font-semibold text-foreground">Non Veg</h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {nonVegItems.map(item => (
+                        <ItemCard key={item.id} item={item} isVeg={false} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* RIGHT SECTION - Cart & Billing */}
-              <div className="w-96 flex flex-col bg-card border border-border rounded-lg overflow-hidden">
+              {/* RIGHT SECTION - 40% */}
+              <div className="w-[40%] flex flex-col bg-card border border-border rounded-lg overflow-hidden">
                 {/* Cart Header */}
-                <div className="p-4 border-b border-border bg-secondary">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="w-5 h-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">Cart</h3>
-                      <span className="text-sm text-muted-foreground">({cart.length} items)</span>
-                    </div>
-                    {selectedCartItems.length > 0 && (
-                      <button
-                        onClick={removeSelected}
-                        className="p-2 text-destructive hover:bg-destructive/10 rounded-lg"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                <div className="p-3 bg-secondary border-b border-border">
+                  <h3 className="font-semibold text-foreground">Cart Items</h3>
                 </div>
 
                 {/* Cart Table */}
                 <div className="flex-1 overflow-y-auto">
-                  {cart.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-                      <Utensils className="w-12 h-12 mb-2 opacity-50" />
-                      <p>No items in cart</p>
-                    </div>
-                  ) : (
-                    <table className="w-full">
-                      <thead className="bg-muted sticky top-0">
+                  <table className="w-full">
+                    <thead className="bg-muted sticky top-0">
+                      <tr>
+                        <th className="p-2 text-left text-xs font-medium text-muted-foreground w-10">✓</th>
+                        <th className="p-2 text-left text-xs font-medium text-muted-foreground">Items</th>
+                        <th className="p-2 text-center text-xs font-medium text-muted-foreground w-24">Qty</th>
+                        <th className="p-2 text-right text-xs font-medium text-muted-foreground w-20">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cart.length === 0 ? (
                         <tr>
-                          <th className="p-2 text-left text-xs font-medium text-muted-foreground">
-                            <input
-                              type="checkbox"
-                              checked={selectedCartItems.length === cart.length && cart.length > 0}
-                              onChange={selectAllCartItems}
-                              className="w-4 h-4 rounded border-border"
-                            />
-                          </th>
-                          <th className="p-2 text-left text-xs font-medium text-muted-foreground">Item</th>
-                          <th className="p-2 text-center text-xs font-medium text-muted-foreground">Qty</th>
-                          <th className="p-2 text-right text-xs font-medium text-muted-foreground">Price</th>
+                          <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                            No items in cart
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {cart.map(item => (
+                      ) : (
+                        cart.map(item => (
                           <tr key={item.id} className="border-b border-border">
                             <td className="p-2">
                               <input
                                 type="checkbox"
-                                checked={selectedCartItems.includes(item.id)}
-                                onChange={() => toggleCartItemSelection(item.id)}
-                                className="w-4 h-4 rounded border-border"
+                                checked={item.checked}
+                                onChange={() => toggleItemCheck(item.id)}
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                               />
                             </td>
-                            <td className="p-2">
-                              <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></span>
-                                <span className="text-sm text-foreground">{item.name}</span>
-                              </div>
-                            </td>
+                            <td className="p-2 text-sm text-foreground">{item.name}</td>
                             <td className="p-2">
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => updateQuantity(item.id, -1)}
-                                  className="w-6 h-6 flex items-center justify-center bg-secondary rounded hover:bg-accent"
+                                  className="w-6 h-6 flex items-center justify-center bg-secondary rounded hover:bg-accent text-foreground"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
-                                <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                                <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
                                 <button
                                   onClick={() => updateQuantity(item.id, 1)}
-                                  className="w-6 h-6 flex items-center justify-center bg-secondary rounded hover:bg-accent"
+                                  className="w-6 h-6 flex items-center justify-center bg-secondary rounded hover:bg-accent text-foreground"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </button>
                               </div>
                             </td>
                             <td className="p-2 text-right text-sm font-medium text-foreground">
-                              ₹{item.price * item.quantity}
+                              ₹{item.price * item.qty}
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Order Summary */}
                 <div className="border-t border-border">
                   <div className="p-3 bg-muted flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-muted-foreground">KOT: <span className="font-medium text-foreground">{kotNumber}</span></span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        {formatTime(elapsedTime)}
-                      </span>
-                    </div>
-                    <div className="text-lg font-bold text-primary">
-                      Total: ₹{totalAmount}
-                    </div>
+                    <span className="text-muted-foreground">KOT: 10 Time - 0:330</span>
+                    <span className="text-lg font-bold text-primary">Total: ₹{totalAmount.toFixed(1)}</span>
                   </div>
 
                   {/* Payment Options */}
                   <div className="p-3 border-t border-border">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Payment Mode</p>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {([
-                        { value: 'cash', label: 'Cash' },
-                        { value: 'due', label: 'Due' },
-                        { value: 'card', label: 'Card' },
-                        { value: 'part-payment', label: 'Part Payment' },
-                        { value: 'other', label: 'Other' },
-                      ] as { value: PaymentMode; label: string }[]).map(option => (
-                        <label key={option.value} className="flex items-center gap-1.5 cursor-pointer">
+                    <div className="flex flex-wrap gap-3 mb-3">
+                      {['cash', 'due', 'card', 'part-payment', 'other'].map(mode => (
+                        <label key={mode} className="flex items-center gap-1.5 cursor-pointer">
                           <input
                             type="radio"
                             name="paymentMode"
-                            value={option.value}
-                            checked={paymentMode === option.value}
-                            onChange={() => setPaymentMode(option.value)}
+                            value={mode}
+                            checked={paymentMode === mode}
+                            onChange={() => setPaymentMode(mode)}
                             className="w-3.5 h-3.5 text-primary"
                           />
-                          <span className="text-xs text-foreground">{option.label}</span>
+                          <span className="text-xs text-foreground capitalize">
+                            {mode === 'part-payment' ? 'Part Payment' : mode}
+                          </span>
                         </label>
                       ))}
                     </div>
 
                     {/* Additional Options */}
-                    <div className="flex flex-wrap gap-3 mb-3">
+                    <div className="flex flex-wrap gap-4 mb-3">
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input
                           type="checkbox"
@@ -616,38 +507,38 @@ const RestaurantPOS: React.FC = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="p-3 border-t border-border bg-secondary grid grid-cols-3 gap-2">
+                  <div className="p-3 border-t border-border bg-secondary grid grid-cols-5 gap-2">
                     <button
                       onClick={handleSave}
-                      className="px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                      className="px-2 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                     >
                       Save
                     </button>
                     <button
                       onClick={handleSaveAndPrint}
-                      className="px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-1"
+                      className="px-2 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-1"
                     >
                       <Printer className="w-3 h-3" />
-                      Save & Print
+                      <span className="hidden xl:inline">Save &</span> Print
                     </button>
                     <button
                       onClick={handleSaveAndKOT}
-                      className="px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                      className="px-2 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                     >
                       Save & KOT
                     </button>
                     <button
                       onClick={handleKOT}
-                      className="px-3 py-2 text-xs font-medium bg-accent text-accent-foreground border border-primary rounded-lg hover:bg-accent/90 transition-colors"
+                      className="px-2 py-2 text-xs font-medium bg-accent text-accent-foreground border border-primary rounded-lg hover:bg-accent/90 transition-colors"
                     >
                       KOT
                     </button>
                     <button
                       onClick={handleKOTAndPrint}
-                      className="px-3 py-2 text-xs font-medium bg-accent text-accent-foreground border border-primary rounded-lg hover:bg-accent/90 transition-colors flex items-center justify-center gap-1 col-span-2"
+                      className="px-2 py-2 text-xs font-medium bg-accent text-accent-foreground border border-primary rounded-lg hover:bg-accent/90 transition-colors flex items-center justify-center gap-1"
                     >
                       <Printer className="w-3 h-3" />
-                      KOT & Print
+                      <span className="hidden xl:inline">KOT &</span> Print
                     </button>
                   </div>
                 </div>
@@ -657,9 +548,9 @@ const RestaurantPOS: React.FC = () => {
             renderUnderConstruction(level4Tabs.find(t => t.id === activeLevel4Tab)?.label || 'Section')
           )}
         </>
+      ) : (
+        renderUnderConstruction(level3Tabs.find(t => t.id === activeLevel3Tab)?.label || 'Section')
       )}
-
-      {activeLevel3Tab !== 'pos' && renderUnderConstruction(level3Tabs.find(t => t.id === activeLevel3Tab)?.label || 'Section')}
     </div>
   );
 };
