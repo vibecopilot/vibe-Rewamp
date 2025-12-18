@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Plus, Minus, Printer, Construction, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -37,13 +37,9 @@ const level3Tabs = [
   { id: 'menu', label: 'Menu' },
   { id: 'inventory', label: 'Inventory' },
   { id: 'reports', label: 'Reports' },
-];
-
-// More dropdown items
-const moreDropdownItems = [
+  { id: 'setup', label: 'Setup' },
   { id: 'customers', label: 'Customers' },
   { id: 'staff', label: 'Staff' },
-  { id: 'settings', label: 'Settings' },
 ];
 
 // Level 4 - POS sub-tabs
@@ -83,9 +79,6 @@ const RestaurantManagement: React.FC = () => {
   const [activeLevel4Tab, setActiveLevel4Tab] = useState('pos');
   const [activeLevel5Tab, setActiveLevel5Tab] = useState('favourite');
   
-  // More dropdown state
-  const [showMoreDropdown, setShowMoreDropdown] = useState(false);
-  const moreDropdownRef = useRef<HTMLDivElement>(null);
   
   // POS states
   const [searchItem, setSearchItem] = useState('');
@@ -103,17 +96,6 @@ const RestaurantManagement: React.FC = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [useLoyalty, setUseLoyalty] = useState(false);
   const [sendFeedback, setSendFeedback] = useState(false);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
-        setShowMoreDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Calculate total
   const totalAmount = useMemo(() => {
@@ -166,13 +148,6 @@ const RestaurantManagement: React.FC = () => {
       toast('This section is under construction', { icon: '🚧' });
     }
     setActiveLevel3Tab(tabId);
-    setShowMoreDropdown(false);
-  };
-
-  const handleMoreDropdownClick = (tabId: string) => {
-    toast('This section is under construction', { icon: '🚧' });
-    setActiveLevel3Tab(tabId);
-    setShowMoreDropdown(false);
   };
 
   const handleLevel4TabClick = (tabId: string) => {
@@ -465,36 +440,6 @@ const RestaurantManagement: React.FC = () => {
                   </button>
                 </li>
               ))}
-              {/* More Dropdown */}
-              <li className="flex-1 min-w-0 relative" ref={moreDropdownRef}>
-                <button
-                  onClick={() => setShowMoreDropdown(!showMoreDropdown)}
-                  className={`w-full flex items-center justify-center gap-1 px-4 py-3 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide ${
-                    moreDropdownItems.some(item => item.id === activeLevel3Tab)
-                      ? 'text-primary border-b-2 border-primary bg-accent/30'
-                      : 'text-foreground hover:bg-accent'
-                  }`}
-                >
-                  More
-                  <ChevronDown size={14} className={`transition-transform ${showMoreDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                {/* Dropdown Menu */}
-                {showMoreDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 min-w-[150px]">
-                    {moreDropdownItems.map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => handleMoreDropdownClick(item.id)}
-                        className={`block w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent ${
-                          activeLevel3Tab === item.id ? 'text-primary bg-accent' : 'text-foreground'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </li>
             </ul>
           </nav>
         </div>
