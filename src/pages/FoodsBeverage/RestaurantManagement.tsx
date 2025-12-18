@@ -547,17 +547,17 @@ const RestaurantManagement: React.FC = () => {
           {activeLevel4Tab === 'pos' ? (
             <>
               {/* LEVEL 5 - Category tabs */}
-              <div className="flex items-center border-b border-border bg-muted/10">
-                <div className={`flex-1 overflow-hidden transition-all duration-300 ${level5Collapsed ? 'max-h-0' : 'max-h-9'}`}>
-                  <nav className="px-2 overflow-x-auto">
-                    <ul className="flex items-center gap-0 flex-nowrap">
+              <div className="flex items-center w-full border-b border-border bg-muted/10">
+                <div className={`flex-1 overflow-hidden transition-all duration-300 ${level5Collapsed ? 'max-h-0' : 'max-h-12'}`}>
+                  <nav className="w-full overflow-x-auto scrollbar-hide">
+                    <ul className="flex items-center w-full">
                       {level5Tabs.map(tab => (
-                        <li key={tab.id} className="flex-shrink-0">
+                        <li key={tab.id} className="flex-1 min-w-0">
                           <button
                             onClick={() => handleLevel5TabClick(tab.id)}
-                            className={`block px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap ${
+                            className={`w-full px-2 py-3 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide text-center ${
                               activeLevel5Tab === tab.id
-                                ? 'text-primary border-b-2 border-primary'
+                                ? 'text-primary border-b-2 border-primary bg-accent/30'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                             }`}
                           >
