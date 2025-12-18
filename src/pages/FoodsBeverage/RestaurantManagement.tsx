@@ -8,6 +8,7 @@ import FBTables from './FBTables';
 import FBOrders from './FBOrders';
 import FBMenu from './FBMenu';
 import FBInventory from './FBInventory';
+import FBDashboard from './FBDashboard';
 // Types
 interface MenuItem {
   id: number;
@@ -150,7 +151,7 @@ const RestaurantManagement: React.FC = () => {
 
   // Tab handlers
   const handleLevel3TabClick = (tabId: string) => {
-    if (tabId !== 'pos' && tabId !== 'setup' && tabId !== 'orders' && tabId !== 'menu' && tabId !== 'inventory') {
+    if (tabId !== 'pos' && tabId !== 'setup' && tabId !== 'orders' && tabId !== 'menu' && tabId !== 'inventory' && tabId !== 'dashboard') {
       toast('This section is under construction', { icon: '🚧' });
     }
     setActiveLevel3Tab(tabId);
@@ -566,6 +567,12 @@ const RestaurantManagement: React.FC = () => {
         <FBMenu />
       ) : activeLevel3Tab === 'inventory' ? (
         <FBInventory />
+      ) : activeLevel3Tab === 'dashboard' ? (
+        <FBDashboard onNavigate={(tab) => {
+          if (tab === 'pos') { setActiveLevel3Tab('pos'); setActiveLevel4Tab('pos'); }
+          else if (tab === 'orders') { setActiveLevel3Tab('orders'); }
+          else if (tab === 'tables') { setActiveLevel3Tab('pos'); setActiveLevel4Tab('tables'); }
+        }} />
       ) : (
         <div className="p-4">
           {renderUnderConstruction(getActiveLevel3Label())}
