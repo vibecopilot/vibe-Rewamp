@@ -222,15 +222,19 @@ const FBSetup: React.FC = () => {
   const SectionHeader: React.FC<{ id: number; title: string }> = ({ id, title }) => (
     <button
       onClick={() => toggleSection(id)}
-      className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/30 border border-border rounded-lg transition-colors"
+      className={`w-full flex items-center justify-between px-6 py-5 border border-border rounded-xl transition-colors ${
+        openSection === id 
+          ? 'bg-primary/10 border-primary/30' 
+          : 'bg-card hover:bg-accent/30'
+      }`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {openSection === id ? (
-          <ChevronDown className="w-5 h-5 text-primary" />
+          <ChevronDown className="w-6 h-6 text-primary" />
         ) : (
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          <ChevronRight className="w-6 h-6 text-muted-foreground" />
         )}
-        <h3 className="text-base font-semibold text-foreground uppercase tracking-wide">{title}</h3>
+        <h3 className="text-lg font-semibold text-foreground uppercase tracking-wide">{title}</h3>
       </div>
     </button>
   );
@@ -243,12 +247,12 @@ const FBSetup: React.FC = () => {
   }, {} as Record<string, MenuItem[]>);
 
   return (
-    <div className="p-4 space-y-3 max-w-6xl mx-auto">
+    <div className="p-6 space-y-4 max-w-6xl mx-auto">
       {/* SECTION 1: Basic Details */}
       <div className="space-y-0">
         <SectionHeader id={1} title="Basic Details" />
         {openSection === 1 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Restaurant Name *</label>
@@ -360,7 +364,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={2} title="Restaurant Details" />
         {openSection === 2 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">License Number</label>
@@ -452,7 +456,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={3} title="Floors/Areas Setup" />
         {openSection === 3 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Do you have multiple floors or areas?</label>
@@ -519,7 +523,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={4} title="Table Bookings/Setup" />
         {openSection === 4 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="space-y-6">
               {floors.map((floor) => (
                 <div key={floor.id} className="space-y-3">
@@ -567,7 +571,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={5} title="Categories & Cuisines" />
         {openSection === 5 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="space-y-6">
               {/* Categories */}
               <div>
@@ -621,7 +625,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={6} title="Order Configure / Menu Items" />
         {openSection === 6 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <p className="text-sm text-muted-foreground mb-4">
               Based on your selected categories, common items are listed. Select items you serve and edit prices.
             </p>
@@ -695,7 +699,7 @@ const FBSetup: React.FC = () => {
       <div className="space-y-0">
         <SectionHeader id={7} title="Attachments / Payment Methods" />
         {openSection === 7 && (
-          <div className="p-6 bg-card border border-t-0 border-border rounded-b-lg animate-fade-in">
+          <div className="p-8 bg-card border border-t-0 border-border rounded-b-xl animate-fade-in">
             <div className="space-y-6">
               {/* Payment Methods */}
               <div>
