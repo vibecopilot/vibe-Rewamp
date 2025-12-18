@@ -235,7 +235,7 @@ const FBOrders: React.FC = () => {
           /* List View */
           <div className="bg-card border border-border rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-primary to-warning text-white">
+              <thead className="bg-primary text-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Order ID</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Table/Type</th>
@@ -346,7 +346,7 @@ const FBOrders: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-primary to-warning">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-primary">
               <h2 className="text-lg font-bold text-white">Order #{selectedOrder.id} Details</h2>
               <button
                 onClick={() => setSelectedOrder(null)}

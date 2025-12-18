@@ -302,8 +302,8 @@ const FBInventory: React.FC = () => {
     toast.success('Status updated!');
   };
 
-  // Table header gradient style
-  const tableHeaderStyle = 'bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(24,100%,50%)] text-white';
+  // Table header style
+  const tableHeaderStyle = 'bg-primary text-white';
 
   // Render Raw Materials Tab
   const renderRawMaterials = () => {
@@ -877,7 +877,7 @@ const FBInventory: React.FC = () => {
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(24,100%,50%)] rounded-full transition-all"
+                      className="h-full bg-primary rounded-full transition-all"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>

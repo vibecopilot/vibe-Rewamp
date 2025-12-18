@@ -378,7 +378,7 @@ const FBMenu: React.FC = () => {
             ) : viewMode === 'list' ? (
               <div className="bg-card border border-border rounded-lg overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-primary to-warning text-white">
+                  <thead className="bg-primary text-white">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Item Name</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Category</th>
@@ -496,7 +496,7 @@ const FBMenu: React.FC = () => {
             {viewMode === 'list' ? (
               <div className="bg-card border border-border rounded-lg overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-primary to-warning text-white">
+                  <thead className="bg-primary text-white">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Category Name</th>
                       <th className="px-4 py-3 text-center text-xs font-semibold uppercase">Item Count</th>
@@ -623,7 +623,7 @@ const FBMenu: React.FC = () => {
       {showItemModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-primary to-warning">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-primary">
               <h2 className="text-lg font-bold text-white">{editingItem ? 'Edit Item' : 'Add New Item'}</h2>
               <button onClick={() => setShowItemModal(false)} className="p-2 text-white hover:bg-white/20 rounded"><X className="w-5 h-5" /></button>
             </div>
@@ -739,7 +739,7 @@ const FBMenu: React.FC = () => {
       {showViewModal && viewingItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-primary to-warning">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-primary">
               <h2 className="text-lg font-bold text-white">{viewingItem.name}</h2>
               <button onClick={() => setShowViewModal(false)} className="p-2 text-white hover:bg-white/20 rounded"><X className="w-5 h-5" /></button>
             </div>
