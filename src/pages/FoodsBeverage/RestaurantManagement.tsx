@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import FBSetup from './FBSetup';
 import FBNewTable from './FBNewTable';
 import FBOrderDelivery from './FBOrderDelivery';
+import FBTables from './FBTables';
 // Types
 interface MenuItem {
   id: number;
@@ -153,9 +154,6 @@ const RestaurantManagement: React.FC = () => {
   };
 
   const handleLevel4TabClick = (tabId: string) => {
-    if (tabId !== 'pos' && tabId !== 'new-table' && tabId !== 'order-delivery') {
-      toast('This section is under construction', { icon: '🚧' });
-    }
     setActiveLevel4Tab(tabId);
   };
 
@@ -543,6 +541,13 @@ const RestaurantManagement: React.FC = () => {
                 toast.success(`Delivery to: ${customerName}`);
               }}
               onCancel={() => setActiveLevel4Tab('pos')}
+            />
+          ) : activeLevel4Tab === 'tables' ? (
+            <FBTables 
+              onViewOrder={(tableNum) => {
+                setActiveLevel4Tab('pos');
+                toast.success(`Viewing order for Table ${tableNum}`);
+              }}
             />
           ) : (
             <div className="p-4">
