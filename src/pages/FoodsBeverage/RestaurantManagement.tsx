@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Plus, Minus, Printer, Construction, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import FBSetup from './FBSetup';
 
 // Types
 interface MenuItem {
@@ -144,7 +145,7 @@ const RestaurantManagement: React.FC = () => {
 
   // Tab handlers
   const handleLevel3TabClick = (tabId: string) => {
-    if (tabId !== 'pos') {
+    if (tabId !== 'pos' && tabId !== 'setup') {
       toast('This section is under construction', { icon: '🚧' });
     }
     setActiveLevel3Tab(tabId);
@@ -534,6 +535,8 @@ const RestaurantManagement: React.FC = () => {
             </div>
           )}
         </>
+      ) : activeLevel3Tab === 'setup' ? (
+        <FBSetup />
       ) : (
         <div className="p-4">
           {renderUnderConstruction(getActiveLevel3Label())}
