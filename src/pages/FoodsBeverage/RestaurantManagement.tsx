@@ -447,17 +447,17 @@ const RestaurantManagement: React.FC = () => {
   return (
     <div className="flex flex-col">
       {/* LEVEL 3 - Main F&B Navigation */}
-      <div className="flex items-center bg-background border-b border-border">
+      <div className="flex items-center w-full bg-background border-b border-border">
         <div className={`flex-1 overflow-hidden transition-all duration-300 ${level3Collapsed ? 'max-h-0' : 'max-h-12'}`}>
-          <nav className="px-2 overflow-x-auto">
-            <ul className="flex items-center gap-0 flex-nowrap">
+          <nav className="w-full overflow-x-auto scrollbar-hide">
+            <ul className="flex items-center w-full">
               {level3Tabs.map(tab => (
-                <li key={tab.id} className="flex-shrink-0">
+                <li key={tab.id} className="flex-1 min-w-0">
                   <button
                     onClick={() => handleLevel3TabClick(tab.id)}
-                    className={`block px-3 py-2.5 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide ${
+                    className={`w-full px-4 py-3 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide text-center ${
                       activeLevel3Tab === tab.id
-                        ? 'text-primary border-b-2 border-primary'
+                        ? 'text-primary border-b-2 border-primary bg-accent/30'
                         : 'text-foreground hover:bg-accent'
                     }`}
                   >
@@ -466,12 +466,12 @@ const RestaurantManagement: React.FC = () => {
                 </li>
               ))}
               {/* More Dropdown */}
-              <li className="flex-shrink-0 relative" ref={moreDropdownRef}>
+              <li className="flex-1 min-w-0 relative" ref={moreDropdownRef}>
                 <button
                   onClick={() => setShowMoreDropdown(!showMoreDropdown)}
-                  className={`flex items-center gap-1 px-3 py-2.5 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide ${
+                  className={`w-full flex items-center justify-center gap-1 px-4 py-3 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide ${
                     moreDropdownItems.some(item => item.id === activeLevel3Tab)
-                      ? 'text-primary border-b-2 border-primary'
+                      ? 'text-primary border-b-2 border-primary bg-accent/30'
                       : 'text-foreground hover:bg-accent'
                   }`}
                 >
@@ -512,17 +512,17 @@ const RestaurantManagement: React.FC = () => {
       {activeLevel3Tab === 'pos' ? (
         <>
           {/* LEVEL 4 - POS sub-navigation */}
-          <div className="flex items-center border-b border-border bg-muted/30">
-            <div className={`flex-1 overflow-hidden transition-all duration-300 ${level4Collapsed ? 'max-h-0' : 'max-h-10'}`}>
-              <nav className="px-2 overflow-x-auto">
-                <ul className="flex items-center gap-0 flex-nowrap">
+          <div className="flex items-center w-full border-b border-border bg-muted/30">
+            <div className={`flex-1 overflow-hidden transition-all duration-300 ${level4Collapsed ? 'max-h-0' : 'max-h-12'}`}>
+              <nav className="w-full overflow-x-auto scrollbar-hide">
+                <ul className="flex items-center w-full">
                   {level4Tabs.map(tab => (
-                    <li key={tab.id} className="flex-shrink-0">
+                    <li key={tab.id} className="flex-1 min-w-0">
                       <button
                         onClick={() => handleLevel4TabClick(tab.id)}
-                        className={`block px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap uppercase ${
+                        className={`w-full px-4 py-3 text-xs font-semibold transition-colors whitespace-nowrap uppercase tracking-wide text-center ${
                           activeLevel4Tab === tab.id
-                            ? 'text-primary border-b-2 border-primary'
+                            ? 'text-primary border-b-2 border-primary bg-accent/30'
                             : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                         }`}
                       >
