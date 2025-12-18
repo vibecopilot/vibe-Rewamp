@@ -3,6 +3,7 @@ import { Search, Plus, Minus, Printer, Construction, ChevronDown, ChevronUp } fr
 import toast from 'react-hot-toast';
 import FBSetup from './FBSetup';
 import FBNewTable from './FBNewTable';
+import FBOrderDelivery from './FBOrderDelivery';
 // Types
 interface MenuItem {
   id: number;
@@ -152,7 +153,7 @@ const RestaurantManagement: React.FC = () => {
   };
 
   const handleLevel4TabClick = (tabId: string) => {
-    if (tabId !== 'pos' && tabId !== 'new-table') {
+    if (tabId !== 'pos' && tabId !== 'new-table' && tabId !== 'order-delivery') {
       toast('This section is under construction', { icon: '🚧' });
     }
     setActiveLevel4Tab(tabId);
@@ -534,6 +535,15 @@ const RestaurantManagement: React.FC = () => {
               setActiveLevel4Tab('pos');
               toast.success(`Table ${tableNum} - Dine In order ready`);
             }} />
+          ) : activeLevel4Tab === 'order-delivery' ? (
+            <FBOrderDelivery 
+              onStartOrder={(customerName) => {
+                setActiveLevel4Tab('pos');
+                setOrderType('delivery');
+                toast.success(`Delivery to: ${customerName}`);
+              }}
+              onCancel={() => setActiveLevel4Tab('pos')}
+            />
           ) : (
             <div className="p-4">
               {renderUnderConstruction(level4Tabs.find(t => t.id === activeLevel4Tab)?.label || 'Section')}
