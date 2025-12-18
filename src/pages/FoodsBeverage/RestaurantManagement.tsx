@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Plus, Minus, Printer, Construction, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FBSetup from './FBSetup';
-
+import FBNewTable from './FBNewTable';
 // Types
 interface MenuItem {
   id: number;
@@ -152,7 +152,7 @@ const RestaurantManagement: React.FC = () => {
   };
 
   const handleLevel4TabClick = (tabId: string) => {
-    if (tabId !== 'pos') {
+    if (tabId !== 'pos' && tabId !== 'new-table') {
       toast('This section is under construction', { icon: '🚧' });
     }
     setActiveLevel4Tab(tabId);
@@ -529,6 +529,11 @@ const RestaurantManagement: React.FC = () => {
                 {activeLevel5Tab === 'favourite' ? renderPOSContent() : renderUnderConstruction(level5Tabs.find(t => t.id === activeLevel5Tab)?.label || 'Section')}
               </div>
             </>
+          ) : activeLevel4Tab === 'new-table' ? (
+            <FBNewTable onSelectTable={(tableNum) => {
+              setActiveLevel4Tab('pos');
+              toast.success(`Table ${tableNum} - Dine In order ready`);
+            }} />
           ) : (
             <div className="p-4">
               {renderUnderConstruction(level4Tabs.find(t => t.id === activeLevel4Tab)?.label || 'Section')}
