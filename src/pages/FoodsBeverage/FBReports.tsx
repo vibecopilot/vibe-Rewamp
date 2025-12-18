@@ -316,7 +316,7 @@ const FBReports: React.FC = () => {
               <div key={idx} className="flex-1 flex flex-col items-center group">
                 <div className="relative w-full flex justify-center">
                   <div 
-                    className="w-2 bg-gradient-to-t from-purple-500 to-orange-400 rounded-t hover:from-purple-600 hover:to-orange-500 transition-all cursor-pointer"
+                    className="w-2 bg-primary rounded-t hover:bg-primary/80 transition-all cursor-pointer"
                     style={{ height: `${heightPercent}%`, minHeight: '20px', maxHeight: `${height - 40}px` }}
                     title={`${item.label}: ₹${item.value.toLocaleString()}`}
                   />
@@ -553,7 +553,7 @@ const FBReports: React.FC = () => {
           </div>
 
           {/* Summary */}
-          <div className="mt-6 bg-gradient-to-r from-purple-500/10 to-orange-500/10 rounded-lg p-4">
+          <div className="mt-6 bg-primary/10 rounded-lg p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-sm text-muted-foreground">Total Income</p>
@@ -581,7 +581,7 @@ const FBReports: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+                <tr className="bg-primary text-white">
                   <th className="p-3 text-left rounded-tl-lg">Metric</th>
                   <th className="p-3 text-right">Oct</th>
                   <th className="p-3 text-right">Nov</th>
@@ -664,7 +664,7 @@ const FBReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+              <tr className="bg-primary text-white">
                 <th className="p-3 text-left rounded-tl-lg">Item</th>
                 <th className="p-3 text-right">Current</th>
                 <th className="p-3 text-right">Min</th>
@@ -775,7 +775,7 @@ const FBReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+              <tr className="bg-primary text-white">
                 <th className="p-3 text-left rounded-tl-lg">Rank</th>
                 <th className="p-3 text-left">Item</th>
                 <th className="p-3 text-right">Orders</th>
@@ -886,7 +886,7 @@ const FBReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+              <tr className="bg-primary text-white">
                 <th className="p-3 text-left rounded-tl-lg">Item</th>
                 <th className="p-3 text-right">Price</th>
                 <th className="p-3 text-right">Cost</th>
@@ -929,7 +929,7 @@ const FBReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+              <tr className="bg-primary text-white">
                 <th className="p-3 text-left rounded-tl-lg">Staff Name</th>
                 <th className="p-3 text-left">Role</th>
                 <th className="p-3 text-right">Days Worked</th>
@@ -1009,7 +1009,7 @@ const FBReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-500 to-orange-400 text-white">
+              <tr className="bg-primary text-white">
                 <th className="p-3 text-left rounded-tl-lg">Staff Name</th>
                 <th className="p-3 text-left">Role</th>
                 <th className="p-3 text-right">Salary</th>
