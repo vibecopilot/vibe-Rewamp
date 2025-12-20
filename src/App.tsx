@@ -30,10 +30,6 @@ import {
   SecurityVisitorCreate,
   SecurityVisitorView,
   SecuritySelfRegistration,
-  SecurityRegisteredVehicles,
-  SecurityStaff,
-  SecurityPatrolling,
-  SecurityGoodsInOut,
 } from "./pages/Security";
 import {
   FBLayout,
@@ -112,10 +108,10 @@ function App() {
         <Route path="/security" element={<AuthenticatedLayout><SecurityLayout /></AuthenticatedLayout>}>
           <Route index element={<Navigate to="/security/visitors" replace />} />
           <Route path="visitors" element={<SecurityVisitors />} />
-          <Route path="registered-vehicles" element={<SecurityRegisteredVehicles />} />
-          <Route path="staff" element={<SecurityStaff />} />
-          <Route path="patrolling" element={<SecurityPatrolling />} />
-          <Route path="goods-in-out" element={<SecurityGoodsInOut />} />
+          <Route path="registered-vehicles" element={<VMSRegisteredVehicles />} />
+          <Route path="staff" element={<VMSStaff />} />
+          <Route path="patrolling" element={<VMSPatrolling />} />
+          <Route path="goods-in-out" element={<VMSGoodsInOut />} />
         </Route>
         
         {/* Security Detail/Create/Edit routes */}

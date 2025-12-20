@@ -41,7 +41,15 @@ const VMSGoodsInOut: React.FC = () => {
     setError(null);
     try {
       const response = await getGoods();
-      const data = response.data || [];
+      // Ensure data is an array - handle different API response formats
+      const rawData = response?.data;
+      const data = Array.isArray(rawData) 
+        ? rawData 
+        : Array.isArray(rawData?.goods) 
+          ? rawData.goods 
+          : Array.isArray(rawData?.data) 
+            ? rawData.data 
+            : [];
       
       const inwards = data.filter((g: GoodsItem) => g.ward_type === 'in');
       const outwards = data.filter((g: GoodsItem) => g.ward_type === 'out');
