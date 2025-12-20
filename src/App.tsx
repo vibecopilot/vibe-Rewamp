@@ -108,7 +108,23 @@ function App() {
         {/* Dashboard */}
         <Route path="/dashboard" element={<AuthenticatedLayout><Dashboard /></AuthenticatedLayout>} />
 
-        {/* VMS - Visitor Management with Tabbed Layout */}
+        {/* Security Module - New with proper sub-tabs */}
+        <Route path="/security" element={<AuthenticatedLayout><SecurityLayout /></AuthenticatedLayout>}>
+          <Route index element={<Navigate to="/security/visitors" replace />} />
+          <Route path="visitors" element={<SecurityVisitors />} />
+          <Route path="registered-vehicles" element={<SecurityRegisteredVehicles />} />
+          <Route path="staff" element={<SecurityStaff />} />
+          <Route path="patrolling" element={<SecurityPatrolling />} />
+          <Route path="goods-in-out" element={<SecurityGoodsInOut />} />
+        </Route>
+        
+        {/* Security Detail/Create/Edit routes */}
+        <Route path="/security/visitors/create" element={<AuthenticatedLayout><SecurityVisitorCreate /></AuthenticatedLayout>} />
+        <Route path="/security/visitors/self-register" element={<AuthenticatedLayout><SecuritySelfRegistration /></AuthenticatedLayout>} />
+        <Route path="/security/visitors/:id" element={<AuthenticatedLayout><SecurityVisitorView /></AuthenticatedLayout>} />
+        <Route path="/security/visitors/:id/edit" element={<AuthenticatedLayout><SecurityVisitorCreate /></AuthenticatedLayout>} />
+
+        {/* VMS - Visitor Management with Tabbed Layout (legacy) */}
         <Route path="/vms" element={<AuthenticatedLayout><VMSLayout /></AuthenticatedLayout>}>
           <Route index element={<Navigate to="/vms/visitors" replace />} />
           <Route path="visitors" element={<VMSVisitors />} />
