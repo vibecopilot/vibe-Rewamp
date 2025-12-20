@@ -126,8 +126,9 @@ function App() {
 
         {/* VMS - Visitor Management with Tabbed Layout (legacy) */}
         <Route path="/vms" element={<AuthenticatedLayout><VMSLayout /></AuthenticatedLayout>}>
-          <Route index element={<Navigate to="/vms/visitors" replace />} />
-          <Route path="visitors" element={<VMSVisitors />} />
+          {/* Redirect legacy VMS Visitors to new Security Visitors (7 sub-tabs) */}
+          <Route index element={<Navigate to="/security/visitors" replace />} />
+          <Route path="visitors" element={<Navigate to="/security/visitors" replace />} />
           <Route path="registered-vehicles" element={<VMSRegisteredVehicles />} />
           <Route path="staff" element={<VMSStaff />} />
           <Route path="patrolling" element={<VMSPatrolling />} />

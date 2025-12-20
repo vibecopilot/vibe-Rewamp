@@ -78,20 +78,20 @@ const modules: Module[] = [
       { name: 'Tasks', count: 202, path: '/soft-services/task' },
     ]
   },
-  { 
-    name: 'VMS', 
-    icon: Users, 
-    path: '/vms/visitors', 
+  {
+    name: 'VMS',
+    icon: Users,
+    path: '/security/visitors',
     color: 'bg-orange-500',
     gradient: 'from-orange-500 to-orange-600',
     growth: 15.7,
     totalCount: 5623,
     subModules: [
-      { name: 'Visitors', count: 3450, path: '/vms/visitors' },
-      { name: 'Vehicles', count: 890, path: '/vms/registered-vehicles' },
-      { name: 'Staff', count: 567, path: '/vms/staff' },
-      { name: 'Patrolling', count: 456, path: '/vms/patrolling' },
-      { name: 'Goods', count: 260, path: '/vms/goods' },
+      { name: 'Visitors', count: 3450, path: '/security/visitors' },
+      { name: 'Vehicles', count: 890, path: '/security/registered-vehicles' },
+      { name: 'Staff', count: 567, path: '/security/staff' },
+      { name: 'Patrolling', count: 456, path: '/security/patrolling' },
+      { name: 'Goods', count: 260, path: '/security/goods-in-out' },
     ]
   },
   { 
