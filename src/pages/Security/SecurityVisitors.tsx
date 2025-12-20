@@ -228,11 +228,17 @@ const SecurityVisitors: React.FC = () => {
   };
 
   const getVisitorStatus = (visitor: Visitor): string => {
-    return visitor.visitor_in_out || visitor.status || '-';
+    const status = visitor.visitor_in_out || visitor.status;
+    // Ensure we always return a string
+    if (typeof status === 'string') return status;
+    if (status && typeof status === 'object') return String(status);
+    return '-';
   };
 
   const getStatusClass = (status: string): string => {
-    switch (status?.toUpperCase()) {
+    // Ensure status is a string before calling toUpperCase
+    const statusStr = typeof status === 'string' ? status.toUpperCase() : '';
+    switch (statusStr) {
       case 'IN': return 'bg-green-100 text-green-700';
       case 'OUT': return 'bg-red-100 text-red-700';
       case 'APPROVED': return 'bg-blue-100 text-blue-700';
