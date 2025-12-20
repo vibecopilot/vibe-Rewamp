@@ -1,0 +1,9 @@
+export { default as SecurityLayout } from './SecurityLayout';
+export { default as SecurityVisitors } from './SecurityVisitors';
+export { default as SecurityVisitorCreate } from './SecurityVisitorCreate';
+export { default as SecurityVisitorView } from './SecurityVisitorView';
+export { default as SecuritySelfRegistration } from './SecuritySelfRegistration';
+export { default as SecurityRegisteredVehicles } from './SecurityRegisteredVehicles';
+export { default as SecurityStaff } from './SecurityStaff';
+export { default as SecurityPatrolling } from './SecurityPatrolling';
+export { default as SecurityGoodsInOut } from './SecurityGoodsInOut';

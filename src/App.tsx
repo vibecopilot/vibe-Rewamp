@@ -25,6 +25,17 @@ import {
   VehicleCreate
 } from "./pages/VMS";
 import {
+  SecurityLayout,
+  SecurityVisitors,
+  SecurityVisitorCreate,
+  SecurityVisitorView,
+  SecuritySelfRegistration,
+  SecurityRegisteredVehicles,
+  SecurityStaff,
+  SecurityPatrolling,
+  SecurityGoodsInOut,
+} from "./pages/Security";
+import {
   FBLayout,
   RestaurantManagement,
   PantryManagement,
