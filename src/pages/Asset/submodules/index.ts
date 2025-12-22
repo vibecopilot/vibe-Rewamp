@@ -7,6 +7,7 @@ export { default as PPMChecklistList } from './PPMChecklistList';
 export { default as PPMActivityList } from './PPMActivityList';
 export { default as PPMCalendar } from './PPMCalendar';
 export { default as StockItemsList } from './StockItemsList';
+export { default as QRCodeList } from './QRCodeList';
 
 // View pages
 export { default as ViewAMC } from './ViewAMC';

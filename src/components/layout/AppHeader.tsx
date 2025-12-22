@@ -64,6 +64,7 @@ const modules = [
           { name: 'PPM Activity', path: '/asset/ppm-activity' },
           { name: 'PPM Calendar', path: '/asset/ppm-calendar' },
           { name: 'Stock Items', path: '/asset/stock-items' },
+          { name: 'QR Code', path: '/asset/qr-code' },
         ]
       },
       { id: 'soft-services', name: 'Soft Services', path: '/soft-services',

@@ -196,6 +196,9 @@ function App() {
         <Route path="/asset/stock-items/:id" element={<AuthenticatedLayout><ViewStockItem /></AuthenticatedLayout>} />
         <Route path="/asset/stock-items/:id/edit" element={<AuthenticatedLayout><EditStockItem /></AuthenticatedLayout>} />
         
+        {/* QR Code */}
+        <Route path="/asset/qr-code" element={<AuthenticatedLayout><AssetList /></AuthenticatedLayout>} />
+        
         {/* Soft Services - Service Tab */}
         <Route path="/soft-services" element={<AuthenticatedLayout><ServiceList /></AuthenticatedLayout>} />
         <Route path="/soft-services/create" element={<AuthenticatedLayout><CreateService /></AuthenticatedLayout>} />
