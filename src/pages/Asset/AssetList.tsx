@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumb from '../../components/ui/Breadcrumb';
 import ListToolbar from '../../components/ui/ListToolbar';
-import { AssetMainList, AMCList, MeterList, ChecklistList, RoutineTaskList, PPMChecklistList, PPMActivityList, PPMCalendar, StockItemsList } from './submodules';
+import { AssetMainList, AMCList, MeterList, ChecklistList, RoutineTaskList, PPMChecklistList, PPMActivityList, PPMCalendar, StockItemsList, QRCodeList } from './submodules';
 
 const AssetList: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid'); // Default to grid
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchValue, setSearchValue] = useState('');
   
-  // Records per page: 12 for grid, 10 for table
   const recordsPerPage = viewMode === 'grid' ? 12 : 10;
 
-  // Derive active tab from URL path
   const getActiveTab = () => {
     const path = location.pathname;
     if (path === '/asset') return 'asset';
@@ -25,6 +23,7 @@ const AssetList: React.FC = () => {
     if (path === '/asset/ppm-activity') return 'ppm-activity';
     if (path === '/asset/ppm-calendar') return 'ppm-calendar';
     if (path === '/asset/stock-items') return 'stock-items';
+    if (path === '/asset/qr-code') return 'qr-code';
     return 'asset';
   };
 
@@ -32,7 +31,6 @@ const AssetList: React.FC = () => {
 
   const handleSearch = (value: string) => setSearchValue(value);
 
-  // Only submodules with existing create pages
   const submodulesWithCreate = ['asset', 'amc', 'checklist', 'ppm-activity'];
 
   const getAddPath = () => {
@@ -68,6 +66,7 @@ const AssetList: React.FC = () => {
       'ppm-activity': 'PPM Activity',
       'ppm-calendar': 'PPM Calendar',
       'stock-items': 'Stock Items',
+      'qr-code': 'QR Code',
     };
     return titles[activeTab] || 'Assets';
   };
@@ -91,6 +90,7 @@ const AssetList: React.FC = () => {
       case 'ppm-activity': return <PPMActivityList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
       case 'ppm-calendar': return <PPMCalendar searchValue={searchValue} />;
       case 'stock-items': return <StockItemsList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
+      case 'qr-code': return <QRCodeList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
       default: return <AssetMainList viewMode={viewMode} searchValue={searchValue} perPage={recordsPerPage} />;
     }
   };
@@ -111,7 +111,7 @@ const AssetList: React.FC = () => {
         onAdd={getAddLabel() ? () => navigate(getAddPath()) : undefined}
         addLabel={getAddLabel()}
         showQrCode={activeTab === 'meter' || activeTab === 'asset'}
-        onQrCode={(activeTab === 'meter' || activeTab === 'asset') ? () => {} : undefined}
+        onQrCode={(activeTab === 'meter' || activeTab === 'asset') ? () => navigate('/asset/qr-code') : undefined}
       />
 
       {renderContent()}

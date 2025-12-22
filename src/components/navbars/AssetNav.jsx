@@ -13,6 +13,7 @@ const assetSubModules = [
   { name: "PPM Activity", path: "/assets/ppm-task" },
   { name: "PPM Calendar", path: "/assets/ppm-calendar" },
   { name: "Stock Items", path: "/assets/stock-items" },
+  { name: "QR Code", path: "/assets/qr-code" },
 ];
 
 const AssetNav = () => {
