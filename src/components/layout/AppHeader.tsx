@@ -82,12 +82,13 @@ const modules = [
         ]
       },
       { id: 'supplier', name: 'Supplier/Vendor', path: '/supplier' },
-      { id: 'audit', name: 'Audit', path: '/audit/operational/scheduled',
-        children: [
-          { name: 'Operational', path: '/audit/operational/scheduled' },
-          { name: 'Vendor', path: '/audit/vendor/scheduled' },
-        ]
-      },
+      // AUDIT tab - Commented out as requested (don't delete - can be enabled later)
+      // { id: 'audit', name: 'Audit', path: '/audit/operational/scheduled',
+      //   children: [
+      //     { name: 'Operational', path: '/audit/operational/scheduled' },
+      //     { name: 'Vendor', path: '/audit/vendor/scheduled' },
+      //   ]
+      // },
       { id: 'mail-room', name: 'Mail Room', path: '/mail-room' },
     ]
   },
@@ -123,17 +124,18 @@ const modules = [
     path: '/documents',
     subModules: []
   },
-  {
-    id: 'finance',
-    name: 'Finance',
-    subModules: [
-      { id: 'procurement', name: 'Procurement', path: '/finance/procurement' },
-      { id: 'other-bills', name: 'Other Bills', path: '/finance/other-bills' },
-      { id: 'cam', name: 'CAM', path: '/finance/cam' },
-      { id: 'wallet', name: 'Wallet', path: '/finance/wallet' },
-      { id: 'wbs', name: 'WBS', path: '/finance/wbs' },
-    ]
-  },
+  // FINANCE module - Commented out as requested (don't delete - can be enabled later)
+  // {
+  //   id: 'finance',
+  //   name: 'Finance',
+  //   subModules: [
+  //     { id: 'procurement', name: 'Procurement', path: '/finance/procurement' },
+  //     { id: 'other-bills', name: 'Other Bills', path: '/finance/other-bills' },
+  //     { id: 'cam', name: 'CAM', path: '/finance/cam' },
+  //     { id: 'wallet', name: 'Wallet', path: '/finance/wallet' },
+  //     { id: 'wbs', name: 'WBS', path: '/finance/wbs' },
+  //   ]
+  // },
   {
     id: 'crm',
     name: 'CRM',
