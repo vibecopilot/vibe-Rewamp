@@ -82,12 +82,15 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   </div>
 );
 
-// Layout wrapper for authenticated pages
+// Import ProtectedRoute
+import { ProtectedRoute } from './routes';
+
+// Layout wrapper for authenticated pages - now includes protection
 const AuthenticatedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
+  <ProtectedRoute>
     <AppHeader />
     <main>{children}</main>
-  </>
+  </ProtectedRoute>
 );
 
 function App() {
