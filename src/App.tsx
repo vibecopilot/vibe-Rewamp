@@ -74,10 +74,11 @@ import { CAMLayout, CamBillingList, AddCamBilling, ViewCamBilling, ReceiptInvoic
 import { OtherBillsList, CreateOtherBill, ViewOtherBill } from "./pages/OtherBills";
 import { MastersList, CreateMaster, ViewMaster, StocksList, ViewStock, GRNList, CreateGRN, ViewGRN, GDNList, CreateGDN, ViewGDN } from "./pages/Inventory";
 // Placeholder pages for other modules
+// Coming Soon placeholder for modules not yet available
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
-  <div className="p-6">
+  <div className="flex flex-col items-center justify-center min-h-[400px] p-6">
     <h1 className="text-2xl font-bold text-foreground mb-4">{title}</h1>
-    <p className="text-muted-foreground">This module is under development.</p>
+    <p className="text-lg text-muted-foreground">Coming Soon</p>
   </div>
 );
 
