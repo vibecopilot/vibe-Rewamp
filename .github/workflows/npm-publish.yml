@@ -1,0 +1,40 @@
+name: Deploy Frontend (Vite)
+
+on:
+  push:
+    branches:
+      - main
+      # change to master if your repo uses master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            # -------------------------------
+            # Deploy frontend
+            # -------------------------------
+            cd /var/www/html/refurbish/vibeconnect-refurbish || exit 1
+
+            echo "🚀 Pulling latest code"
+            git pull origin main || exit 1
+
+            echo "📦 Installing dependencies"
+            npm install || exit 1
+
+            echo "🏗️ Building frontend"
+            npm run build || exit 1
+
+            echo "✅ rewamp-vibe deployed successfully"
+          EOF
