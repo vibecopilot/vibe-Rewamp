@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { FaGoogle, FaApple, FaArrowRight } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import wave from "/wave.png";
+import loginCityscape from "@/assets/login-cityscape.jpg";
 import {
   getEmployeeAssociatedSites,
   getHRMSEmployeeID,
@@ -23,13 +23,12 @@ const Login = () => {
   const [password, showPassword] = useState(false);
   const [page, setPage] = useState("login");
   const [rememberMe, setRememberMe] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const [roleAccess, setRoleAccess] = useState({});
   const [clientDashboardVisible, setClientDashboardVisible] = useState(false);
-  const [bgImage, setBgImage] = useState(wave);
+  const [bgImage, setBgImage] = useState(loginCityscape);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [bgImages, setBgImages] = useState([wave]);
+  const [bgImages, setBgImages] = useState([loginCityscape]);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const onChange = (e) => {
@@ -202,91 +201,22 @@ const Login = () => {
             console.log(`Loaded ${imageUrls.length} images for slideshow`);
           } else {
             console.log("No VibeBg images found, using default");
-            setBgImages([wave]);
-            setBgImage(wave);
+            setBgImages([loginCityscape]);
+            setBgImage(loginCityscape);
           }
         } else {
-          setBgImages([wave]);
-          setBgImage(wave);
+          setBgImages([loginCityscape]);
+          setBgImage(loginCityscape);
         }
       } catch (error) {
         console.error("Error fetching background images:", error);
-        setBgImages([wave]);
-        setBgImage(wave);
+        setBgImages([loginCityscape]);
+        setBgImage(loginCityscape);
       }
     };
     
     fetchBackgroundImages();
   }, []);
-
-  /*
-   useEffect(() => {
-    const fetchBackgroundImage = async () => {
-      try {
-        const cachedImage = localStorage.getItem('VibeBg');
-        const cachedTimestamp = localStorage.getItem('VibeBgTimestamp');
-        const currentTime = new Date().getTime();
-        const sixHours = 6 * 60 * 60 * 1000;
-
-        if (cachedImage && cachedTimestamp && (currentTime - parseInt(cachedTimestamp)) < sixHours) {
-          setBgImage(cachedImage);
-          return;
-        }
-
-        const aks = await vibeBGImages();
-        const resp = aks.data;
-        console.log("API response:", resp);
-
-        if (resp && resp.data && resp.data.length > 0) {
-          const vibeBgImages = resp.data.filter(item => item.key === "VibeBg");
-          console.log("Filtered VibeBg images:", vibeBgImages);
-          
-          if (vibeBgImages.length > 0) {
-            const dayStartTime = new Date();
-            dayStartTime.setHours(0, 0, 0, 0);
-            const timeSinceDayStart = currentTime - dayStartTime.getTime();
-            const sixHourInterval = Math.floor(timeSinceDayStart / sixHours);
-            const imageIndex = sixHourInterval % vibeBgImages.length;
-            
-            const selectedImage = vibeBgImages[imageIndex];
-            const newImageUrl = selectedImage.image;
-            
-            console.log(`Using image ${imageIndex + 1} of ${vibeBgImages.length} for 6-hour interval ${sixHourInterval}`);
-            console.log("Selected image URL:", newImageUrl);
-            
-            setBgImage(newImageUrl);
-            setBgImages(vibeBgImages.map(img => img.image));
-            setCurrentImageIndex(imageIndex);
-            
-            localStorage.setItem('VibeBg', newImageUrl);
-            localStorage.setItem('VibeBgTimestamp', currentTime.toString());
-          } else {
-            console.log("No VibeBg images found, using cached or default");
-            if (cachedImage) {
-              setBgImage(cachedImage);
-            } else {
-              setBgImage(wave);
-            }
-          }
-        } else if (cachedImage) {
-          setBgImage(cachedImage);
-        } else {
-          setBgImage(wave);
-        }
-      } catch (error) {
-        console.error("Error fetching background image:", error);
-        const cachedImage = localStorage.getItem('VibeBg');
-        if (cachedImage) {
-          setBgImage(cachedImage);
-        } else {
-          setBgImage(wave);
-        }
-      }
-    };
-    
-    fetchBackgroundImage();
-  }, []);
-  */
 
   // Slideshow effect - change image every 5 seconds
   useEffect(() => {
@@ -306,103 +236,52 @@ const Login = () => {
     return () => clearInterval(interval);
   }, [bgImages]);
 
-  // 
-
   return (
-    <div className="flex h-screen w-full">
-      {/* Left Side - Image Panel */}
-      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden">
-        <div 
-          className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ${isTransitioning ? 'opacity-90' : 'opacity-100'}`}
-          style={{ backgroundImage: `url(${bgImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+    <div className="flex min-h-screen w-full bg-background">
+      {/* Left Side - Form Panel */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 md:px-16 lg:px-20 xl:px-24 py-8 sm:py-12">
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8 sm:mb-12">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary flex items-center justify-center">
+            <FaHome className="text-primary-foreground text-lg sm:text-xl" />
+          </div>
+          <span className="text-xl sm:text-2xl font-bold text-foreground">VibeCopilot</span>
         </div>
-        
-        {/* Logo and Back Link */}
-        <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
-          <h1 className="text-2xl font-bold text-white jersey-15-regular tracking-wider">
-            VIBE CONNECT
+
+        {/* Form Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+            Welcome Back
           </h1>
-          {/* <a 
-            href="/" 
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm hover:bg-white/20 transition-all"
-          >
-            Back to website <FaArrowRight className="w-3 h-3" />
-          </a> */}
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Let's login to grab amazing deal
+          </p>
         </div>
-        
-        {/* Tagline */}
-        <div className="absolute bottom-12 left-6 right-6 z-10">
-          <h2 className="text-3xl font-light text-white leading-tight mb-6">
-            Capturing Moments,<br />
-            Creating Memories
-          </h2>
-          
-          {/* Pagination Dots */}
-          <div className="flex gap-2">
-            {bgImages.map((_, index) => (
-              <div
-                key={index}
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? 'w-8 bg-white'
-                    : 'w-4 bg-white/40'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Right Side - Form Panel */}
-      <div className="flex-1 flex items-center justify-end">
-        {/* Background Image with Blur */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bgImage})` }}
-        />
-        <div className="absolute  inset-0 bg-black/60" />
-        
-        <div className="relative z-10 w-full pl-[8rem] pt-[15rem] pb-[4rem] py-20 shadow-lg shadow-white/25 rounded bg-black/20 backdrop-blur max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8">
-            <h1 className="text-2xl font-bold text-white jersey-15-regular tracking-wider">
-              VIBE CONNECT
-            </h1>
+        {/* Form */}
+        <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5 max-w-md">
+          {/* Email Field */}
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-sm font-medium text-muted-foreground">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Enter your email"
+              onChange={onChange}
+              value={formData.email}
+              className="w-full px-4 py-3 sm:py-3.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm sm:text-base"
+            />
           </div>
 
-          {/* Form Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-semibold text-[hsl(var(--login-text))] mb-2">
-              {page === "login" ? "Welcome Back" : "Single Sign-On"}
-            </h2>
-            <p className="text-[hsl(var(--login-text-muted))]">
-              {page === "login" ? (
-                <>Don't have an account? <span className="text-primary underline cursor-pointer">Sign up</span></>
-              ) : (
-                <span className="cursor-pointer hover:text-primary" onClick={() => setPage("login")}>Back to Login</span>
-              )}
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={onSubmit} className="space-y-5">
-            {/* Email Field */}
-            <div>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                placeholder="Email"
-                onChange={onChange}
-                value={formData.email}
-                className="w-64 px-4 py-3.5 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] placeholder:text-[hsl(var(--login-text-muted))] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Password Field */}
-            {page === "login" && (
+          {/* Password Field */}
+          {page === "login" && (
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-muted-foreground">
+                Password
+              </label>
               <div className="relative">
                 <input
                   name="password"
@@ -411,37 +290,109 @@ const Login = () => {
                   type={password ? "text" : "password"}
                   onChange={onChange}
                   value={formData.password}
-                  className="w-64 px-4 py-3.5 rounded-lg bg-[hsl(var(--login-input-bg))] border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] placeholder:text-[hsl(var(--login-text-muted))] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
+                  className="w-full px-4 py-3 sm:py-3.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12 text-sm sm:text-base"
                 />
                 <button
                   type="button"
                   onClick={togglePassword}
-                  className="absolute ml-4 top-1/2 -translate-y-1/2 text-[hsl(var(--login-text-muted))] hover:text-[hsl(var(--login-text))] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {password ? <AiFillEye size={20} /> : <AiFillEyeInvisible size={20} />}
                 </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Submit Button */}
+          {/* Remember Me & Forgot Password */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
+              />
+              <span className="text-sm text-muted-foreground">Remember me</span>
+            </label>
+            <button 
+              type="button" 
+              className="text-sm text-primary hover:text-primary-dark transition-colors text-left sm:text-right"
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               type="submit"
-              className="w-64 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary-dark transition-all duration-200 shadow-lg shadow-primary/25"
+              className="flex-1 py-3 sm:py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary-dark transition-all duration-200 shadow-lg shadow-primary/25 text-sm sm:text-base"
             >
-              {page === "login" ? "Login" : "Continue with SSO"}
+              Login
             </button>
+            <button
+              type="button"
+              onClick={() => setPage(page === "login" ? "sso" : "login")}
+              className="flex-1 py-3 sm:py-3.5 rounded-lg border border-border text-foreground font-medium hover:bg-secondary transition-all text-sm sm:text-base"
+            >
+              SSO
+            </button>
+          </div>
 
-            {/* SSO Toggle */}
-            {/* {page === "login" && (
-              <button
-                type="button"
-                onClick={() => setPage("sso")}
-                className="w-full py-3.5 rounded-lg border border-[hsl(var(--login-input-border))] text-[hsl(var(--login-text))] font-medium hover:bg-[hsl(var(--login-input-bg))] transition-all"
-              >
-                SSO Login
-              </button>
-            )} */}
-          </form>
+          {/* Sign Up Link */}
+          <div className="text-center pt-4">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <span className="text-primary font-semibold cursor-pointer hover:underline">
+                Sign Up
+              </span>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      {/* Right Side - Image Panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden p-4 xl:p-6">
+        <div className="relative w-full h-full rounded-2xl xl:rounded-3xl overflow-hidden shadow-2xl">
+          {/* Background Image */}
+          <div 
+            className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ${isTransitioning ? 'opacity-90 scale-105' : 'opacity-100 scale-100'}`}
+            style={{ backgroundImage: `url(${bgImage})` }}
+          />
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-transparent to-primary/60" />
+          
+          {/* Content */}
+          <div className="relative z-10 flex flex-col justify-between h-full p-6 xl:p-10">
+            {/* Top Text */}
+            <div className="text-center pt-6 xl:pt-10">
+              <h2 className="text-xl xl:text-2xl 2xl:text-3xl font-medium text-white leading-relaxed drop-shadow-lg">
+                Browse thousands of properties to buy, sell,<br className="hidden xl:block" />
+                or rent with trusted agents.
+              </h2>
+            </div>
+            
+            {/* Pagination Dots */}
+            {bgImages.length > 1 && (
+              <div className="flex justify-center gap-2 pb-6">
+                {bgImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentImageIndex(index);
+                      setBgImage(bgImages[index]);
+                    }}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === currentImageIndex
+                        ? 'w-8 bg-white'
+                        : 'w-2 bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
